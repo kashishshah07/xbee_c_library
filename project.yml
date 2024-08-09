@@ -1,0 +1,20 @@
+---
+:project:
+  :name: xbee_project
+  :test_file_prefix: test_
+  :source:
+    - src
+  :test:
+    - test
+
+:paths:
+  :source:
+    - src
+  :include:
+    - src
+  :test:
+    - test
+
+:plugins:
+  :enabled:
+    - stdout_pretty_tests_report
