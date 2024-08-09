@@ -1,53 +1,62 @@
-/**
- * @file xbee.c
- * @brief XBee Library Source
- * @version 1.0
- * @date 2024-08-08
- * 
- * @license MIT
- * 
- * @author Felix Galindo, Digi International
- * @contact felix.galindo@digi.com
- */
-
 #include "xbee.h"
-#include "xbee_api_frames.h"
-#include "xbee_at_cmds.h"
+#include "xbee_api_frames.h"  // Include your API frame functions here
 
-// XBee Functions
-void xbee_setup(void) {
+// Base class methods
+void XBee_Connect(XBee* self, const void* config) {
+    self->vtable->connect(self, config);
 }
 
-void xbee_connect(void) {
+void XBee_Disconnect(XBee* self) {
+    self->vtable->disconnect(self);
 }
 
-uint8_t xbee_is_connected(void) {
+void XBee_SendData(XBee* self, const uint8_t* data, uint16_t length) {
+    self->vtable->send_data(self, data, length);
 }
 
-void xbee_disconnect(void) {
+void XBee_ReceiveData(XBee* self, uint8_t* buffer, uint16_t buffer_size) {
+    self->vtable->receive_data(self, buffer, buffer_size);
 }
 
-void xbee_send_packet(void) {
+void XBee_SoftReset(XBee* self) {
+    self->vtable->soft_reset(self);
 }
 
-uint8_t xbee_receive_packet(void) {
+void XBee_HardReset(XBee* self) {
+    self->vtable->hard_reset(self);
 }
 
-void xbee_process(void) {
+void XBee_Process(XBee* self) {
+    self->vtable->process(self);
 }
 
-void xbee_soft_reset(void) {
+void XBee_ConfigureNetwork(XBee* self, const void* config) {
+    self->vtable->configure_network(self, config);
 }
 
-void xbee_hard_reset(void) {
+void XBee_ConfigureSerial(XBee* self, const void* config) {
+    self->vtable->configure_serial(self, config);
 }
 
-void xbee_read_adc(void) {
+bool XBee_CheckNetworkConnection(XBee* self) {
+    return self->vtable->check_network_connection(self);
 }
 
-void xbee_set_gpio(void) {
+// Methods to set callback functions
+void XBee_SetOnReceiveCallback(XBee* self, OnReceiveCallback callback) {
+    self->onReceive = callback;
 }
 
-void xbee_read_gpio(void) {
+void XBee_SetOnConnectCallback(XBee* self, OnConnectCallback callback) {
+    self->onConnect = callback;
 }
+
+void XBee_SetOnDisconnectCallback(XBee* self, OnDisconnectCallback callback) {
+    self->onDisconnect = callback;
+}
+
+void XBee_SetOnSendCallback(XBee* self, OnSendCallback callback) {
+    self->onSend = callback;
+}
+
 

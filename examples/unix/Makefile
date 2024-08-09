@@ -12,7 +12,7 @@ BUILD_DIR = build
 EXAMPLE_DIR = .
 
 # Source files
-SRCS = $(SRC_DIR)/xbee.c $(SRC_DIR)/xbee_api_frames.c $(SRC_DIR)/xbee_at_cmds.c
+SRCS = $(SRC_DIR)/xbee.c $(SRC_DIR)/xbee_api_frames.c $(SRC_DIR)/xbee_at_cmds.c $(SRC_DIR)/xbee_lr.c
 OBJS = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SRCS))
 
 # Example files

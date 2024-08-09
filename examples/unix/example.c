@@ -1,5 +1,6 @@
 #include "xbee_api_frames.h"
 #include "xbee_at_cmds.h"
+#include "xbee_lr.h"
 #include "uart.h"
 #include <fcntl.h>
 #include <termios.h>
@@ -13,28 +14,18 @@ int main() {
     time_t start_time, current_time;
     time(&start_time);
 
-   while (1) {
+   // Create an instance of the XBeeLR class
+    XBeeLR * my_xbee_lr = XBeeLR_Create();
 
-        xbee_api_frame_t frame;
-        int status = api_receive_api_frame(&frame);
-        if (status == 0) {
-            switch (frame.type) {
-                case XBEE_API_TYPE_AT_RESPONSE:
-                    xbee_handle_at_response(&frame);
-                    break;
-                case XBEE_API_TYPE_MODEM_STATUS:
-                    xbee_handle_modem_status(&frame);
-                    break;
-                case XBEE_API_TYPE_RX_PACKET:
-                    xbee_handle_rx_packet(&frame);
-                    break;
-                default:
-                    printf("Received unknown frame type: %d\n", frame.type);
-                    break;
-            }
-        } else if (status == -1) {
-            printf("Error receiving frame.\n");
-        }
+    //Example configuration (can be NULL if not needed)
+    const void* config = NULL;
+
+    //Use the XBee_Connect method, which will call the custom connect function for XBeeLR
+    XBee_Connect((XBee*)my_xbee_lr, config);
+
+
+   while (1) {
+        XBee_Process((XBee*)my_xbee_lr);
 
         // Get the current time
         time(&current_time);
