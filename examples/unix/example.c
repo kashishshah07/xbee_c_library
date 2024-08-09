@@ -23,6 +23,11 @@ int main() {
     //Use the XBee_Connect method, which will call the custom connect function for XBeeLR
     XBee_Connect((XBee*)my_xbee_lr, config);
 
+    // Implement XBeeLR specific data sending logic
+    uint8_t example_payload[] = {0x01, 0x02, 0x03, 0x04, 0x05};
+
+    // Length of the payload
+    uint16_t payload_len = sizeof(example_payload) / sizeof(example_payload[0]);
 
    while (1) {
         XBee_Process((XBee*)my_xbee_lr);
@@ -30,13 +35,14 @@ int main() {
         // Get the current time
         time(&current_time);
 
-        // Check if 5 seconds have passed
-        if (difftime(current_time, start_time) >= 5) {
+        // Check if 10 seconds have passed
+        if (difftime(current_time, start_time) >= 10) {
             // Reset the start time
             time(&start_time);
 
-            // Send the BD AT Command through API Frame with an empty parameter
-            api_send_at_command(AT_DE, NULL, 0);
+            // // Send the BD AT Command through API Frame with an empty parameter
+            // api_send_at_command(AT_DE, NULL, 0);
+            XBee_SendData((XBee*)my_xbee_lr, example_payload, payload_len);
         }
 
     }

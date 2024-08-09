@@ -37,7 +37,10 @@
  */
 typedef enum {
     AT_,
-    AT_DE,   /**< Device EUI (LoRaWAN specific) */
+    AT_DE,   /**< LoRaWAN Device EUI */
+    AT_AK,   /**< LoRaWAN Application Key */
+    AT_AE,   /**< LoRaWAN Application EUI */
+    AT_NK,   /**< LoRaWAN Network Key */
     AT_FQ,   /**< Test Configuration Frequency */
     AT_PW,   /**< Test Configuration Power */
     // ... (other existing AT commands) ...

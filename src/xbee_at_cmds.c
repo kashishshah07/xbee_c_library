@@ -24,7 +24,9 @@ const char* at_command_to_string(at_command_t command) {
         case AT_DE: return "DE";
         case AT_FQ: return "FQ";
         case AT_BD: return "BD";
-        // Add other cases here
+        case AT_AK: return "AK";
+        case AT_AE: return "AE";
+        case AT_NK: return "NK";
         default: return "";
     }
 }

@@ -41,5 +41,7 @@ void api_send_at_command(at_command_t command, const uint8_t *parameter, uint8_t
 void xbee_handle_at_response(xbee_api_frame_t *frame);
 void xbee_handle_modem_status(xbee_api_frame_t *frame);
 void xbee_handle_rx_packet(xbee_api_frame_t *frame);
+void SendTxReqApiFrame(const uint8_t* payload, uint16_t payload_len, uint8_t port, uint8_t options);
+void SendJoinReqApiFrame();
 
 #endif // XBEE_FRAMES_H

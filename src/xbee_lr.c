@@ -9,6 +9,12 @@
 void XBeeLR_Connect(XBee* self, const void* config) {
     const XBeeLRNetworkConfig* netConfig = (const XBeeLRNetworkConfig*)config;
     // Implement XBeeLR specific connection logic using netConfig
+    // api_send_at_command(AT_AE,"37D56A3F6CDCF0A5", 16);
+    // api_send_at_command(AT_AK,"BD32AAB41C54175E9060D86F3A8B7F42", 32);
+    // api_send_at_command(AT_NK,"BD32AAB41C54175E9060D86F3A8B7F42", 32);
+    // api_send_at_command(AT_WR, NULL, 0);
+    // api_send_at_command(AT_AC, NULL, 0);
+    SendJoinReqApiFrame();
 }
 
 void XBeeLR_Disconnect(XBee* self) {
@@ -16,7 +22,8 @@ void XBeeLR_Disconnect(XBee* self) {
 }
 
 void XBeeLR_SendData(XBee* self, const uint8_t* data, uint16_t length) {
-    // Implement XBeeLR specific data sending logic
+    // Call the SendTxReqApiFrame function with the example payload
+    SendTxReqApiFrame(data, length, 1 ,0);
 }
 
 void XBeeLR_ReceiveData(XBee* self, uint8_t* buffer, uint16_t buffer_size) {
