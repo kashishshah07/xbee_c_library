@@ -20,14 +20,15 @@ int main() {
     //Example configuration (can be NULL if not needed)
     const void* config = NULL;
 
-    XBeeLR_GetDevEUI(my_xbee_lr);
+    uint8_t dev_eui[17];
+    XBeeLR_GetDevEUI(my_xbee_lr, dev_eui, sizeof(dev_eui));
+    port_debug_printf("DEVEUI: %s\n", dev_eui);
 
-    // Implement XBeeLR specific data sending logic
+    // XBeeLR payload to send
     uint8_t example_payload[] = {0x01, 0x02, 0x03, 0x04, 0x05};
-
-    // Length of the payload
     uint16_t payload_len = sizeof(example_payload) / sizeof(example_payload[0]);
 
+    port_debug_printf("Connecting...\n");
     XBee_Connect((XBee*)my_xbee_lr);
     time(&start_time);
 
@@ -41,12 +42,18 @@ int main() {
         // Check if 10 seconds have passed
         if (difftime(current_time, start_time) >= 10) {
             //Send data if connected, else connect
-            // if(XBee_Connected(my_xbee_lr)){
+            if(XBee_Connected((XBee*)my_xbee_lr)){
+                port_debug_printf("Sending 0x");
+                for (int i = 0; i < payload_len; i++) {
+                    port_debug_printf("%02X", example_payload[i]);
+                }
+                port_debug_printf("\n");
                 XBee_SendData((XBee*)my_xbee_lr, example_payload, payload_len);
-            // }
-            // else{
-            //     XBee_Connect((XBee*)my_xbee_lr);
-            // }
+            }
+            else{
+                port_debug_printf("Not connected. Connecting...\n");
+                XBee_Connect((XBee*)my_xbee_lr);
+            }
             // Reset the start time
             time(&start_time);
 

@@ -37,7 +37,7 @@ typedef struct {
     void (*process)(XBee* self);
     void (*configure_network)(XBee* self, const void* config);
     void (*configure_serial)(XBee* self, const void* config);
-    bool (*connected)(XBee* self);
+    uint8_t (*connected)(XBee* self);
 } XBeeVTable;
 
 struct XBee {
@@ -60,7 +60,7 @@ void XBee_HardReset(XBee* self);
 void XBee_Process(XBee* self);
 void XBee_ConfigureNetwork(XBee* self, const void* config);
 void XBee_ConfigureSerial(XBee* self, const void* config);
-bool XBee_Connected(XBee* self);
+uint8_t XBee_Connected(XBee* self);
 
 // Methods to set callback functions
 void XBee_SetOnReceiveCallback(XBee* self, OnReceiveCallback callback);

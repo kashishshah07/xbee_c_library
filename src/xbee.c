@@ -46,7 +46,7 @@ void XBee_ConfigureSerial(XBee* self, const void* config) {
     self->vtable->configure_serial(self, config);
 }
 
-bool XBee_Connected(XBee* self) {
+uint8_t XBee_Connected(XBee* self) {
     return self->vtable->connected(self);
 }
 

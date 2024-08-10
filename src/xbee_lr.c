@@ -57,7 +57,6 @@ void XBeeLR_Process(XBee* self) {
 
 
 void XBeeLR_ConfigureNetwork(XBee* self, const void* config) {
-    const XBeeLRNetworkConfig* netConfig = (const XBeeLRNetworkConfig*)config;
     uint8_t response = 0;
     uint8_t response_length;
     int status;
@@ -81,11 +80,10 @@ void XBeeLR_ConfigureNetwork(XBee* self, const void* config) {
 }
 
 void XBeeLR_ConfigureSerial(XBee* self, const void* config) {
-    const XBeeLRSerialConfig* serialConfig = (const XBeeLRSerialConfig*)config;
     // Implement XBeeLR specific serial configuration logic
 }
 
-bool XBeeLR_Connected(XBee* self) {
+uint8_t XBeeLR_Connected(XBee* self) {
     // Implement logic to check XBeeLR network connection
     uint8_t response = 0;
     uint8_t response_length;
@@ -96,31 +94,30 @@ bool XBeeLR_Connected(XBee* self) {
 
     if (status == 0) {
         // Print the received reponse
-        port_debug_printf("Join Status: %s \n", response ? "Joined" : "Not Joined");
+        // port_debug_printf("ATJS Resp: %u \n", response);
+        // port_debug_printf("Join Status: %s \n", response ? "Joined" : "Not Joined");
     } else {
         port_debug_printf("Failed to receive AT_JS response, error code: %d\n", status);
     }
-    return response == '1' ? 1 : 0;  
+    return response;  
 }
 
-bool XBeeLR_GetDevEUI(XBee* self) {
-    // Implement logic to read XBeeLR LoRaWAN DEVEUI
-    uint8_t response_buffer[32];
-    memset(response_buffer,0,sizeof(response_buffer));
-    uint8_t response_length;
-    int status;
-
-    // Send the AT_JS command to query the Join Status
-    status = api_send_at_command_and_get_response(AT_DE, NULL, response_buffer, &response_length, 5000);
-
-    if (status == 0) {
-        // Print the received response
-        port_debug_printf("DEVEUI: ");
-        port_debug_printf("%s\n", response_buffer);
-    } else {
-        port_debug_printf("Failed to receive AT_DE response, error code: %d\n", status);
+bool XBeeLR_GetDevEUI(XBee* self, uint8_t* response_buffer, uint8_t buffer_size) {
+    // Clear buffer
+    if(buffer_size < 17){
+        return false;
     }
-    return true;  // Placeholder
+    memset(response_buffer,0,buffer_size);
+
+    // Send the AT_DE command to query the DevEUI
+    uint8_t response_length;
+    int status = api_send_at_command_and_get_response(AT_DE, NULL, response_buffer, &response_length, 5000);
+
+    if (status != 0) {
+        port_debug_printf("Failed to receive AT_DE response, error code: %d\n", status);
+        return false;
+    }
+    return true;  
 }
 
 // VTable for XBeeLR

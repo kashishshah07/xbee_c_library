@@ -22,6 +22,6 @@ typedef struct {
 } XBeeLR;
 
 XBeeLR* XBeeLR_Create(void);
-bool XBeeLR_GetDevEUI(XBee* self);
+bool XBeeLR_GetDevEUI(XBee* self, uint8_t* response_buffer, uint8_t buffer_size);
 
 #endif // XBEELR_H
