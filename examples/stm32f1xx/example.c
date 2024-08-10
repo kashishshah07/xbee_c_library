@@ -7,7 +7,7 @@ int main(void) {
     HAL_Init();
     SystemClock_Config();  // Assuming you have this function set up for your STM32 project
 
-    uart_init(9600);  // Initialize UART for STM32
+    port_uart_init(9600);  // Initialize UART for STM32
 
     uint32_t previousMillis = 0;
     const uint32_t interval = 5000;  // Interval at which to send the command (milliseconds)
@@ -27,7 +27,7 @@ int main(void) {
                     xbee_handle_rx_packet(&frame);
                     break;
                 default:
-                    printf("Received unknown frame type: %d\n", frame.type);
+                    port_debug_printf("Received unknown frame type: %d\n", frame.type);
                     break;
             }
         }

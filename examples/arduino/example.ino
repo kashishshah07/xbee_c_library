@@ -6,7 +6,7 @@ unsigned long previousMillis = 0;  // Stores the last time the command was sent
 const long interval = 5000;        // Interval at which to send the command (milliseconds)
 
 void setup() {
-    uart_init(9600);  // Initialize UART for Arduino
+    port_uart_init(9600);  // Initialize UART for Arduino
 }
 
 void loop() {

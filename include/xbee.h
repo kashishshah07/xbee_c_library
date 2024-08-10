@@ -10,24 +10,15 @@
  * @contact felix.galindo@digi.com
  */
 
-
 #ifndef XBEE_H
 #define XBEE_H
 
 #include <stdint.h>
 #include <stdbool.h>
+#include "port.h"
 
 // Abstract base class for XBee
 typedef struct XBee XBee;
-
-// Structure for network configuration (Base, extend for specific XBees)
-typedef struct {
-    // Common network configuration parameters
-} XBeeNetworkConfig;
-
-typedef struct {
-    // Common serial configuration parameters
-} XBeeSerialConfig;
 
 // Callback function types
 typedef void (*OnReceiveCallback)(XBee* self, const uint8_t* data, uint16_t length);

@@ -21,18 +21,6 @@ typedef struct {
     // Add XBeeLR specific attributes here
 } XBeeLR;
 
-typedef struct {
-    // XBeeLR specific network configuration parameters
-    XBeeNetworkConfig common;  // Inherit common parameters
-    // Add specific parameters for XBeeLR network
-} XBeeLRNetworkConfig;
-
-typedef struct {
-    // XBeeLR specific serial configuration parameters
-    XBeeSerialConfig common;  // Inherit common parameters
-    // Add specific parameters for XBeeLR serial
-} XBeeLRSerialConfig;
-
 XBeeLR* XBeeLR_Create(void);
 bool XBeeLR_GetDevEUI(XBee* self);
 

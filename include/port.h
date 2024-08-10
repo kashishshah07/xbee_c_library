@@ -1,6 +1,6 @@
 /**
- * @file uart.h
- * @brief UART Abstraction Header
+ * @file port.h
+ * @brief Port Abstraction Header
  * @version 1.0
  * @date 2024-08-08
  * 
@@ -10,8 +10,8 @@
  * @contact felix.galindo@digi.com
  */
 
-#ifndef UART_H
-#define UART_H
+#ifndef PORT_H
+#define PORT_H
 
 #include <stdint.h>
 
@@ -26,10 +26,12 @@ typedef enum {
     UART_ERROR_UNKNOWN
 } uart_status_t;
 
-uart_status_t uart_read(uint8_t *buf, int len, int *bytes_read);
-int uart_write(uint8_t *data, uint16_t len);
-uint32_t get_current_time_ms(void);
-void uart_clear_receive_buffer(void);
-void uart_init(const char *device, uint32_t baudrate);
+uart_status_t port_uart_read(uint8_t *buf, int len, int *bytes_read);
+int port_uart_write(uint8_t *data, uint16_t len);
+uint32_t port_millis(void);
+void port_flush_rx(void);
+void port_uart_init(const char *device, uint32_t baudrate);
+void port_delay(uint32_t ms);
+void port_debug_printf(const char *format, ...);
 
 #endif // UART_H

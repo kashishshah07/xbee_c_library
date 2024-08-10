@@ -1,16 +1,16 @@
 #include "xbee_api_frames.h"
 #include "xbee_at_cmds.h"
-#include "uart.h"
+#include "port.h"
 #include <bcm2835.h>
 #include <stdio.h>
 #include <stdint.h>
 
 int main(void) {
     // Initialize UART with a baud rate of 9600
-    uart_init(9600);
+    port_uart_init(9600);
 
     // Timing variables
-    uint32_t previousMillis = get_current_time_ms();
+    uint32_t previousMillis = port_millis();
     const uint32_t interval = 5000;  // Interval at which to send the command (milliseconds)
 
     while (1) {
@@ -31,15 +31,15 @@ int main(void) {
                     xbee_handle_rx_packet(&frame);
                     break;
                 default:
-                    printf("Received unknown frame type: %d\n", frame.type);
+                    port_debug_printf("Received unknown frame type: %d\n", frame.type);
                     break;
             }
         } else if (status == -1) {
-            printf("Error receiving frame.\n");
+            port_debug_printf("Error receiving frame.\n");
         }
 
         // Check if 5 seconds have passed
-        uint32_t currentMillis = get_current_time_ms();
+        uint32_t currentMillis = port_millis();
         if (currentMillis - previousMillis >= interval) {
             previousMillis = currentMillis;
 

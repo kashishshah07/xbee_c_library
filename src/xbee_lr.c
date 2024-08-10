@@ -51,18 +51,32 @@ void XBeeLR_Process(XBee* self) {
     if (status == 0) {
         api_handle_frame(frame);
     } else if (status == -1) {
-        printf("Error receiving frame.\n");
+        port_debug_printf("Error receiving frame.\n");
     }
 }
 
 
 void XBeeLR_ConfigureNetwork(XBee* self, const void* config) {
     const XBeeLRNetworkConfig* netConfig = (const XBeeLRNetworkConfig*)config;
-    api_send_at_command(AT_AE,"37D56A3F6CDCF0A5", 16);
-    api_send_at_command(AT_AK,"BD32AAB41C54175E9060D86F3A8B7F42", 32);
-    api_send_at_command(AT_NK,"BD32AAB41C54175E9060D86F3A8B7F42", 32);
-    api_send_at_command(AT_WR, NULL, 0);
-    api_send_at_command(AT_AC, NULL, 0);
+    uint8_t response = 0;
+    uint8_t response_length;
+    int status;
+    status += api_send_at_command_and_get_response(AT_AE, "37D56A3F6CDCF0A5", &response, &response_length, 5000);
+    status += api_send_at_command_and_get_response(AT_AK, "BD32AAB41C54175E9060D86F3A8B7F42", &response, &response_length, 5000);
+    status += api_send_at_command_and_get_response(AT_NK, "BD32AAB41C54175E9060D86F3A8B7F42", &response, &response_length, 5000);
+
+    if(status == 0){
+        status = api_send_at_command_and_get_response(AT_WR, NULL, &response, &response_length, 5000);
+        status = api_send_at_command_and_get_response(AT_AC, NULL, &response, &response_length, 5000);
+    }else{
+        port_debug_printf("Failed to configure network\n");
+    }
+
+    // api_send_at_command(AT_AE,"37D56A3F6CDCF0A5", 16);
+    // api_send_at_command(AT_AK,"BD32AAB41C54175E9060D86F3A8B7F42", 32);
+    // api_send_at_command(AT_NK,"BD32AAB41C54175E9060D86F3A8B7F42", 32);
+    // api_send_at_command(AT_WR, NULL, 0);
+    // api_send_at_command(AT_AC, NULL, 0);
     // Implement XBeeLR specific network configuration logic
 }
 
@@ -82,9 +96,9 @@ bool XBeeLR_Connected(XBee* self) {
 
     if (status == 0) {
         // Print the received reponse
-        printf("Join Status: %s \n", response ? "Joined" : "Not Joined");
+        port_debug_printf("Join Status: %s \n", response ? "Joined" : "Not Joined");
     } else {
-        printf("Failed to receive AT_JS response, error code: %d\n", status);
+        port_debug_printf("Failed to receive AT_JS response, error code: %d\n", status);
     }
     return response == '1' ? 1 : 0;  
 }
@@ -101,10 +115,10 @@ bool XBeeLR_GetDevEUI(XBee* self) {
 
     if (status == 0) {
         // Print the received response
-        printf("DEVEUI: ");
-        printf("%s\n", response_buffer);
+        port_debug_printf("DEVEUI: ");
+        port_debug_printf("%s\n", response_buffer);
     } else {
-        printf("Failed to receive AT_DE response, error code: %d\n", status);
+        port_debug_printf("Failed to receive AT_DE response, error code: %d\n", status);
     }
     return true;  // Placeholder
 }
@@ -136,28 +150,22 @@ XBeeLR* XBeeLR_Create(void) {
 
 // XBeeLR private functions
 static void SendJoinReqApiFrame() {
-    uint8_t frame_data[1]; // Adjust size as needed based on the frame structure
-
-    // Example frame data for Join Request (you need to adjust based on actual protocol)
-    frame_data[0] = 0x01;  // Frame ID
-    // Add other relevant data to frame_data based on protocol specification
-    // ...
+    uint8_t frame_id = 1;
 
     // Call the api_send_frame function to send the Join Request API frame
-    api_send_frame(0x14, frame_data, sizeof(frame_data));
+    api_send_frame(XBEE_API_TYPE_LR_JOIN_REQUEST, &frame_id, 1);
 }
 
 static void SendTxReqApiFrame(const uint8_t* payload, uint16_t payload_len, uint8_t port, uint8_t options) {
     uint8_t frame_data[128]; // Adjust size as needed based on the frame structure
 
     // Example frame data for Tx Request
-    frame_data[0] = 0x50;  // API Frame Tx Request ID
-    frame_data[1] = 0x01;  // Frame ID
-    frame_data[3] = port;  // LoRaWAN Port
-    frame_data[4] = options;  // Transmit Options
+    frame_data[0] = 0x01;  // Frame ID
+    frame_data[1] = port;  // LoRaWAN Port
+    frame_data[2] = options;  // Transmit Options
     // Add the payload to the frame data
-    memcpy(&frame_data[5], payload, payload_len);
+    memcpy(&frame_data[3], payload, payload_len);
 
     // Call the api_send_frame function to send the Tx Request API frame
-    api_send_frame(0x50, frame_data, 4 + payload_len);
+    api_send_frame(XBEE_API_TYPE_LR_TX_REQUEST, frame_data, 3 + payload_len);
 }

@@ -9,7 +9,7 @@
  * This file provides a basic XBee Library port using the EFM32 HAL.
  */
 
-#include "uart.h"
+#include "port.h"
 #include "em_usart.h"
 #include "em_gpio.h"
 #include "em_cmu.h"
@@ -19,7 +19,7 @@
 #define UART_TX_PIN 0        // TX pin number
 #define UART_RX_PIN 1        // RX pin number
 
-void uart_init(uint32_t baudrate) {
+void port_uart_init(uint32_t baudrate) {
     // Enable clocks for GPIO and USART0
     CMU_ClockEnable(cmuClock_GPIO, true);
     CMU_ClockEnable(cmuClock_USART0, true);
@@ -43,7 +43,7 @@ void uart_init(uint32_t baudrate) {
     USART_Enable(USART0, usartEnable);
 }
 
-int uart_write(uint8_t *data, uint16_t len) {
+int port_uart_write(uint8_t *data, uint16_t len) {
     for (uint16_t i = 0; i < len; i++) {
         USART_Tx(USART0, data[i]);
     }
@@ -52,7 +52,7 @@ int uart_write(uint8_t *data, uint16_t len) {
     // For simplicity, we'll assume success here, but error checks can be added
     return 0;  // Success
 }
-uart_status_t uart_read(uint8_t *buf, int len, int *bytes_read) {
+uart_status_t port_uart_read(uint8_t *buf, int len, int *bytes_read) {
     *bytes_read = 0;
     uint32_t start_time = TIMER_CounterGet(TIMER0);
 
@@ -70,11 +70,11 @@ uart_status_t uart_read(uint8_t *buf, int len, int *bytes_read) {
     return UART_SUCCESS;
 }
 
-uint32_t get_current_time_ms(void) {
+uint32_t port_millis(void) {
     return TIMER_CounterGet(TIMER0);  // Use a TIMER or similar to get time in milliseconds
 }
 
-void uart_clear_receive_buffer(void) {
+void port_flush_rx(void) {
     while (USART_StatusGet(USART0) & USART_STATUS_RXDATAV) {
         volatile uint8_t dummy = USART_Rx(USART0);
         (void)dummy;  // Discard the data

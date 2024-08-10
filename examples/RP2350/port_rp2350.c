@@ -9,7 +9,7 @@
  * This file provides a basic XBee library port using the BCM2835 library.
  */
 
-#include "uart.h"
+#include "port.h"
 #include <bcm2835.h>
 #include <stdio.h>
 #include <stdint.h>
@@ -17,10 +17,10 @@
 #define UART_TX_PIN RPI_GPIO_P1_08 // GPIO14 TXD
 #define UART_RX_PIN RPI_GPIO_P1_10 // GPIO15 RXD
 
-void uart_init(uint32_t baudrate) {
+void port_uart_init(uint32_t baudrate) {
     // Initialize the BCM2835 library
     if (!bcm2835_init()) {
-        printf("BCM2835 initialization failed!\n");
+        port_debug_printf("BCM2835 initialization failed!\n");
         return;
     }
 
@@ -36,7 +36,7 @@ void uart_init(uint32_t baudrate) {
     bcm2835_uart_set_parity(BCM2835_UART_PARITY_OFF);
 }
 
-int uart_write(uint8_t *data, uint16_t len) {
+int port_uart_write(uint8_t *data, uint16_t len) {
     for (uint16_t i = 0; i < len; i++) {
         uart_putc_raw(uart0, data[i]);
     }
@@ -46,7 +46,7 @@ int uart_write(uint8_t *data, uint16_t len) {
     return 0;  // Success
 }
 
-uart_status_t uart_read(uint8_t *buf, int len, int *bytes_read) {
+uart_status_t port_uart_read(uint8_t *buf, int len, int *bytes_read) {
     *bytes_read = 0;
     uint32_t start_time = bcm2835_st_read();  // Start time in microseconds
 
@@ -64,11 +64,11 @@ uart_status_t uart_read(uint8_t *buf, int len, int *bytes_read) {
     return UART_SUCCESS;
 }
 
-uint32_t get_current_time_ms(void) {
+uint32_t port_millis(void) {
     return bcm2835_st_read() / 1000;  // Convert microseconds to milliseconds
 }
 
-void uart_clear_receive_buffer(void) {
+void port_flush_rx(void) {
     while (bcm2835_uart_data_available()) {
         volatile uint8_t dummy = bcm2835_uart_receive();
         (void)dummy;  // Discard the data

@@ -9,7 +9,7 @@ int main(void) {
     CMU_ClockEnable(cmuClock_HFPER, true);
     CMU_ClockEnable(cmuClock_TIMER0, true);
 
-    uart_init(9600);  // Initialize UART for EFM32
+    port_uart_init(9600);  // Initialize UART for EFM32
 
     uint32_t previousMillis = 0;
     const uint32_t interval = 5000;  // Interval at which to send the command (milliseconds)
@@ -29,7 +29,7 @@ int main(void) {
                     xbee_handle_rx_packet(&frame);
                     break;
                 default:
-                    printf("Received unknown frame type: %d\n", frame.type);
+                    port_debug_printf("Received unknown frame type: %d\n", frame.type);
                     break;
             }
         }

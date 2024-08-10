@@ -10,7 +10,7 @@
  * @contact felix.galindo@digi.com
  */
 
-#include "uart.h"
+#include "port.h"
 #include <fcntl.h>
 #include <termios.h>
 #include <unistd.h>
@@ -18,10 +18,11 @@
 #include <sys/time.h>
 #include <errno.h>
 #include <sys/ioctl.h>
+#include <stdarg.h>
 
 static int uart_fd = -1;
 
-void uart_init(const char *device, uint32_t baudrate) {
+void port_uart_init(const char *device, uint32_t baudrate) {
     struct termios options;
 
     // Open the UART device file
@@ -51,7 +52,7 @@ void uart_init(const char *device, uint32_t baudrate) {
     tcsetattr(uart_fd, TCSANOW, &options);
 }
 
-int uart_write(uint8_t *data, uint16_t len) {
+int port_uart_write(uint8_t *data, uint16_t len) {
     ssize_t written = write(uart_fd, data, len);
 
     if (written == len) {
@@ -60,7 +61,7 @@ int uart_write(uint8_t *data, uint16_t len) {
         return -1;  // UART failure
     }
 }
-uart_status_t uart_read(uint8_t *buf, int len, int *bytes_read) {
+uart_status_t port_uart_read(uint8_t *buf, int len, int *bytes_read) {
     *bytes_read = 0;
     int result;
     fd_set readfds;
@@ -123,12 +124,23 @@ uart_status_t uart_read(uint8_t *buf, int len, int *bytes_read) {
     return UART_SUCCESS;
 }
 
-uint32_t get_current_time_ms(void) {
+uint32_t port_millis(void) {
     struct timeval tv;
     gettimeofday(&tv, NULL);
     return (uint32_t)(tv.tv_sec * 1000 + tv.tv_usec / 1000);
 }
 
-void uart_clear_receive_buffer(void) {
+void port_flush_rx(void) {
     tcflush(uart_fd, TCIFLUSH);
+}
+
+void port_delay(uint32_t ms) {
+    usleep(ms * 1000);  // POSIX or bare metal delay (microseconds)
+}
+
+void port_debug_printf(const char *format, ...) {
+    va_list args;
+    va_start(args, format);
+    vprintf(format, args);  // Standard POSIX vprintf function
+    va_end(args);
 }

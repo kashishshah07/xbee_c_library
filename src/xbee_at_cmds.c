@@ -11,7 +11,7 @@
  */
 
 #include "xbee_at_cmds.h"
-#include "uart.h"
+#include "port.h"
 #include <stdio.h>
 #include <string.h>
 
