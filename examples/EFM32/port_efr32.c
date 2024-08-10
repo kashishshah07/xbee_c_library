@@ -1,12 +1,12 @@
 /**
- * @file uart_efm32.c
- * @brief UART Abstraction for EFM32
+ * @file port_efm32.c
+ * @brief XBee Library Port for EFM32
  * @version 1.0
  * @date 2024-08-08
  * 
  * @license MIT
  * 
- * This file provides a basic UART interface using the EFM32 HAL.
+ * This file provides a basic XBee Library port using the EFM32 HAL.
  */
 
 #include "uart.h"

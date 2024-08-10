@@ -1,6 +1,6 @@
 /**
- * @file uart_stm32.c
- * @brief UART Abstraction for STM32 HAL
+ * @file port_stm32.c
+ * @brief XBee Library Port for STM32
  * @version 1.0
  * @date 2024-08-08
  * 

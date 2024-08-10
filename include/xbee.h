@@ -24,7 +24,7 @@ typedef void (*OnSendCallback)(XBee* self, const uint8_t* data, uint16_t length)
 
 // Function pointers for methods in the base class
 typedef struct {
-    void (*connect)(XBee* self, const void* config);
+    void (*connect)(XBee* self);
     void (*disconnect)(XBee* self);
     void (*send_data)(XBee* self, const uint8_t* data, uint16_t length);
     void (*receive_data)(XBee* self, uint8_t* buffer, uint16_t buffer_size);
@@ -33,7 +33,7 @@ typedef struct {
     void (*process)(XBee* self);
     void (*configure_network)(XBee* self, const void* config);
     void (*configure_serial)(XBee* self, const void* config);
-    bool (*check_network_connection)(XBee* self);
+    bool (*connected)(XBee* self);
 } XBeeVTable;
 
 struct XBee {
@@ -48,16 +48,15 @@ struct XBee {
 };
 
 // Interface functions to call the methods
-void XBee_Connect(XBee* self, const void* config);
+void XBee_Connect(XBee* self);
 void XBee_Disconnect(XBee* self);
 void XBee_SendData(XBee* self, const uint8_t* data, uint16_t length);
-void XBee_ReceiveData(XBee* self, uint8_t* buffer, uint16_t buffer_size);
 void XBee_SoftReset(XBee* self);
 void XBee_HardReset(XBee* self);
 void XBee_Process(XBee* self);
 void XBee_ConfigureNetwork(XBee* self, const void* config);
 void XBee_ConfigureSerial(XBee* self, const void* config);
-bool XBee_CheckNetworkConnection(XBee* self);
+bool XBee_Connected(XBee* self);
 
 // Methods to set callback functions
 void XBee_SetOnReceiveCallback(XBee* self, OnReceiveCallback callback);

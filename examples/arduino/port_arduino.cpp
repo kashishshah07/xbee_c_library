@@ -1,7 +1,6 @@
-
 /**
- * @file uart_arduino.cpp
- * @brief UART Abstraction for Arduino
+ * @file port_arduino.cpp
+ * @brief XBee Library Port for Arduino
  * @version 1.0
  * @date 2024-08-08
  * 

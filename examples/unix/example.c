@@ -21,7 +21,7 @@ int main() {
     const void* config = NULL;
 
     //Use the XBee_Connect method, which will call the custom connect function for XBeeLR
-    XBee_Connect((XBee*)my_xbee_lr, config);
+    XBee_Connect((XBee*)my_xbee_lr);
 
     // Implement XBeeLR specific data sending logic
     uint8_t example_payload[] = {0x01, 0x02, 0x03, 0x04, 0x05};

@@ -36,31 +36,28 @@
  * corresponds to a specific configuration or control operation within the module.
  */
 typedef enum {
+    /**< XBee Common AT Commands */
     AT_,
+    AT_CN,   /**< Exit Command Mode */
+    AT_AP,   /**< API Enable */
+    AT_BD,   /**< Baud Rate */
+    AT_WR,   /**< Write to non-volatile memory */
+    AT_RE,   /**< Restore factory defaults */
+    AT_VR,   /**< Firmware Version */
+    AT_AC,   /**< Apply Changes */
+    AT_NR,   /**< Network Reset */
+
+    /**< XBee LR Specific AT Commands */
     AT_DE,   /**< LoRaWAN Device EUI */
     AT_AK,   /**< LoRaWAN Application Key */
     AT_AE,   /**< LoRaWAN Application EUI */
     AT_NK,   /**< LoRaWAN Network Key */
     AT_FQ,   /**< Test Configuration Frequency */
     AT_PW,   /**< Test Configuration Power */
+
     // ... (other existing AT commands) ...
-    AT_ID,   /**< PAN ID */
-    AT_CH,   /**< Operating Channel */
-    AT_MY,   /**< 16-bit Source Address */
-    AT_DH,   /**< Destination Address High */
-    AT_DL,   /**< Destination Address Low */
-    AT_CN,   /**< Exit Command Mode */
-    AT_AP,   /**< API Enable */
-    AT_NI,   /**< Node Identifier */
-    AT_BD,   /**< Baud Rate */
-    AT_WR,   /**< Write to non-volatile memory */
-    AT_RE,   /**< Restore factory defaults */
-    AT_VR,   /**< Firmware Version */
-    AT_CE,   /**< Coordinator Enable */
-    AT_RO,   /**< Packetization Timeout */
-    AT_ND,   /**< Node Discover */
-    AT_AC,   /**< Apply Changes */
-    AT_NR    /**< Network Reset */
+
+
 } at_command_t;
 
 /**

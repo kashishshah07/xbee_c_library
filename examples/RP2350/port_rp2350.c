@@ -1,12 +1,12 @@
 /**
- * @file uart_rpi.c
- * @brief UART Abstraction for Raspberry Pi using BCM2835
+ * @file xbee_port_rp2350.c
+ * @brief XBee Library POrt for Raspberry Pi using BCM2835
  * @version 1.0
  * @date 2024-08-08
  * 
  * @license MIT
  * 
- * This file provides a basic UART interface using the BCM2835 library.
+ * This file provides a basic XBee library port using the BCM2835 library.
  */
 
 #include "uart.h"

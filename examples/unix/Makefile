@@ -16,7 +16,7 @@ SRCS = $(SRC_DIR)/xbee.c $(SRC_DIR)/xbee_api_frames.c $(SRC_DIR)/xbee_at_cmds.c 
 OBJS = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SRCS))
 
 # Example files
-EXAMPLE_SRCS = $(EXAMPLE_DIR)/uart_unix.c $(EXAMPLE_DIR)/example.c
+EXAMPLE_SRCS = $(EXAMPLE_DIR)/port_unix.c $(EXAMPLE_DIR)/example.c
 EXAMPLE_OBJS = $(patsubst $(EXAMPLE_DIR)/%.c,$(BUILD_DIR)/%.o,$(EXAMPLE_SRCS))
 
 # Output binary

@@ -237,31 +237,3 @@ void xbee_handle_rx_packet(xbee_api_frame_t *frame) {
     printf("\n");
     // Add further processing as needed
 }
-
-
-void SendJoinReqApiFrame() {
-    uint8_t frame_data[1]; // Adjust size as needed based on the frame structure
-
-    // Example frame data for Join Request (you need to adjust based on actual protocol)
-    frame_data[0] = 0x01;  // Frame ID
-    // Add other relevant data to frame_data based on protocol specification
-    // ...
-
-    // Call the api_send_frame function to send the Join Request API frame
-    api_send_frame(0x14, frame_data, sizeof(frame_data));
-}
-
-void SendTxReqApiFrame(const uint8_t* payload, uint16_t payload_len, uint8_t port, uint8_t options) {
-    uint8_t frame_data[128]; // Adjust size as needed based on the frame structure
-
-    // Example frame data for Tx Request
-    frame_data[0] = 0x50;  // API Frame Tx Request ID
-    frame_data[1] = 0x01;  // Frame ID
-    frame_data[3] = port;  // LoRaWAN Port
-    frame_data[4] = options;  // Transmit Options
-    // Add the payload to the frame data
-    memcpy(&frame_data[5], payload, payload_len);
-
-    // Call the api_send_frame function to send the Tx Request API frame
-    api_send_frame(0x50, frame_data, 4 + payload_len);
-}

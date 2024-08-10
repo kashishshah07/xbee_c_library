@@ -1,6 +1,6 @@
 /**
- * @file uart_unix.c
- * @brief UART Abstraction for Unix
+ * @file port_unix.c
+ * @brief XBee Library Port for Unix
  * @version 1.0
  * @date 2024-08-08
  * 
