@@ -26,7 +26,7 @@ static uint8_t calculate_checksum(const uint8_t *frame, uint16_t len) {
     return 0xFF - sum;
 }
 
-void api_send_frame(uint8_t frame_type, const uint8_t *data, uint16_t len) {
+int api_send_frame(uint8_t frame_type, const uint8_t *data, uint16_t len) {
     uint8_t frame[256];
     uint16_t frame_length = 0;
 
@@ -56,13 +56,24 @@ void api_send_frame(uint8_t frame_type, const uint8_t *data, uint16_t len) {
     printf("\n");
 
     // Send frame via UART
-    uart_write(frame, frame_length);
+    int uart_status = uart_write(frame, frame_length);
+    if (uart_status != 0) {
+        return API_SEND_ERROR_UART_FAILURE;
+    }
+
+    // Return success if everything went well
+    return API_SEND_SUCCESS;
 }
 
 // Function to send AT command through API frame mode and print it
-void api_send_at_command(at_command_t command, const uint8_t *parameter, uint8_t param_length) {
+int api_send_at_command(at_command_t command, const uint8_t *parameter, uint8_t param_length) {
     uint8_t frame_data[128];
     uint16_t frame_length = 0;
+
+   // Check if the parameter length is too large
+    if (param_length > 128) {
+        return API_SEND_ERROR_FRAME_TOO_LARGE;
+    }
 
     // Frame ID (0x01 for reliable, 0x00 for no response required)
     frame_data[frame_length++] = 0x01;
@@ -71,6 +82,10 @@ void api_send_at_command(at_command_t command, const uint8_t *parameter, uint8_t
     const char *cmd_str = at_command_to_string(command);
     frame_data[frame_length++] = cmd_str[0];
     frame_data[frame_length++] = cmd_str[1];
+
+    if (cmd_str == NULL) {
+        return API_SEND_ERROR_INVALID_COMMAND;
+    }
 
     // AT Command Parameter
     if (param_length > 0) {
@@ -91,7 +106,7 @@ void api_send_at_command(at_command_t command, const uint8_t *parameter, uint8_t
     }
 
     // Use api_send_frame to send the complete frame
-    api_send_frame(0x08, frame_data, frame_length);
+    return api_send_frame(0x08, frame_data, frame_length);
 }
 
 int api_receive_api_frame(xbee_api_frame_t *frame) {
@@ -189,6 +204,63 @@ int api_receive_api_frame(xbee_api_frame_t *frame) {
     }
 
     return 0; // Successfully received a frame
+}
+
+void api_handle_frame(xbee_api_frame_t frame){
+    switch (frame.type) {
+        case XBEE_API_TYPE_AT_RESPONSE:
+            xbee_handle_at_response(&frame);
+            break;
+        case XBEE_API_TYPE_MODEM_STATUS:
+            xbee_handle_modem_status(&frame);
+            break;
+        case XBEE_API_TYPE_RX_PACKET:
+            xbee_handle_rx_packet(&frame);
+            break;
+        default:
+            printf("Received unknown frame type: %d\n", frame.type);
+            break;
+    }
+}
+
+int api_send_at_command_and_get_response(at_command_t command, const char *parameter, uint8_t *response_buffer, uint8_t *response_length, uint32_t timeout_ms) {
+    // Send the AT command using API frame
+    uint8_t param_length = (parameter != NULL) ? strlen(parameter) : 0;
+    api_send_at_command(command, (const uint8_t *)parameter, param_length);
+
+    // Get the start time using the platform-specific function
+    uint32_t start_time = get_current_time_ms();
+    
+    // Wait and receive the response within the timeout period
+    xbee_api_frame_t frame;
+    int status;
+
+    while (1) {
+        // Attempt to receive the API frame
+        status = api_receive_api_frame(&frame);
+
+        // Check if a valid frame was received
+        if (status == 0) {
+            // Check if the received frame is an AT response
+            if (frame.type == XBEE_API_TYPE_AT_RESPONSE) {
+                // Extract the AT command response
+                *response_length = frame.length - 5;  // Subtract the frame ID and AT command bytes
+                memcpy(response_buffer, &frame.data[5], *response_length);
+
+                // Return success
+                return 0;
+            } 
+            else{
+                api_handle_frame(frame);
+            }
+        }
+
+        // Check if the timeout period has elapsed using platform-specific time
+        if ((get_current_time_ms() - start_time) >= timeout_ms) {
+            printf("Timeout waiting for AT response.\n");
+            return -1;
+        }
+    }
 }
 
 void xbee_handle_at_response(xbee_api_frame_t *frame) {

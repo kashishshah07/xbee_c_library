@@ -16,6 +16,10 @@
 #include "xbee_at_cmds.h"
 
 #define XBEE_MAX_FRAME_DATA_SIZE 256
+#define API_SEND_SUCCESS 0
+#define API_SEND_ERROR_INVALID_COMMAND -1
+#define API_SEND_ERROR_UART_FAILURE -2
+#define API_SEND_ERROR_FRAME_TOO_LARGE -3
 
 // Enum for different API frame types
 typedef enum {
@@ -42,9 +46,13 @@ typedef struct {
 
 // Function prototypes
 int api_receive_api_frame(xbee_api_frame_t *frame);
-void api_send_at_command(at_command_t command, const uint8_t *parameter, uint8_t param_length);
+int api_send_at_command(at_command_t command, const uint8_t *parameter, uint8_t param_length);
+int api_send_frame(uint8_t frame_type, const uint8_t *data, uint16_t len);
+int api_send_at_command_and_get_response(at_command_t command, const char *parameter, uint8_t *response_buffer, uint8_t *response_length, uint32_t timeout_ms);
+void api_handle_frame(xbee_api_frame_t frame);
 void xbee_handle_at_response(xbee_api_frame_t *frame);
 void xbee_handle_modem_status(xbee_api_frame_t *frame);
 void xbee_handle_rx_packet(xbee_api_frame_t *frame);
+
 
 #endif // XBEE_FRAMES_H

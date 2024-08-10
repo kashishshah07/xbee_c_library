@@ -36,10 +36,14 @@ void uart_init(uint32_t baudrate) {
     bcm2835_uart_set_parity(BCM2835_UART_PARITY_OFF);
 }
 
-void uart_write(uint8_t *data, uint16_t len) {
-    for (int i = 0; i < len; i++) {
-        bcm2835_uart_send(data[i]);
+int uart_write(uint8_t *data, uint16_t len) {
+    for (uint16_t i = 0; i < len; i++) {
+        uart_putc_raw(uart0, data[i]);
     }
+
+    // Assuming there's a way to check if the transmission was successful
+    // For simplicity, we'll assume success here, but error checks can be added
+    return 0;  // Success
 }
 
 uart_status_t uart_read(uint8_t *buf, int len, int *bytes_read) {

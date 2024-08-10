@@ -51,12 +51,15 @@ void uart_init(const char *device, uint32_t baudrate) {
     tcsetattr(uart_fd, TCSANOW, &options);
 }
 
-void uart_write(uint8_t *data, uint16_t len) {
-    if (uart_fd != -1) {
-        write(uart_fd, data, len);
+int uart_write(uint8_t *data, uint16_t len) {
+    ssize_t written = write(uart_fd, data, len);
+
+    if (written == len) {
+        return 0;  // Success
+    } else {
+        return -1;  // UART failure
     }
 }
-
 uart_status_t uart_read(uint8_t *buf, int len, int *bytes_read) {
     *bytes_read = 0;
     int result;

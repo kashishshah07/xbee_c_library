@@ -1,3 +1,16 @@
+/**
+ * @file xbee.c
+ * @brief XBee Class Header
+ * @version 1.0
+ * @date 2024-08-08
+ * 
+ * @license MIT
+ * 
+ * @author Felix Galindo, Digi International
+ * @contact felix.galindo@digi.com
+ */
+
+
 #ifndef XBEE_H
 #define XBEE_H
 

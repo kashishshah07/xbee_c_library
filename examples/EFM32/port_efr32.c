@@ -43,12 +43,15 @@ void uart_init(uint32_t baudrate) {
     USART_Enable(USART0, usartEnable);
 }
 
-void uart_write(uint8_t *data, uint16_t len) {
-    for (int i = 0; i < len; i++) {
+int uart_write(uint8_t *data, uint16_t len) {
+    for (uint16_t i = 0; i < len; i++) {
         USART_Tx(USART0, data[i]);
     }
-}
 
+    // Assuming there's a way to check if the transmission was successful
+    // For simplicity, we'll assume success here, but error checks can be added
+    return 0;  // Success
+}
 uart_status_t uart_read(uint8_t *buf, int len, int *bytes_read) {
     *bytes_read = 0;
     uint32_t start_time = TIMER_CounterGet(TIMER0);

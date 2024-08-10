@@ -17,8 +17,14 @@ void uart_init(uint32_t baudrate) {
     Serial.begin(baudrate);
 }
 
-void uart_write(uint8_t *data, uint16_t len) {
-    Serial.write(data, len);
+int uart_write(uint8_t *data, uint16_t len) {
+    size_t written = Serial.write(data, len);
+
+    if (written == len) {
+        return 0;  // Success
+    } else {
+        return -1;  // UART failure
+    }
 }
 
 uart_status_t uart_read(uint8_t *buf, int len, int *bytes_read) {

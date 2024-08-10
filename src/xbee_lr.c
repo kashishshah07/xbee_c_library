@@ -1,3 +1,15 @@
+/**
+ * @file xbee_lr.c
+ * @brief XBee LR Subclass Source 
+ * @version 1.0
+ * @date 2024-08-08
+ * 
+ * @license MIT
+ * 
+ * @author Felix Galindo, Digi International
+ * @contact felix.galindo@digi.com
+ */
+
 #include "xbee_lr.h"
 #include "xbee_api_frames.h"
 #include <stdlib.h>
@@ -31,25 +43,13 @@ void XBeeLR_HardReset(XBee* self) {
     // Implement XBeeLR specific hard reset logic
 }
 
+
 void XBeeLR_Process(XBee* self) {
     // Implement XBeeLR specific process logic
     xbee_api_frame_t frame;
     int status = api_receive_api_frame(&frame);
     if (status == 0) {
-        switch (frame.type) {
-            case XBEE_API_TYPE_AT_RESPONSE:
-                xbee_handle_at_response(&frame);
-                break;
-            case XBEE_API_TYPE_MODEM_STATUS:
-                xbee_handle_modem_status(&frame);
-                break;
-            case XBEE_API_TYPE_RX_PACKET:
-                xbee_handle_rx_packet(&frame);
-                break;
-            default:
-                printf("Received unknown frame type: %d\n", frame.type);
-                break;
-        }
+        api_handle_frame(frame);
     } else if (status == -1) {
         printf("Error receiving frame.\n");
     }
@@ -73,6 +73,39 @@ void XBeeLR_ConfigureSerial(XBee* self, const void* config) {
 
 bool XBeeLR_Connected(XBee* self) {
     // Implement logic to check XBeeLR network connection
+    uint8_t response = 0;
+    uint8_t response_length;
+    int status;
+
+    // Send the AT_JS command to query the Join Status
+    status = api_send_at_command_and_get_response(AT_JS, NULL, &response, &response_length, 5000);
+
+    if (status == 0) {
+        // Print the received reponse
+        printf("Join Status: %s \n", response ? "Joined" : "Not Joined");
+    } else {
+        printf("Failed to receive AT_JS response, error code: %d\n", status);
+    }
+    return response == '1' ? 1 : 0;  
+}
+
+bool XBeeLR_GetDevEUI(XBee* self) {
+    // Implement logic to read XBeeLR LoRaWAN DEVEUI
+    uint8_t response_buffer[32];
+    memset(response_buffer,0,sizeof(response_buffer));
+    uint8_t response_length;
+    int status;
+
+    // Send the AT_JS command to query the Join Status
+    status = api_send_at_command_and_get_response(AT_DE, NULL, response_buffer, &response_length, 5000);
+
+    if (status == 0) {
+        // Print the received response
+        printf("DEVEUI: ");
+        printf("%s\n", response_buffer);
+    } else {
+        printf("Failed to receive AT_DE response, error code: %d\n", status);
+    }
     return true;  // Placeholder
 }
 

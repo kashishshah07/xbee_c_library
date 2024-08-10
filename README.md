@@ -2,10 +2,10 @@
 # XBee C Library
 
 ## Overview
-This library provides a framework for interfacing with XBee modules using an API that abstracts AT commands and API frames. It supports multiple platforms including Unix, STM32, RP2350, and EFM32.
+This library provides a framework for interfacing with XBee modules using an XBee API that abstracts AT commands and API frames. It supports multiple platforms including Unix, STM32, RP2350, and EFM32.
 
 ## Library Structure
-- **src**: Contains the core source files implementing XBee APIs.
+- **src**: Contains the core source files implementing XBee classes and APIs.
 - **include**: Contains header files exposing the library's API.
 - **examples**: Contains example implementations for various platforms.
 - **test**: Contains unit tests for validating the functionality of the library.
@@ -31,14 +31,14 @@ This library provides a framework for interfacing with XBee modules using an API
 3. Update the examples to demonstrate the new functionality.
 
 ## Detailed File Breakdown
-- **xbee.c**: Implements the core XBee API layer.
+- **xbee.c**: Implements the XBee class
 - **xbee_at_cmds.c**: Implements functions for sending and receiving AT commands.
-- **xbee_lr.c**: Implements logic specific to the XBee LR module.
+- **xbee_lr.c**: Implements XBee LR module subclass.
 - **xbee_api_frames.c**: Implements parsing and handling of API frames.
 
 ## Library Architecture
 The library is designed to be modular, allowing easy expansion and support for different XBee modules and platforms. The main components include:
-- **XBee Core**: Handles core XBee Library API layer.
+- **XBee Core**: Handles core XBee Class and API layer.
 - **AT Commands**: Manages AT command interface.
 - **API Frames**: Handles API frame communication.
 

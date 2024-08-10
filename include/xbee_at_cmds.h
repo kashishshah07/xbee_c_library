@@ -52,6 +52,7 @@ typedef enum {
     AT_AK,   /**< LoRaWAN Application Key */
     AT_AE,   /**< LoRaWAN Application EUI */
     AT_NK,   /**< LoRaWAN Network Key */
+    AT_JS,   /**< LoRaWAN Join Status */
     AT_FQ,   /**< Test Configuration Frequency */
     AT_PW,   /**< Test Configuration Power */
 

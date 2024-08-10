@@ -20,10 +20,15 @@ void uart_init(uint32_t baudrate) {
     HAL_UART_Init(&huart1);
 }
 
-void uart_write(uint8_t *data, uint16_t len) {
-    HAL_UART_Transmit(&huart1, data, len, HAL_MAX_DELAY);
-}
+int uart_write(uint8_t *data, uint16_t len) {
+    HAL_StatusTypeDef status = HAL_UART_Transmit(&huart1, data, len, HAL_MAX_DELAY);
 
+    if (status == HAL_OK) {
+        return 0;  // Success
+    } else {
+        return -1;  // UART failure
+    }
+}
 uart_status_t uart_read(uint8_t *buf, int len, int *bytes_read) {
     HAL_StatusTypeDef status = HAL_UART_Receive(&huart1, buf, len, UART_READ_TIMEOUT_MS);
 

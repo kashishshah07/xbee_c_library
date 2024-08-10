@@ -1,5 +1,17 @@
+/**
+ * @file xbee.c
+ * @brief XBee Class Source
+ * @version 1.0
+ * @date 2024-08-08
+ * 
+ * @license MIT
+ * 
+ * @author Felix Galindo, Digi International
+ * @contact felix.galindo@digi.com
+ */
+
 #include "xbee.h"
-#include "xbee_api_frames.h"  // Include your API frame functions here
+#include "xbee_api_frames.h" 
 
 // Base class methods
 void XBee_Connect(XBee* self) {

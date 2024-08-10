@@ -27,7 +27,8 @@ const char* at_command_to_string(at_command_t command) {
         case AT_AK: return "AK";
         case AT_AE: return "AE";
         case AT_NK: return "NK";
-        default: return "";
+        case AT_JS: return "JS";
+        default: return NULL;
     }
 }
 

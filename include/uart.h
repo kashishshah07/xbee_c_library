@@ -1,4 +1,3 @@
-
 /**
  * @file uart.h
  * @brief UART Abstraction Header
@@ -28,7 +27,7 @@ typedef enum {
 } uart_status_t;
 
 uart_status_t uart_read(uint8_t *buf, int len, int *bytes_read);
-void uart_write(uint8_t *data, uint16_t len);
+int uart_write(uint8_t *data, uint16_t len);
 uint32_t get_current_time_ms(void);
 void uart_clear_receive_buffer(void);
 void uart_init(const char *device, uint32_t baudrate);
