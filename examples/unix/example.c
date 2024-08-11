@@ -12,16 +12,16 @@
 
 
 void OnReceiveCallback(XBee* self, XBeeLRPacket_t packet){
-    port_debug_printf("Ack %u\n", packet.ack);
-    port_debug_printf("Port %u\n", packet.port);
-    port_debug_printf("RSSI %d\n", packet.rssi);
-    port_debug_printf("SNR %d\n", packet.snr);
-    port_debug_printf("Downlink Counter %lu\n", packet.counter);
     port_debug_printf("Received Packet: ");
     for (int i = 1; i < packet.payloadSize; i++) {
         port_debug_printf("%02X ", packet.payload[i]);
     }
     port_debug_printf("\n");
+    port_debug_printf("Ack %u\n", packet.ack);
+    port_debug_printf("Port %u\n", packet.port);
+    port_debug_printf("RSSI %d\n", packet.rssi);
+    port_debug_printf("SNR %d\n", packet.snr);
+    port_debug_printf("Downlink Counter %lu\n", packet.counter);
 }
 
 void OnSendCallback(XBee* self, XBeeLRPacket_t packet){
@@ -72,10 +72,10 @@ int main() {
 
     port_debug_printf("Configuring...\n");
     XBeeLR_SetAppEUI((XBee*)my_xbee_lr, "37D56A3F6CDCF0A5");
-    XBeeLR_SetAppKey((XBee*)my_xbee_lr, "BD32AAB41C54175E9060D86F3A8B7F42");
-    XBeeLR_SetNwkKey((XBee*)my_xbee_lr, "BD32AAB41C54175E9060D86F3A8B7F42");
-    // XBee_WriteConfig((XBee*)my_xbee_lr);
-    // XBee_ApplyChanges((XBee*)my_xbee_lr);
+    XBeeLR_SetAppKey((XBee*)my_xbee_lr, "CD32AAB41C54175E9060D86F3A8B7F48");
+    XBeeLR_SetNwkKey((XBee*)my_xbee_lr, "CD32AAB41C54175E9060D86F3A8B7F48");
+    XBee_WriteConfig((XBee*)my_xbee_lr);
+    XBee_ApplyChanges((XBee*)my_xbee_lr);
 
     // XBeeLR payload to send
     uint8_t example_payload[] = {0xC0, 0xC0, 0xC0, 0xFF, 0xEE};
@@ -108,6 +108,9 @@ int main() {
                 }
                 port_debug_printf("\n");
                 XBee_SendData((XBee*)my_xbee_lr, &packet);
+                packet.payload[0] = packet.payload[0] + 1; //change payload
+                packet.port++; //change port
+                port_debug_printf("Send Frame Id 0x%02X \n", packet.frameId); //XBee_SendData will update packet.frameId to allow tracking 
             }
             else{
                 port_debug_printf("Not connected. Connecting...\n");

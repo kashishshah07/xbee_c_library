@@ -28,6 +28,8 @@ const char* at_command_to_string(at_command_t command) {
         case AT_AE: return "AE";
         case AT_NK: return "NK";
         case AT_JS: return "JS";
+        case AT_WR: return "WR";
+        case AT_AC: return "AC";
         default: return NULL;
     }
 }

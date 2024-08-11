@@ -16,8 +16,6 @@
 #include <stdio.h>
 #include <string.h>
 
-
-static void SendTxReqApiFrame(XBee* self, const uint8_t* payload, uint16_t payload_len, uint8_t port, uint8_t options);
 static void SendJoinReqApiFrame(XBee* self);
 
 // XBeeLR specific implementations
@@ -40,7 +38,18 @@ void XBeeLR_Disconnect(XBee* self) {
 void XBeeLR_SendData(XBee* self, const void* data) {
     // Call the SendTxReqApiFrame function with the example payload
     XBeeLRPacket_t *packet = (XBeeLRPacket_t*) data;
-    SendTxReqApiFrame(self,packet->payload, packet->payloadSize, packet->port ,packet->ack & 0x01);
+    uint8_t frame_data[128]; // Adjust size as needed based on the frame structure
+
+    // Example frame data for Tx Request
+    packet->frameId = self->frameIdCounter;
+    frame_data[0] = self->frameIdCounter;  // Frame ID
+    frame_data[1] = packet->port;  // LoRaWAN Port
+    frame_data[2] = packet->ack & 0x01;  // Transmit Options
+    // Add the payload to the frame data
+    memcpy(&frame_data[3], packet->payload, packet->payloadSize);
+
+    // Call the api_send_frame function to send the Tx Request API frame
+    api_send_frame(self, XBEE_API_TYPE_LR_TX_REQUEST, frame_data, 3 + packet->payloadSize);
 }
 
 void XBeeLR_SoftReset(XBee* self) {
@@ -136,20 +145,6 @@ static void SendJoinReqApiFrame(XBee* self) {
 
     // Call the api_send_frame function to send the Join Request API frame
     api_send_frame(self, XBEE_API_TYPE_LR_JOIN_REQUEST, &frame_id, 1);
-}
-
-static void SendTxReqApiFrame(XBee* self, const uint8_t* payload, uint16_t payload_len, uint8_t port, uint8_t options) {
-    uint8_t frame_data[128]; // Adjust size as needed based on the frame structure
-
-    // Example frame data for Tx Request
-    frame_data[0] = self->frameIdCounter;  // Frame ID
-    frame_data[1] = port;  // LoRaWAN Port
-    frame_data[2] = options;  // Transmit Options
-    // Add the payload to the frame data
-    memcpy(&frame_data[3], payload, payload_len);
-
-    // Call the api_send_frame function to send the Tx Request API frame
-    api_send_frame(self, XBEE_API_TYPE_LR_TX_REQUEST, frame_data, 3 + payload_len);
 }
 
 void XBeeLR_Handle_Rx_Packet(XBee* self, void *param) {
