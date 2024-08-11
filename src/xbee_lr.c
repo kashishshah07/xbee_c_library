@@ -41,8 +41,8 @@ void XBeeLR_SendData(XBee* self, const void* data) {
     uint8_t frame_data[128]; // Adjust size as needed based on the frame structure
 
     // Example frame data for Tx Request
-    packet->frameId = self->frameIdCounter;
-    frame_data[0] = self->frameIdCounter;  // Frame ID
+    packet->frameId = self->frameIdCntr;
+    frame_data[0] = self->frameIdCntr;  // Frame ID
     frame_data[1] = packet->port;  // LoRaWAN Port
     frame_data[2] = packet->ack & 0x01;  // Transmit Options
     // Add the payload to the frame data
@@ -153,8 +153,9 @@ void XBeeLR_Handle_Rx_Packet(XBee* self, void *param) {
 
     xbee_api_frame_t *frame = (xbee_api_frame_t *)param;
     if (frame->type != XBEE_API_TYPE_LR_RX_PACKET && frame->type != XBEE_API_TYPE_LR_EXPLICIT_RX_PACKET) return;
-    XBeeLRPacket_t packet;
-    memset(&packet,0,sizeof(XBeeLRPacket_t));
+
+    XBeeLRPacket_t * packet = (XBeeLRPacket_t*)malloc(sizeof(XBeeLRPacket_t));
+    memset(packet,0,sizeof(XBeeLRPacket_t));
 
     API_FRAME_DEBUG_PRINT("Received Packet: ");
     for (int i = 1; i < frame->length; i++) {
@@ -163,24 +164,24 @@ void XBeeLR_Handle_Rx_Packet(XBee* self, void *param) {
     API_FRAME_DEBUG_PRINT("\n");
 
     if(frame->type == XBEE_API_TYPE_LR_EXPLICIT_RX_PACKET){
-        packet.port = frame->data[1];
-        packet.rssi = frame->data[2];
-        packet.snr = frame->data[3];
-        packet.dr = frame->data[4];
-        packet.counter = frame->data[5] << 24 | frame->data[6] << 16 | frame->data[7] << 8 | frame->data[8];
-        packet.payload = &(frame->data[9]);
-        packet.payloadSize = frame->length - 9;
+        packet->port = frame->data[1];
+        packet->rssi = frame->data[2];
+        packet->snr = frame->data[3];
+        packet->dr = frame->data[4];
+        packet->counter = frame->data[5] << 24 | frame->data[6] << 16 | frame->data[7] << 8 | frame->data[8];
+        packet->payload = &(frame->data[9]);
+        packet->payloadSize = frame->length - 9;
     }else{
-        packet.port = frame->data[1];
-        packet.payload = &(frame->data[2]);
-        packet.payloadSize = frame->length - 2;
+        packet->port = frame->data[1];
+        packet->payload = &(frame->data[2]);
+        packet->payloadSize = frame->length - 2;
     }
 
-    XBeeLR* my_xbee_lr = (XBeeLR*) self;
-    if(my_xbee_lr->ctable->OnReceiveCallback){
-        my_xbee_lr->ctable->OnReceiveCallback(self,packet);
+    if(self->ctable->OnReceiveCallback){
+        self->ctable->OnReceiveCallback(self,packet);
     }
 
+    free(packet);
     // Add further processing as needed
 }
 
@@ -190,8 +191,9 @@ void XBeeLR_Handle_Transmit_Status(XBee* self, void *param) {
 
     xbee_api_frame_t *frame = (xbee_api_frame_t *)param;
     if (frame->type != XBEE_API_TYPE_TX_STATUS) return;
-    XBeeLRPacket_t packet;
-    memset(&packet,0,sizeof(XBeeLRPacket_t));
+
+    XBeeLRPacket_t * packet = (XBeeLRPacket_t*)malloc(sizeof(XBeeLRPacket_t));
+    memset(packet,0,sizeof(XBeeLRPacket_t));
 
     API_FRAME_DEBUG_PRINT("Received Transmit Status Frame: ");
     for (int i = 1; i < frame->length; i++) {
@@ -199,12 +201,11 @@ void XBeeLR_Handle_Transmit_Status(XBee* self, void *param) {
     }
     API_FRAME_DEBUG_PRINT("\n");
 
-    packet.frameId = frame->data[1];
-    packet.status = frame->data[2];
+    packet->frameId = frame->data[1];
+    packet->status = frame->data[2];
 
-    XBeeLR* my_xbee_lr = (XBeeLR*) self;
-    if(my_xbee_lr->ctable->OnSendCallback){
-        my_xbee_lr->ctable->OnSendCallback(self,packet);
+    if(self->ctable->OnSendCallback){
+        self->ctable->OnSendCallback(self,packet);
     }
 
     // Add further processing as needed
@@ -230,6 +231,6 @@ XBeeLR* XBeeLR_Create(const XBeeCTable* cTable, const XBeeHTable* hTable) {
     XBeeLR* instance = (XBeeLR*)malloc(sizeof(XBeeLR));
     instance->base.vtable = &XBeeLR_VTable;
     instance->base.htable = hTable;
-    instance->ctable = cTable;
+    instance->base.ctable = cTable;
     return instance;
 }

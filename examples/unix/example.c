@@ -11,32 +11,34 @@
 #include <time.h>
 
 
-void OnReceiveCallback(XBee* self, XBeeLRPacket_t packet){
+void OnReceiveCallback(XBee* self, void* data){
+    XBeeLRPacket_t* packet = (XBeeLRPacket_t*) data;
     port_debug_printf("Received Packet: ");
-    for (int i = 1; i < packet.payloadSize; i++) {
-        port_debug_printf("%02X ", packet.payload[i]);
+    for (int i = 1; i < packet->payloadSize; i++) {
+        port_debug_printf("%02X ", packet->payload[i]);
     }
     port_debug_printf("\n");
-    port_debug_printf("Ack %u\n", packet.ack);
-    port_debug_printf("Port %u\n", packet.port);
-    port_debug_printf("RSSI %d\n", packet.rssi);
-    port_debug_printf("SNR %d\n", packet.snr);
-    port_debug_printf("Downlink Counter %lu\n", packet.counter);
+    port_debug_printf("Ack %u\n", packet->ack);
+    port_debug_printf("Port %u\n", packet->port);
+    port_debug_printf("RSSI %d\n", packet->rssi);
+    port_debug_printf("SNR %d\n", packet->snr);
+    port_debug_printf("Downlink Counter %lu\n", packet->counter);
 }
 
-void OnSendCallback(XBee* self, XBeeLRPacket_t packet){
-    switch(packet.status){
+void OnSendCallback(XBee* self, void* data){
+    XBeeLRPacket_t* packet = (XBeeLRPacket_t*) data;
+    switch(packet->status){
         case 0:
-            port_debug_printf("Send successful (frameId: 0x%02X)\n",packet.frameId);
+            port_debug_printf("Send successful (frameId: 0x%02X)\n",packet->frameId);
             break;
         case 0x01:
-            port_debug_printf("Send failed (frameId: 0x%02X) (reason: Ack Failed)\n",packet.frameId);
+            port_debug_printf("Send failed (frameId: 0x%02X) (reason: Ack Failed)\n",packet->frameId);
             break;
         case 0x022:
-            port_debug_printf("Send failed (frameId: 0x%02X) (reason: Not Connected)\n",packet.frameId);
+            port_debug_printf("Send failed (frameId: 0x%02X) (reason: Not Connected)\n",packet->frameId);
             break;
         default:
-            port_debug_printf("Send failed (frameId: 0x%02X) (reason: 0x%02X)\n",packet.frameId, packet.status);
+            port_debug_printf("Send failed (frameId: 0x%02X) (reason: 0x%02X)\n",packet->frameId, packet->status);
             break;
     }
 }

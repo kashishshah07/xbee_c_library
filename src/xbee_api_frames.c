@@ -30,7 +30,8 @@ static uint8_t calculate_checksum(const uint8_t *frame, uint16_t len) {
 int api_send_frame(XBee* self,uint8_t frame_type, const uint8_t *data, uint16_t len) {
     uint8_t frame[256];
     uint16_t frame_length = 0;
-    self->frameIdCounter++;
+    self->frameIdCntr++;
+    if(self->frameIdCntr == 0) self->frameIdCntr = 1; //reset frame counter when 0
 
     // Start delimiter
     frame[frame_length++] = 0x7E;
@@ -77,8 +78,8 @@ int api_send_at_command(XBee* self,at_command_t command, const uint8_t *paramete
         return API_SEND_ERROR_FRAME_TOO_LARGE;
     }
 
-    // Frame ID (0x01 for reliable, 0x00 for no response required)
-    frame_data[frame_length++] = 0x01;
+    // Frame ID
+    frame_data[frame_length++] = self->frameIdCntr;
 
     // AT Command (2 bytes)
     const char *cmd_str = at_command_to_string(command);

@@ -46,11 +46,20 @@ typedef struct {
     void (*PortDelay)(uint32_t ms);
 } XBeeHTable;
 
+// Function pointers for callback methods in the base class
+typedef struct {
+    void (*OnReceiveCallback)(XBee* self, void * data);
+    void (*OnConnectCallback)(XBee* self);
+    void (*OnDisconnectCallback)(XBee* self);
+    void (*OnSendCallback)(XBee* self, void * data);
+} XBeeCTable;
+
 struct XBee {
     // Add common XBee attributes here
     const XBeeVTable* vtable;
     const XBeeHTable* htable;
-    uint8_t frameIdCounter;
+    const XBeeCTable* ctable;
+    uint8_t frameIdCntr;
 };
 
 // Interface functions to call the methods

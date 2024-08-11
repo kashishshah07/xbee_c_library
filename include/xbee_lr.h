@@ -30,19 +30,10 @@ typedef struct XBeeLRPacket_s{
     uint32_t counter;
 }XBeeLRPacket_t;
 
-// Function pointers for callback methods in the base class
-typedef struct {
-    void (*OnReceiveCallback)(XBee* self, XBeeLRPacket_t data);
-    void (*OnConnectCallback)(XBee* self);
-    void (*OnDisconnectCallback)(XBee* self);
-    void (*OnSendCallback)(XBee* self, XBeeLRPacket_t data);
-} XBeeCTable;
-
 // Subclass for XBeeLR
 typedef struct {
     XBee base;  // Inherit from XBee
     // Add XBeeLR specific attributes here like methods specific to an XBee type
-    const XBeeCTable* ctable;
 } XBeeLR;
 
 

@@ -15,6 +15,7 @@
 
 // Base class methods
 int XBee_Init(XBee* self, uint32_t baudrate, const char* device) {
+    self->frameIdCntr = 1;
     return self->vtable->init(self, baudrate, device);
 }
 
