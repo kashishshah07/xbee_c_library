@@ -22,14 +22,14 @@
 
 static int uart_fd = -1;
 
-void port_uart_init(const char *device, uint32_t baudrate) {
+int port_uart_init(uint32_t baudrate, const char *device) {
     struct termios options;
 
     // Open the UART device file
     uart_fd = open(device, O_RDWR | O_NOCTTY | O_NDELAY);
     if (uart_fd == -1) {
         perror("Unable to open UART");
-        return;
+        return UART_INIT_FAILED;
     }
 
     // Get the current options for the port
@@ -50,6 +50,8 @@ void port_uart_init(const char *device, uint32_t baudrate) {
 
     // Apply the options
     tcsetattr(uart_fd, TCSANOW, &options);
+
+    return 0;
 }
 
 int port_uart_write(uint8_t *data, uint16_t len) {

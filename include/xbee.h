@@ -15,57 +15,56 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <stdlib.h>
 #include "port.h"
 
 // Abstract base class for XBee
 typedef struct XBee XBee;
 
-// Callback function types
-typedef void (*OnReceiveCallback)(XBee* self, const uint8_t* data, uint16_t length);
-typedef void (*OnConnectCallback)(XBee* self);
-typedef void (*OnDisconnectCallback)(XBee* self);
-typedef void (*OnSendCallback)(XBee* self, const uint8_t* data, uint16_t length);
-
 // Function pointers for methods in the base class
 typedef struct {
+    int (*init)(XBee* self, uint32_t baudrate, const char* device);
     void (*connect)(XBee* self);
     void (*disconnect)(XBee* self);
-    void (*send_data)(XBee* self, const uint8_t* data, uint16_t length);
+    void (*send_data)(XBee* self, const void* data);
     void (*receive_data)(XBee* self, uint8_t* buffer, uint16_t buffer_size);
     void (*soft_reset)(XBee* self);
     void (*hard_reset)(XBee* self);
     void (*process)(XBee* self);
-    void (*configure_network)(XBee* self, const void* config);
-    void (*configure_serial)(XBee* self, const void* config);
     uint8_t (*connected)(XBee* self);
+    void (*handle_rx_packet_frame)(XBee* self, void *frame);
+    void (*handle_transmit_status_frame)(XBee* self, void *frame);
 } XBeeVTable;
 
-struct XBee {
-    const XBeeVTable* vtable;
-    // Add common XBee attributes here (e.g., baud rate, network settings)
+// Function pointers for hardware abstraction methods in the base class
+typedef struct {
+    uart_status_t (*PortUartRead)(uint8_t *buf, int len, int *bytes_read);
+    int (*PortUartWrite)(uint8_t *data, uint16_t len);
+    uint32_t (*PortMillis)(void);
+    void (*PortFlushRx)(void);
+    int (*PortUartInit)(uint32_t baudrate, const char *device);
+    void (*PortDelay)(uint32_t ms);
+} XBeeHTable;
 
-    // Callback function pointers
-    OnReceiveCallback onReceive;
-    OnConnectCallback onConnect;
-    OnDisconnectCallback onDisconnect;
-    OnSendCallback onSend;
+struct XBee {
+    // Add common XBee attributes here
+    const XBeeVTable* vtable;
+    const XBeeHTable* htable;
+    uint8_t frameIdCounter;
 };
 
 // Interface functions to call the methods
+int XBee_Init(XBee* self, uint32_t baudrate, const char* device);
 void XBee_Connect(XBee* self);
 void XBee_Disconnect(XBee* self);
-void XBee_SendData(XBee* self, const uint8_t* data, uint16_t length);
+void XBee_SendData(XBee* self, const void*);
 void XBee_SoftReset(XBee* self);
 void XBee_HardReset(XBee* self);
 void XBee_Process(XBee* self);
 void XBee_ConfigureNetwork(XBee* self, const void* config);
 void XBee_ConfigureSerial(XBee* self, const void* config);
 uint8_t XBee_Connected(XBee* self);
-
-// Methods to set callback functions
-void XBee_SetOnReceiveCallback(XBee* self, OnReceiveCallback callback);
-void XBee_SetOnConnectCallback(XBee* self, OnConnectCallback callback);
-void XBee_SetOnDisconnectCallback(XBee* self, OnDisconnectCallback callback);
-void XBee_SetOnSendCallback(XBee* self, OnSendCallback callback);
+bool XBee_WriteConfig(XBee* self);
+bool XBee_ApplyChanges(XBee* self);
 
 #endif // XBEE_H

@@ -21,6 +21,7 @@
 // Enum for UART read status
 typedef enum {
     UART_SUCCESS = 0,
+    UART_INIT_FAILED,
     UART_ERROR_TIMEOUT,
     UART_ERROR_OVERRUN,
     UART_ERROR_UNKNOWN
@@ -30,7 +31,7 @@ uart_status_t port_uart_read(uint8_t *buf, int len, int *bytes_read);
 int port_uart_write(uint8_t *data, uint16_t len);
 uint32_t port_millis(void);
 void port_flush_rx(void);
-void port_uart_init(const char *device, uint32_t baudrate);
+int port_uart_init(uint32_t baudrate, const char *device);
 void port_delay(uint32_t ms);
 void port_debug_printf(const char *format, ...);
 

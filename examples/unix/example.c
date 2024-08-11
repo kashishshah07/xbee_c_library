@@ -10,30 +10,89 @@
 #include <stdarg.h>
 #include <time.h>
 
+
+void OnReceiveCallback(XBee* self, XBeeLRPacket_t packet){
+    port_debug_printf("Ack %u\n", packet.ack);
+    port_debug_printf("Port %u\n", packet.port);
+    port_debug_printf("RSSI %d\n", packet.rssi);
+    port_debug_printf("SNR %d\n", packet.snr);
+    port_debug_printf("Downlink Counter %lu\n", packet.counter);
+    port_debug_printf("Received Packet: ");
+    for (int i = 1; i < packet.payloadSize; i++) {
+        port_debug_printf("%02X ", packet.payload[i]);
+    }
+    port_debug_printf("\n");
+}
+
+void OnSendCallback(XBee* self, XBeeLRPacket_t packet){
+    switch(packet.status){
+        case 0:
+            port_debug_printf("Send successful (frameId: 0x%02X)\n",packet.frameId);
+            break;
+        case 0x01:
+            port_debug_printf("Send failed (frameId: 0x%02X) (reason: Ack Failed)\n",packet.frameId);
+            break;
+        case 0x022:
+            port_debug_printf("Send failed (frameId: 0x%02X) (reason: Not Connected)\n",packet.frameId);
+            break;
+        default:
+            port_debug_printf("Send failed (frameId: 0x%02X) (reason: 0x%02X)\n",packet.frameId, packet.status);
+            break;
+    }
+}
+
 int main() {
-    port_uart_init("/dev/cu.usbserial-1120", B9600);
+    // port_uart_init("/dev/cu.usbserial-1120", B9600);
     time_t start_time, current_time;
     
-   // Create an instance of the XBeeLR class
-    XBeeLR * my_xbee_lr = XBeeLR_Create();
+    // Harware Abstraction Function Pointer Table for XBeeLR
+    const XBeeHTable XBeeLR_HTable = {
+        .PortUartRead = port_uart_read,
+        .PortUartWrite = port_uart_write,
+        .PortMillis = port_millis,
+        .PortFlushRx = port_flush_rx,
+        .PortUartInit = port_uart_init,
+        .PortDelay = port_delay,
+    };
 
-    //Example configuration (can be NULL if not needed)
-    const void* config = NULL;
+    // Callback Function Pointer Table for XBeeLR
+    const XBeeCTable XBeeLR_CTable = {
+        .OnReceiveCallback = OnReceiveCallback,
+        .OnSendCallback = OnSendCallback,
+    };
+
+   // Create an instance of the XBeeLR class
+    XBeeLR * my_xbee_lr = XBeeLR_Create(&XBeeLR_CTable,&XBeeLR_HTable);
+    XBee_Init((XBee*)my_xbee_lr,B9600, "/dev/cu.usbserial-1120");
+    port_delay(1);
 
     uint8_t dev_eui[17];
-    XBeeLR_GetDevEUI(my_xbee_lr, dev_eui, sizeof(dev_eui));
+    XBeeLR_GetDevEUI((XBee*)my_xbee_lr, dev_eui, sizeof(dev_eui));
     port_debug_printf("DEVEUI: %s\n", dev_eui);
 
+    port_debug_printf("Configuring...\n");
+    XBeeLR_SetAppEUI((XBee*)my_xbee_lr, "37D56A3F6CDCF0A5");
+    XBeeLR_SetAppKey((XBee*)my_xbee_lr, "BD32AAB41C54175E9060D86F3A8B7F42");
+    XBeeLR_SetNwkKey((XBee*)my_xbee_lr, "BD32AAB41C54175E9060D86F3A8B7F42");
+    // XBee_WriteConfig((XBee*)my_xbee_lr);
+    // XBee_ApplyChanges((XBee*)my_xbee_lr);
+
     // XBeeLR payload to send
-    uint8_t example_payload[] = {0x01, 0x02, 0x03, 0x04, 0x05};
+    uint8_t example_payload[] = {0xC0, 0xC0, 0xC0, 0xFF, 0xEE};
     uint16_t payload_len = sizeof(example_payload) / sizeof(example_payload[0]);
+    XBeeLRPacket_t packet = {
+        .payload = example_payload,
+        .payloadSize = payload_len,
+        .port = 2,
+        .ack = 0,
+    };
 
     port_debug_printf("Connecting...\n");
     XBee_Connect((XBee*)my_xbee_lr);
     time(&start_time);
 
    while (1) {
-        //Let XBee process
+        //Let XBee class process any serial data
         XBee_Process((XBee*)my_xbee_lr);
 
         // Get the current time
@@ -48,7 +107,7 @@ int main() {
                     port_debug_printf("%02X", example_payload[i]);
                 }
                 port_debug_printf("\n");
-                XBee_SendData((XBee*)my_xbee_lr, example_payload, payload_len);
+                XBee_SendData((XBee*)my_xbee_lr, &packet);
             }
             else{
                 port_debug_printf("Not connected. Connecting...\n");
@@ -56,10 +115,7 @@ int main() {
             }
             // Reset the start time
             time(&start_time);
-
         }
-
     }
-
     return 0;
 }

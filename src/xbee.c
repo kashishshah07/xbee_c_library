@@ -14,6 +14,10 @@
 #include "xbee_api_frames.h" 
 
 // Base class methods
+int XBee_Init(XBee* self, uint32_t baudrate, const char* device) {
+    return self->vtable->init(self, baudrate, device);
+}
+
 void XBee_Connect(XBee* self) {
     self->vtable->connect(self);
 }
@@ -22,8 +26,8 @@ void XBee_Disconnect(XBee* self) {
     self->vtable->disconnect(self);
 }
 
-void XBee_SendData(XBee* self, const uint8_t* data, uint16_t length) {
-    self->vtable->send_data(self, data, length);
+void XBee_SendData(XBee* self, const void* data) {
+    self->vtable->send_data(self, data);
 }
 
 void XBee_SoftReset(XBee* self) {
@@ -38,33 +42,28 @@ void XBee_Process(XBee* self) {
     self->vtable->process(self);
 }
 
-void XBee_ConfigureNetwork(XBee* self, const void* config) {
-    self->vtable->configure_network(self, config);
-}
-
-void XBee_ConfigureSerial(XBee* self, const void* config) {
-    self->vtable->configure_serial(self, config);
-}
-
 uint8_t XBee_Connected(XBee* self) {
     return self->vtable->connected(self);
 }
 
-// Methods to set callback functions
-void XBee_SetOnReceiveCallback(XBee* self, OnReceiveCallback callback) {
-    self->onReceive = callback;
+bool XBee_WriteConfig(XBee* self) {
+    uint8_t response[33];
+    uint8_t response_length;
+    int status = api_send_at_command_and_get_response(self, AT_WR, NULL, response, &response_length, 5000);
+    if(status != API_SEND_SUCCESS){
+        port_debug_printf("Failed to Write Config\n");
+    }
+    return status;
 }
 
-void XBee_SetOnConnectCallback(XBee* self, OnConnectCallback callback) {
-    self->onConnect = callback;
-}
-
-void XBee_SetOnDisconnectCallback(XBee* self, OnDisconnectCallback callback) {
-    self->onDisconnect = callback;
-}
-
-void XBee_SetOnSendCallback(XBee* self, OnSendCallback callback) {
-    self->onSend = callback;
+bool XBee_ApplyChanges(XBee* self) {
+    uint8_t response[33];
+    uint8_t response_length;
+    int status = api_send_at_command_and_get_response(self, AT_AC, NULL, response, &response_length, 5000);
+    if(status != API_SEND_SUCCESS){
+        port_debug_printf("Failed to Apply Changes\n");
+    }
+    return status;
 }
 
 
