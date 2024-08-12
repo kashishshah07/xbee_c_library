@@ -2,7 +2,11 @@
 # XBee C Library
 
 ### Overview
-This library provides a framework for interfacing with XBee modules using an XBee API that abstracts AT commands and API frames. It supports multiple platforms including Unix, STM32, RP2350, and EFM32.
+This library provides a framework for interfacing with XBee modules using an XBee Library API that abstracts AT commands and API frames. It supports multiple platforms including Unix, STM32, RP2350, and EFM32.
+
+### Currently Supported XBees
+- XBee LR (LoRaWAN)
+- More coming soon..
 
 ### Library Structure
 - **src**: Contains the core source files implementing XBee classes and APIs.
@@ -19,9 +23,6 @@ This library provides a framework for interfacing with XBee modules using an XBe
 1. Navigate to the `test` directory.
 2. Compile the test files using your platform's toolchain.
 3. Run the compiled binary to execute the unit tests.
-
-### Currently Supported XBees
-- XBee LR (LoRaWAN)
 
 ### How to Add Support for Other XBee Subclasses
 1. Extend the XBee API, API Frames, and AT commands files as needed for the new subclass.
@@ -132,27 +133,42 @@ Calls the subclass's process implementation, which is responsible for handling o
 These methods provide a foundational interface for working with XBee modules, supporting various operations like initialization, connection management, data transmission, and both soft and hard resets.
 
 
+## Usage Example: Communicating with XBee LR Modules
 
-## Usage Example: Communicating with XBee Modules
+This section provides an example of how to use the XBee class, specifically for the XBee LR (Long Range) module. The example covers creating an instance of the XBee LR class, initializing the module, setting up the hardware and command tables, configuring network settings, connecting to a network, sending data, and handling received data.
 
-This section provides an example of how to use the XBee class to communicate with XBee modules. The example covers creating an instance of the XBee class, initializing the XBee module, connecting to a network, sending data, and handling received data. The code is written to be adaptable to various platforms, with platform-specific details abstracted through the library's API.
+### Creating the XBee LR Instance
 
-### Creating the XBee Instance
-
-Before performing any operations, create an instance of the XBee class using the `XBee_Create` function:
+To create an instance of the XBee LR class, you need to pass the hardware and command tables to the `XBeeLR_Create` function:
 
 ```c
-#include "xbee.h"
+#include "xbee_lr.h"
 #include "port.h"
 
-// Define a pointer for the XBee instance
-XBee* my_xbee;
+// Define a pointer for the XBee LR instance
+XBeeLR* my_xbee_lr;
+
+// Hardware Abstraction Function Pointer Table for XBeeLR
+const XBeeHTable XBeeLR_HTable = {
+    .PortUartRead = port_uart_read,
+    .PortUartWrite = port_uart_write,
+    .PortMillis = port_millis,
+    .PortFlushRx = port_flush_rx,
+    .PortUartInit = port_uart_init,
+    .PortDelay = port_delay,
+};
+
+// Callback Function Pointer Table for XBeeLR
+const XBeeCTable XBeeLR_CTable = {
+    .OnReceiveCallback = OnReceiveCallback, // Callback for receiving data
+    .OnSendCallback = NULL,                 // Can be left as NULL if no callbacks are needed
+};
 
 int main() {
-    // Create the XBee instance
-    my_xbee = XBee_Create();
-    if (my_xbee == NULL) {
-        printf("Failed to create XBee instance.
+    // Create the XBee LR instance with hardware and command tables
+    my_xbee_lr = XBeeLR_Create(&XBeeLR_HTable, &XBeeLR_CTable);
+    if (my_xbee_lr == NULL) {
+        printf("Failed to create XBee LR instance.
 ");
         return -1;
     }
@@ -161,26 +177,39 @@ int main() {
 }
 ```
 
-### Initialization and Connection
+### Initialization, Configuration, and Connection
 
-After creating the XBee instance, initialize the XBee module and connect to the network:
+After creating the XBee LR instance, initialize the XBee LR module, configure the network settings, and connect to the network:
 
 ```c
-    // Initialize the XBee module
-    if (!XBee_Init(my_xbee, 9600, "COM3")) {  // Replace "COM3" with the appropriate serial port for your platform
-        printf("Failed to initialize XBee module.
+    // Initialize the XBee LR module
+    if (!XBeeLR_Init(my_xbee_lr, 9600, "COM3")) {  // Replace "COM3" with the appropriate serial port for your platform
+        printf("Failed to initialize XBee LR module.
 ");
         return -1;
     }
 
-    // Connect to the network
-    if (!XBee_Connect(my_xbee)) {
-        printf("Failed to connect to the network.
-");
-        return -1;
-    }
+    // Read LoRaWAN DevEUI and print it
+    uint8_t dev_eui[17];
+    XBeeLR_GetDevEUI((XBee*)my_xbee_lr, dev_eui, sizeof(dev_eui));
+    port_debug_printf("DEVEUI: %s
+", dev_eui);
 
-    printf("XBee module initialized and connected.
+    // Set LoRaWAN Network Settings
+    port_debug_printf("Configuring...
+");
+    XBeeLR_SetAppEUI((XBee*)my_xbee_lr, "37D56A3F6CDCF0A5");
+    XBeeLR_SetAppKey((XBee*)my_xbee_lr, "CD32AAB41C54175E9060D86F3A8B7F48");
+    XBeeLR_SetNwkKey((XBee*)my_xbee_lr, "CD32AAB41C54175E9060D86F3A8B7F48");
+    XBee_WriteConfig((XBee*)my_xbee_lr);
+    XBee_ApplyChanges((XBee*)my_xbee_lr);
+
+    // Connect to the LoRaWAN network
+    port_debug_printf("Connecting...
+");
+    XBee_Connect((XBee*)my_xbee_lr);
+
+    printf("XBee LR module initialized and connected.
 ");
 
     // Proceed with other operations...
@@ -189,13 +218,20 @@ After creating the XBee instance, initialize the XBee module and connect to the 
 
 ### Sending Data
 
-To send data over the XBee network, use the `XBee_SendData` method:
+To send data over the XBee LR network, use the `XBeeLR_SendData` method. Here's an example of preparing and sending a payload:
 
 ```c
-// Data to send
-const char* data = "Hello, XBee Network!";
+// XBeeLR payload to send
+uint8_t example_payload[] = {0xC0, 0xC0, 0xC0, 0xFF, 0xEE};
+uint16_t payload_len = sizeof(example_payload) / sizeof(example_payload[0]);
+XBeeLRPacket_t packet = {
+    .payload = example_payload,
+    .payloadSize = payload_len,
+    .port = 2,
+    .ack = 0,
+};
 
-if (!XBee_SendData(my_xbee, data)) {
+if (!XBeeLR_SendData(my_xbee_lr, &packet)) {
     printf("Failed to send data.
 ");
 } else {
@@ -206,33 +242,45 @@ if (!XBee_SendData(my_xbee, data)) {
 
 ### Receiving Data
 
-Implement a callback function to handle data received from the XBee module:
+Handle data received from the XBee LR module using the `OnReceiveCallback` function:
 
 ```c
-void data_received_callback(const char* data) {
-    printf("Data received: %s
-", data);
+void OnReceiveCallback(XBee* self, void* data){
+    XBeeLRPacket_t* packet = (XBeeLRPacket_t*) data;
+    port_debug_printf("Received Packet: ");
+    for (int i = 1; i < packet->payloadSize; i++) {
+        port_debug_printf("%02X ", packet->payload[i]);
+    }
+    port_debug_printf("
+");
+    port_debug_printf("Ack %u
+", packet->ack);
+    port_debug_printf("Port %u
+", packet->port);
+    port_debug_printf("RSSI %d
+", packet->rssi);
+    port_debug_printf("SNR %d
+", packet->snr);
+    port_debug_printf("Downlink Counter %lu
+", packet->counter);
 }
 
-// Register the callback (assuming XBee_Process is handling incoming data in a loop)
-XBee_RegisterReceiveCallback(my_xbee, data_received_callback);
-
-// In your main loop, process incoming data:
+// Assuming a continuous loop to process incoming data
 while (1) {
-    XBee_Process(my_xbee);
-    // Sleep or delay mechanism, platform-specific, e.g., usleep(10000) on Unix, Sleep(10) on Windows, etc.
+    XBeeLR_Process(my_xbee_lr);
+    usleep(10000);  // Sleep for 10ms to avoid busy-waiting
 }
 ```
 
 ### Closing the Connection
 
-After completing your operations, disconnect the XBee module, clean up resources, and free the XBee instance:
+After completing your operations, disconnect the XBee LR module, clean up resources, and free the XBee LR instance:
 
 ```c
-XBee_Disconnect(my_xbee);
-XBee_Close(my_xbee);
-XBee_Destroy(my_xbee);  // Free the XBee instance
-printf("XBee module disconnected and resources cleaned up.
+XBeeLR_Disconnect(my_xbee_lr);
+XBeeLR_Close(my_xbee_lr);
+XBeeLR_Destroy(my_xbee_lr);  // Free the XBee LR instance
+printf("XBee LR module disconnected and resources cleaned up.
 ");
 ```
 
@@ -241,46 +289,94 @@ printf("XBee module disconnected and resources cleaned up.
 Here is the full example code combining the steps mentioned above:
 
 ```c
-#include "xbee.h"
+#include "xbee_lr.h"
 #include "port.h"
 
-XBee* my_xbee;
+XBeeLR* my_xbee_lr;
 
-void data_received_callback(const char* data) {
-    printf("Data received: %s
-", data);
+// Hardware Abstraction Function Pointer Table for XBeeLR
+const XBeeHTable XBeeLR_HTable = {
+    .PortUartRead = port_uart_read,
+    .PortUartWrite = port_uart_write,
+    .PortMillis = port_millis,
+    .PortFlushRx = port_flush_rx,
+    .PortUartInit = port_uart_init,
+    .PortDelay = port_delay,
+};
+
+// Callback Function Pointer Table for XBeeLR
+const XBeeCTable XBeeLR_CTable = {
+    .OnReceiveCallback = OnReceiveCallback, // Callback for receiving data
+    .OnSendCallback = NULL,                 // Can be left as NULL if no callbacks are needed
+};
+
+void OnReceiveCallback(XBee* self, void* data){
+    XBeeLRPacket_t* packet = (XBeeLRPacket_t*) data;
+    port_debug_printf("Received Packet: ");
+    for (int i = 1; i < packet->payloadSize; i++) {
+        port_debug_printf("%02X ", packet->payload[i]);
+    }
+    port_debug_printf("
+");
+    port_debug_printf("Ack %u
+", packet->ack);
+    port_debug_printf("Port %u
+", packet->port);
+    port_debug_printf("RSSI %d
+", packet->rssi);
+    port_debug_printf("SNR %d
+", packet->snr);
+    port_debug_printf("Downlink Counter %lu
+", packet->counter);
 }
 
 int main() {
-    // Create the XBee instance
-    my_xbee = XBee_Create();
-    if (my_xbee == NULL) {
-        printf("Failed to create XBee instance.
+    // Create the XBee LR instance with hardware and command tables
+    my_xbee_lr = XBeeLR_Create(&XBeeLR_HTable, &XBeeLR_CTable);
+    if (my_xbee_lr == NULL) {
+        printf("Failed to create XBee LR instance.
 ");
         return -1;
     }
 
-    // Initialize the XBee module
-    if (!XBee_Init(my_xbee, 9600, "COM3")) {  // Replace "COM3" with the appropriate serial port
-        printf("Failed to initialize XBee module.
+    // Initialize the XBee LR module
+    if (!XBeeLR_Init(my_xbee_lr, 9600, "COM3")) {  // Replace "COM3" with the appropriate serial port
+        printf("Failed to initialize XBee LR module.
 ");
         return -1;
     }
 
-    // Connect to the network
-    if (!XBee_Connect(my_xbee)) {
-        printf("Failed to connect to the network.
+    // Read LoRaWAN DevEUI and print it
+    uint8_t dev_eui[17];
+    XBeeLR_GetDevEUI((XBee*)my_xbee_lr, dev_eui, sizeof(dev_eui));
+    port_debug_printf("DEVEUI: %s
+", dev_eui);
+
+    // Set LoRaWAN Network Settings
+    port_debug_printf("Configuring...
 ");
-        return -1;
-    }
+    XBeeLR_SetAppEUI((XBee*)my_xbee_lr, "37D56A3F6CDCF0A5");
+    XBeeLR_SetAppKey((XBee*)my_xbee_lr, "CD32AAB41C54175E9060D86F3A8B7F48");
+    XBeeLR_SetNwkKey((XBee*)my_xbee_lr, "CD32AAB41C54175E9060D86F3A8B7F48");
+    XBee_WriteConfig((XBee*)my_xbee_lr);
+    XBee_ApplyChanges((XBee*)my_xbee_lr);
 
-    printf("XBee module initialized and connected.
+    // Connect to the LoRaWAN network
+    port_debug_printf("Connecting...
 ");
+    XBee_Connect((XBee*)my_xbee_lr);
 
-    XBee_RegisterReceiveCallback(my_xbee, data_received_callback);
+    const char* data = "Hello, XBee LR Network!";
+    uint8_t example_payload[] = {0xC0, 0xC0, 0xC0, 0xFF, 0xEE};
+    uint16_t payload_len = sizeof(example_payload) / sizeof(example_payload[0]);
+    XBeeLRPacket_t packet = {
+        .payload = example_payload,
+        .payloadSize = payload_len,
+        .port = 2,
+        .ack = 0,
+    };
 
-    const char* data = "Hello, XBee Network!";
-    if (!XBee_SendData(my_xbee, data)) {
+    if (!XBeeLR_SendData(my_xbee_lr, &packet)) {
         printf("Failed to send data.
 ");
     } else {
@@ -290,21 +386,19 @@ int main() {
 
     // Main loop to process incoming data
     while (1) {
-        XBee_Process(my_xbee);
-        // Sleep or delay mechanism, platform-specific
+        XBeeLR_Process(my_xbee_lr);
+        usleep(10000);  // Sleep for 10ms
     }
 
-    XBee_Disconnect(my_xbee);
-    XBee_Close(my_xbee);
-    XBee_Destroy(my_xbee);  // Free the XBee instance
-    printf("XBee module disconnected and resources cleaned up.
+    XBeeLR_Disconnect(my_xbee_lr);
+    XBeeLR_Close(my_xbee_lr);
+    XBeeLR_Destroy(my_xbee_lr);  // Free the XBee LR instance
+    printf("XBee LR module disconnected and resources cleaned up.
 ");
 
     return 0;
 }
 ```
-
-This example demonstrates the full process of creating an XBee instance, initializing the module, connecting to a network, sending data, and handling incoming data. The code is designed to be adaptable to different platforms, with platform-specific details abstracted by the library.
 
 
 ## How to Port to Other Platforms
