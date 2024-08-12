@@ -24,10 +24,12 @@ bool XBeeLR_Init(XBee* self, uint32_t baudrate, const char* device) {
     return self->htable->PortUartInit(baudrate, device) == 0 ? true:false;
 }
 
+//Attempts to Connect to network
+//Blocking function. @todo: add option for non-blocking
 bool XBeeLR_Connect(XBee* self) {
     // Implement XBeeLR specific connection logic using netConfig
     SendJoinReqApiFrame(self);
-    
+
     //@todo check modem status to determine of successful or not
     return true;
 }
@@ -37,6 +39,8 @@ bool XBeeLR_Disconnect(XBee* self) {
     return true;
 }
 
+//Sends data over network
+//Blocking function. @todo: add option for non-blocking
 bool XBeeLR_SendData(XBee* self, const void* data) {
     // Call the SendTxReqApiFrame function with the example payload
     XBeeLRPacket_t *packet = (XBeeLRPacket_t*) data;
@@ -66,6 +70,7 @@ void XBeeLR_HardReset(XBee* self) {
     // Implement XBeeLR specific hard reset logic
 }
 
+//Must be called continously
 void XBeeLR_Process(XBee* self) {
     // Implement XBeeLR specific process logic
     xbee_api_frame_t frame;
@@ -101,6 +106,7 @@ bool XBeeLR_Connected(XBee* self) {
 /* XBeeLR Specific Functions */
 
 //Sends ATAE cmd to set LoRaWAN AppEUI
+//Blocking function. Waits until get response or timeouts
 bool XBeeLR_SetAppEUI(XBee* self, const char* value) {
     uint8_t response[17];
     uint8_t response_length;
@@ -112,6 +118,7 @@ bool XBeeLR_SetAppEUI(XBee* self, const char* value) {
 }
 
 //Sends ATAK cmd to set LoRaWAN AppKey
+//Blocking function. Waits until get response or timeouts
 bool XBeeLR_SetAppKey(XBee* self, const char* value) {
     uint8_t response[33];
     uint8_t response_length;
@@ -123,6 +130,7 @@ bool XBeeLR_SetAppKey(XBee* self, const char* value) {
 }
 
 //Sends ATNK cmd to set LoRaWAN NwkKey
+//Blocking function. Waits until get response or timeouts
 bool XBeeLR_SetNwkKey(XBee* self, const char* value) {
     uint8_t response[33];
     uint8_t response_length;
@@ -134,6 +142,7 @@ bool XBeeLR_SetNwkKey(XBee* self, const char* value) {
 }
 
 //Sends ATDE cmd to read LoRaWAN DevEUI
+//Blocking function. Waits until get response or timeouts
 bool XBeeLR_GetDevEUI(XBee* self, uint8_t* response_buffer, uint8_t buffer_size) {
     // Clear buffer
     if(buffer_size < 17){
@@ -154,12 +163,13 @@ bool XBeeLR_GetDevEUI(XBee* self, uint8_t* response_buffer, uint8_t buffer_size)
 
 // XBeeLR private functions
 static void SendJoinReqApiFrame(XBee* self) {
-    uint8_t frame_id = 1;
+    uint8_t frame_id = self->frameIdCntr;
 
     // Call the api_send_frame function to send the Join Request API frame
     api_send_frame(self, XBEE_API_TYPE_LR_JOIN_REQUEST, &frame_id, 1);
 }
 
+//Parses RX_PACKET frame and calls recieve callback function
 static void XBeeLR_Handle_Rx_Packet(XBee* self, void *param) {
 
     if(param == NULL) return;

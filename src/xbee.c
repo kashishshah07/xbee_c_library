@@ -21,14 +21,17 @@ bool XBee_Init(XBee* self, uint32_t baudrate, const char* device) {
     return self->vtable->init(self, baudrate, device);
 }
 
+//Calls XBee subclass connect implementation
 bool XBee_Connect(XBee* self) {
     return self->vtable->connect(self);
 }
 
+//Calls XBee subclass disconnect implementation
 bool XBee_Disconnect(XBee* self) {
     return self->vtable->disconnect(self);
 }
 
+//Calls XBee subclass SendData implementation
 bool XBee_SendData(XBee* self, const void* data) {
     return self->vtable->send_data(self, data);
 }
@@ -41,6 +44,8 @@ void XBee_HardReset(XBee* self) {
     self->vtable->hard_reset(self);
 }
 
+//Calls XBee subclass Process implementation
+//Must be called continously
 void XBee_Process(XBee* self) {
     self->vtable->process(self);
 }

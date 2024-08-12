@@ -42,3 +42,5 @@ The library is designed to be modular, allowing easy expansion and support for d
 - **AT Commands**: Manages AT command interface.
 - **API Frames**: Handles API frame communication.
 
+## License 
+See MIT-LICENSE.txt file

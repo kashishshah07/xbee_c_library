@@ -10,7 +10,6 @@
 #include <stdarg.h>
 #include <time.h>
 
-
 //Callback function that gets called by XBee instance when receiving a packet
 void OnReceiveCallback(XBee* self, void* data){
     XBeeLRPacket_t* packet = (XBeeLRPacket_t*) data;
