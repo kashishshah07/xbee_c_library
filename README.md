@@ -25,6 +25,9 @@ This library provides a framework for interfacing with XBee modules using an XBe
 2. Compile the test files using your platform's toolchain.
 3. Run the compiled binary to execute the unit tests.
 
+## Currently Supported XBees
+- XBee LR (LoRaWAN)
+
 ## How to Add Support for Other XBee Subclasses
 1. Extend the XBee API, API Frames, and AT commands files as needed for the new subclass.
 2. Add the necessary support functions in the source files.
