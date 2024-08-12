@@ -1,27 +1,36 @@
 /**
  * @file xbee_at_cmds.h
- * @brief XBee AT Commands Header
- * @version 1.1
+ * @brief Header file for XBee AT commands.
+ * 
+ * This file defines the interface for working with XBee AT commands. AT commands
+ * are used for configuring and controlling the XBee module. 
+ * 
+ * @version 1.0
  * @date 2024-08-08
- *
+ * 
  * @license MIT
- *
- * This file contains definitions and functions for interacting with XBee modules
- * using AT commands. The AT commands allow for configuration and control of the
- * XBee module, including setting network parameters, reading device information,
- * and managing device operations.
- *
- * Example usage:
- * @code
- * uint8_t param[] = { 0x01 };
- * at_command_send(AT_ID, param, sizeof(param));
- * @endcode
- *
- * @note Ensure the UART is properly initialized before sending any AT commands.
- *
- * @author Felix Galindo, Digi International
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ * 
+ * @author Felix Galindo
  * @contact felix.galindo@digi.com
  */
+
 
 #ifndef XBEE_AT_H
 #define XBEE_AT_H
