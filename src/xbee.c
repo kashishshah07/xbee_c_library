@@ -14,25 +14,27 @@
 #include "xbee_api_frames.h" 
 
 // Base class methods
-int XBee_Init(XBee* self, uint32_t baudrate, const char* device) {
+
+
+bool XBee_Init(XBee* self, uint32_t baudrate, const char* device) {
     self->frameIdCntr = 1;
     return self->vtable->init(self, baudrate, device);
 }
 
-void XBee_Connect(XBee* self) {
-    self->vtable->connect(self);
+bool XBee_Connect(XBee* self) {
+    return self->vtable->connect(self);
 }
 
-void XBee_Disconnect(XBee* self) {
-    self->vtable->disconnect(self);
+bool XBee_Disconnect(XBee* self) {
+    return self->vtable->disconnect(self);
 }
 
-void XBee_SendData(XBee* self, const void* data) {
-    self->vtable->send_data(self, data);
+bool XBee_SendData(XBee* self, const void* data) {
+    return self->vtable->send_data(self, data);
 }
 
-void XBee_SoftReset(XBee* self) {
-    self->vtable->soft_reset(self);
+bool XBee_SoftReset(XBee* self) {
+    return self->vtable->soft_reset(self);
 }
 
 void XBee_HardReset(XBee* self) {
@@ -43,10 +45,12 @@ void XBee_Process(XBee* self) {
     self->vtable->process(self);
 }
 
-uint8_t XBee_Connected(XBee* self) {
+bool XBee_Connected(XBee* self) {
     return self->vtable->connected(self);
 }
 
+//Sends ATWR command
+//0 if successful
 bool XBee_WriteConfig(XBee* self) {
     uint8_t response[33];
     uint8_t response_length;
@@ -57,6 +61,8 @@ bool XBee_WriteConfig(XBee* self) {
     return status;
 }
 
+//Sends ATAC command
+//0 if successful
 bool XBee_ApplyChanges(XBee* self) {
     uint8_t response[33];
     uint8_t response_length;

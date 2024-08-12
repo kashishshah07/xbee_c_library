@@ -23,15 +23,14 @@ typedef struct XBee XBee;
 
 // Function pointers for methods in the base class
 typedef struct {
-    int (*init)(XBee* self, uint32_t baudrate, const char* device);
-    void (*connect)(XBee* self);
-    void (*disconnect)(XBee* self);
-    void (*send_data)(XBee* self, const void* data);
-    void (*receive_data)(XBee* self, uint8_t* buffer, uint16_t buffer_size);
-    void (*soft_reset)(XBee* self);
+    bool (*init)(XBee* self, uint32_t baudrate, const char* device);
+    bool (*connect)(XBee* self);
+    bool (*disconnect)(XBee* self);
+    bool (*send_data)(XBee* self, const void* data);
+    bool (*soft_reset)(XBee* self);
     void (*hard_reset)(XBee* self);
     void (*process)(XBee* self);
-    uint8_t (*connected)(XBee* self);
+    bool (*connected)(XBee* self);
     void (*handle_rx_packet_frame)(XBee* self, void *frame);
     void (*handle_transmit_status_frame)(XBee* self, void *frame);
 } XBeeVTable;
@@ -63,16 +62,14 @@ struct XBee {
 };
 
 // Interface functions to call the methods
-int XBee_Init(XBee* self, uint32_t baudrate, const char* device);
-void XBee_Connect(XBee* self);
-void XBee_Disconnect(XBee* self);
-void XBee_SendData(XBee* self, const void*);
-void XBee_SoftReset(XBee* self);
+bool XBee_Init(XBee* self, uint32_t baudrate, const char* device);
+bool XBee_Connect(XBee* self);
+bool XBee_Disconnect(XBee* self);
+bool XBee_SendData(XBee* self, const void*);
+bool XBee_SoftReset(XBee* self);
 void XBee_HardReset(XBee* self);
 void XBee_Process(XBee* self);
-void XBee_ConfigureNetwork(XBee* self, const void* config);
-void XBee_ConfigureSerial(XBee* self, const void* config);
-uint8_t XBee_Connected(XBee* self);
+bool XBee_Connected(XBee* self);
 bool XBee_WriteConfig(XBee* self);
 bool XBee_ApplyChanges(XBee* self);
 

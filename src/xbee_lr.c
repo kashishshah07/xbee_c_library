@@ -19,23 +19,25 @@
 static void SendJoinReqApiFrame(XBee* self);
 
 // XBeeLR specific implementations
-int XBeeLR_Init(XBee* self, uint32_t baudrate, const char* device) {
+bool XBeeLR_Init(XBee* self, uint32_t baudrate, const char* device) {
     // Implement XBeeLR initialization
-    return self->htable->PortUartInit(baudrate, device);
+    return self->htable->PortUartInit(baudrate, device) == 0 ? true:false;
 }
 
-
-// XBeeLR specific implementations
-void XBeeLR_Connect(XBee* self) {
+bool XBeeLR_Connect(XBee* self) {
     // Implement XBeeLR specific connection logic using netConfig
     SendJoinReqApiFrame(self);
+    
+    //@todo check modem status to determine of successful or not
+    return true;
 }
 
-void XBeeLR_Disconnect(XBee* self) {
+bool XBeeLR_Disconnect(XBee* self) {
     // Implement XBeeLR specific disconnection logic
+    return true;
 }
 
-void XBeeLR_SendData(XBee* self, const void* data) {
+bool XBeeLR_SendData(XBee* self, const void* data) {
     // Call the SendTxReqApiFrame function with the example payload
     XBeeLRPacket_t *packet = (XBeeLRPacket_t*) data;
     uint8_t frame_data[128]; // Adjust size as needed based on the frame structure
@@ -50,16 +52,19 @@ void XBeeLR_SendData(XBee* self, const void* data) {
 
     // Call the api_send_frame function to send the Tx Request API frame
     api_send_frame(self, XBEE_API_TYPE_LR_TX_REQUEST, frame_data, 3 + packet->payloadSize);
+
+    //@todo check transmit status to determine of successful or not
+    return true;
 }
 
-void XBeeLR_SoftReset(XBee* self) {
+bool XBeeLR_SoftReset(XBee* self) {
     // Implement XBeeLR specific soft reset logic
+    return true;
 }
 
 void XBeeLR_HardReset(XBee* self) {
     // Implement XBeeLR specific hard reset logic
 }
-
 
 void XBeeLR_Process(XBee* self) {
     // Implement XBeeLR specific process logic
@@ -72,37 +77,9 @@ void XBeeLR_Process(XBee* self) {
     }
 }
 
-bool XBeeLR_SetAppEUI(XBee* self, const char* value) {
-    uint8_t response[17];
-    uint8_t response_length;
-    int status = api_send_at_command_and_get_response(self, AT_AE, value, response, &response_length, 5000);
-    if(status != API_SEND_SUCCESS){
-        port_debug_printf("Failed to set App EUI\n");
-    }
-    return status;
-}
-
-bool XBeeLR_SetAppKey(XBee* self, const char* value) {
-    uint8_t response[33];
-    uint8_t response_length;
-    int status = api_send_at_command_and_get_response(self, AT_AK, value, response, &response_length, 5000);
-    if(status != API_SEND_SUCCESS){
-        port_debug_printf("Failed to set App Key\n");
-    }
-    return status;
-}
-
-bool XBeeLR_SetNwkKey(XBee* self, const char* value) {
-    uint8_t response[33];
-    uint8_t response_length;
-    int status = api_send_at_command_and_get_response(self, AT_NK, value, response, &response_length, 5000);
-    if(status != API_SEND_SUCCESS){
-        port_debug_printf("Failed to set Nwk Key\n");
-    }
-    return status;
-}
-
-uint8_t XBeeLR_Connected(XBee* self) {
+//Check if connected to network
+//true if connected
+bool XBeeLR_Connected(XBee* self) {
     // Implement logic to check XBeeLR network connection
     uint8_t response = 0;
     uint8_t response_length;
@@ -121,6 +98,42 @@ uint8_t XBeeLR_Connected(XBee* self) {
     return response;  
 }
 
+/* XBeeLR Specific Functions */
+
+//Sends ATAE cmd to set LoRaWAN AppEUI
+bool XBeeLR_SetAppEUI(XBee* self, const char* value) {
+    uint8_t response[17];
+    uint8_t response_length;
+    int status = api_send_at_command_and_get_response(self, AT_AE, value, response, &response_length, 5000);
+    if(status != API_SEND_SUCCESS){
+        port_debug_printf("Failed to set App EUI\n");
+    }
+    return status;
+}
+
+//Sends ATAK cmd to set LoRaWAN AppKey
+bool XBeeLR_SetAppKey(XBee* self, const char* value) {
+    uint8_t response[33];
+    uint8_t response_length;
+    int status = api_send_at_command_and_get_response(self, AT_AK, value, response, &response_length, 5000);
+    if(status != API_SEND_SUCCESS){
+        port_debug_printf("Failed to set App Key\n");
+    }
+    return status;
+}
+
+//Sends ATNK cmd to set LoRaWAN NwkKey
+bool XBeeLR_SetNwkKey(XBee* self, const char* value) {
+    uint8_t response[33];
+    uint8_t response_length;
+    int status = api_send_at_command_and_get_response(self, AT_NK, value, response, &response_length, 5000);
+    if(status != API_SEND_SUCCESS){
+        port_debug_printf("Failed to set Nwk Key\n");
+    }
+    return status;
+}
+
+//Sends ATDE cmd to read LoRaWAN DevEUI
 bool XBeeLR_GetDevEUI(XBee* self, uint8_t* response_buffer, uint8_t buffer_size) {
     // Clear buffer
     if(buffer_size < 17){
@@ -147,7 +160,7 @@ static void SendJoinReqApiFrame(XBee* self) {
     api_send_frame(self, XBEE_API_TYPE_LR_JOIN_REQUEST, &frame_id, 1);
 }
 
-void XBeeLR_Handle_Rx_Packet(XBee* self, void *param) {
+static void XBeeLR_Handle_Rx_Packet(XBee* self, void *param) {
 
     if(param == NULL) return;
 

@@ -27,6 +27,8 @@ static uint8_t calculate_checksum(const uint8_t *frame, uint16_t len) {
     return 0xFF - sum;
 }
 
+//Sends XBee API frame 
+//Returns 0 if successful
 int api_send_frame(XBee* self,uint8_t frame_type, const uint8_t *data, uint16_t len) {
     uint8_t frame[256];
     uint16_t frame_length = 0;
@@ -68,7 +70,8 @@ int api_send_frame(XBee* self,uint8_t frame_type, const uint8_t *data, uint16_t 
     return API_SEND_SUCCESS;
 }
 
-// Function to send AT command through API frame mode and print it
+// Function to send AT command through API frame mode
+//Returns 0 if successful
 int api_send_at_command(XBee* self,at_command_t command, const uint8_t *parameter, uint8_t param_length) {
     uint8_t frame_data[128];
     uint16_t frame_length = 0;
@@ -112,6 +115,8 @@ int api_send_at_command(XBee* self,at_command_t command, const uint8_t *paramete
     return api_send_frame(self, XBEE_API_TYPE_AT_COMMAND, frame_data, frame_length);
 }
 
+//Checks for received api frames and populates frame pointer
+//Returns 0 if successful
 int api_receive_api_frame(XBee* self,xbee_api_frame_t *frame) {
     if (!frame) {
         API_FRAME_DEBUG_PRINT("Error: Invalid frame pointer. The frame pointer passed to the function is NULL.\n");
@@ -209,6 +214,7 @@ int api_receive_api_frame(XBee* self,xbee_api_frame_t *frame) {
     return 0; // Successfully received a frame
 }
 
+//Calls registered handlers
 void api_handle_frame(XBee* self, xbee_api_frame_t frame){
     switch (frame.type) {
         case XBEE_API_TYPE_AT_RESPONSE:
@@ -234,6 +240,8 @@ void api_handle_frame(XBee* self, xbee_api_frame_t frame){
     }
 }
 
+//Sends AT Cmd via API frame and waits for response
+//Returns 0 if successful 
 int api_send_at_command_and_get_response(XBee* self, at_command_t command, const char *parameter, uint8_t *response_buffer, 
     uint8_t *response_length, uint32_t timeout_ms) {
     // Send the AT command using API frame
@@ -286,6 +294,7 @@ int api_send_at_command_and_get_response(XBee* self, at_command_t command, const
     }
 }
 
+//Print out AT Response
 void xbee_handle_at_response(XBee* self, xbee_api_frame_t *frame) {
     // The first byte of frame->data is the Frame ID
     uint8_t frame_id = frame->data[1];
@@ -315,6 +324,7 @@ void xbee_handle_at_response(XBee* self, xbee_api_frame_t *frame) {
     }
 }
 
+//Should be moved to be handled by user?
 void xbee_handle_modem_status(XBee* self, xbee_api_frame_t *frame) {
     if (frame->type != XBEE_API_TYPE_MODEM_STATUS) return;
 

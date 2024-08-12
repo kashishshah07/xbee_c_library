@@ -11,6 +11,7 @@
 #include <time.h>
 
 
+//Callback function that gets called by XBee instance when receiving a packet
 void OnReceiveCallback(XBee* self, void* data){
     XBeeLRPacket_t* packet = (XBeeLRPacket_t*) data;
     port_debug_printf("Received Packet: ");
@@ -25,6 +26,7 @@ void OnReceiveCallback(XBee* self, void* data){
     port_debug_printf("Downlink Counter %lu\n", packet->counter);
 }
 
+//Callback function that gets called by XBee instance when is done sending a packet
 void OnSendCallback(XBee* self, void* data){
     XBeeLRPacket_t* packet = (XBeeLRPacket_t*) data;
     switch(packet->status){
@@ -44,10 +46,8 @@ void OnSendCallback(XBee* self, void* data){
 }
 
 int main() {
-    // port_uart_init("/dev/cu.usbserial-1120", B9600);
-    time_t start_time, current_time;
-    
-    // Harware Abstraction Function Pointer Table for XBeeLR
+
+    // Harware Abstraction Function Pointer Table for XBeeLR (needs to be set!)
     const XBeeHTable XBeeLR_HTable = {
         .PortUartRead = port_uart_read,
         .PortUartWrite = port_uart_write,
@@ -59,25 +59,33 @@ int main() {
 
     // Callback Function Pointer Table for XBeeLR
     const XBeeCTable XBeeLR_CTable = {
-        .OnReceiveCallback = OnReceiveCallback,
-        .OnSendCallback = OnSendCallback,
+        .OnReceiveCallback = OnReceiveCallback, //can be left as all NULL if no callbacks needed
+        .OnSendCallback = NULL, //can be left as all NULL if no callbacks needed
     };
 
    // Create an instance of the XBeeLR class
     XBeeLR * my_xbee_lr = XBeeLR_Create(&XBeeLR_CTable,&XBeeLR_HTable);
-    XBee_Init((XBee*)my_xbee_lr,B9600, "/dev/cu.usbserial-1120");
-    port_delay(1);
 
+    //Init XBee
+    if(XBee_Init((XBee*)my_xbee_lr,B9600, "/dev/cu.usbserial-1120"))
+        port_debug_printf("Failed to initialize XBee\n");
+
+    //Read LoRaWAN DevEUI and print
     uint8_t dev_eui[17];
     XBeeLR_GetDevEUI((XBee*)my_xbee_lr, dev_eui, sizeof(dev_eui));
     port_debug_printf("DEVEUI: %s\n", dev_eui);
 
+     //Set LoRaWAN Network Settings
     port_debug_printf("Configuring...\n");
     XBeeLR_SetAppEUI((XBee*)my_xbee_lr, "37D56A3F6CDCF0A5");
     XBeeLR_SetAppKey((XBee*)my_xbee_lr, "CD32AAB41C54175E9060D86F3A8B7F48");
     XBeeLR_SetNwkKey((XBee*)my_xbee_lr, "CD32AAB41C54175E9060D86F3A8B7F48");
     XBee_WriteConfig((XBee*)my_xbee_lr);
     XBee_ApplyChanges((XBee*)my_xbee_lr);
+
+    //Connect to LoRaWAN network
+    port_debug_printf("Connecting...\n");
+    XBee_Connect((XBee*)my_xbee_lr);
 
     // XBeeLR payload to send
     uint8_t example_payload[] = {0xC0, 0xC0, 0xC0, 0xFF, 0xEE};
@@ -89,8 +97,8 @@ int main() {
         .ack = 0,
     };
 
-    port_debug_printf("Connecting...\n");
-    XBee_Connect((XBee*)my_xbee_lr);
+    //To keep track of time
+    time_t start_time, current_time;
     time(&start_time);
 
    while (1) {
@@ -110,8 +118,9 @@ int main() {
                 }
                 port_debug_printf("\n");
                 XBee_SendData((XBee*)my_xbee_lr, &packet);
+
+                //Update payload
                 packet.payload[0] = packet.payload[0] + 1; //change payload
-                packet.port++; //change port
                 port_debug_printf("Send Frame Id 0x%02X \n", packet.frameId); //XBee_SendData will update packet.frameId to allow tracking 
             }
             else{
