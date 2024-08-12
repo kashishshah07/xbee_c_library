@@ -40,7 +40,19 @@
 
 // API Frame Functions
 
-// Calculate checksum for API frame
+/**
+ * @brief Calculates the checksum for an API frame.
+ * 
+ * This function computes the checksum for a given XBee API frame. The checksum 
+ * is calculated by summing the bytes of the frame starting from the fourth byte 
+ * (index 3) to the end of the frame and then subtracting the sum from 0xFF. 
+ * The resulting checksum ensures the integrity of the data in the API frame.
+ * 
+ * @param[in] frame Pointer to the API frame data.
+ * @param[in] len Length of the API frame data.
+ * 
+ * @return uint8_t The calculated checksum value.
+ */
 static uint8_t calculate_checksum(const uint8_t *frame, uint16_t len) {
     uint8_t sum = 0;
     for (uint16_t i = 3; i < len; i++) {
@@ -49,8 +61,23 @@ static uint8_t calculate_checksum(const uint8_t *frame, uint16_t len) {
     return 0xFF - sum;
 }
 
-//Sends XBee API frame 
-//Returns 0 if successful
+/**
+ * @brief Sends an XBee API frame.
+ * 
+ * This function constructs and sends an XBee API frame over the UART. The frame 
+ * includes a start delimiter, length, frame type, data, and a checksum to ensure 
+ * data integrity. The function increments the frame ID counter with each call, 
+ * ensuring that frame IDs are unique. If the frame is successfully sent, the function 
+ * returns 0; otherwise, it returns an error code indicating the failure.
+ * 
+ * @param[in] self Pointer to the XBee instance.
+ * @param[in] frame_type The type of the API frame to send.
+ * @param[in] data Pointer to the frame data to be included in the API frame.
+ * @param[in] len Length of the frame data in bytes.
+ * 
+ * @return int Returns 0 (`API_SEND_SUCCESS`) if the frame is successfully sent, 
+ * or a non-zero error code (`API_SEND_ERROR_UART_FAILURE`) if there is a failure.
+ */
 int api_send_frame(XBee* self,uint8_t frame_type, const uint8_t *data, uint16_t len) {
     uint8_t frame[256];
     uint16_t frame_length = 0;
@@ -92,8 +119,24 @@ int api_send_frame(XBee* self,uint8_t frame_type, const uint8_t *data, uint16_t 
     return API_SEND_SUCCESS;
 }
 
-// Function to send AT command through API frame mode
-//Returns 0 if successful
+/**
+ * @brief Sends an AT command through an API frame.
+ * 
+ * This function constructs and sends an AT command in API frame mode. It prepares 
+ * the frame by including the frame ID, the AT command, and any optional parameters. 
+ * The function checks for various errors, such as invalid commands or parameters 
+ * that are too large, and returns appropriate error codes. If the AT command is 
+ * successfully sent, the function returns 0.
+ * 
+ * @param[in] self Pointer to the XBee instance.
+ * @param[in] command The AT command to be sent, specified as an `at_command_t` enum.
+ * @param[in] parameter Pointer to the parameter data to be included with the AT command (can be NULL).
+ * @param[in] param_length Length of the parameter data in bytes (0 if no parameters).
+ * 
+ * @return int Returns 0 (`API_SEND_SUCCESS`) if the AT command is successfully sent, 
+ * or a non-zero error code if there is a failure (`API_SEND_ERROR_FRAME_TOO_LARGE`, 
+ * `API_SEND_ERROR_INVALID_COMMAND`, etc.).
+ */
 int api_send_at_command(XBee* self,at_command_t command, const uint8_t *parameter, uint8_t param_length) {
     uint8_t frame_data[128];
     uint16_t frame_length = 0;
@@ -137,8 +180,20 @@ int api_send_at_command(XBee* self,at_command_t command, const uint8_t *paramete
     return api_send_frame(self, XBEE_API_TYPE_AT_COMMAND, frame_data, frame_length);
 }
 
-//Checks for received api frames and populates frame pointer
-//Returns 0 if successful
+/**
+ * @brief Checks for and receives an XBee API frame, populating the provided frame pointer.
+ * 
+ * This function attempts to read and receive an XBee API frame from the UART interface. 
+ * It validates the received data by checking the start delimiter, frame length, and checksum. 
+ * If the frame is successfully received and validated, the frame structure is populated 
+ * with the received data. The function returns 0 if successful, or a negative error code 
+ * if any step in the process fails.
+ * 
+ * @param[in] self Pointer to the XBee instance.
+ * @param[out] frame Pointer to an `xbee_api_frame_t` structure where the received frame data will be stored.
+ * 
+ * @return int Returns 0 if the frame is successfully received, or a negative error code indicating the type of failure.
+ */
 int api_receive_api_frame(XBee* self,xbee_api_frame_t *frame) {
     if (!frame) {
         API_FRAME_DEBUG_PRINT("Error: Invalid frame pointer. The frame pointer passed to the function is NULL.\n");
@@ -236,7 +291,20 @@ int api_receive_api_frame(XBee* self,xbee_api_frame_t *frame) {
     return 0; // Successfully received a frame
 }
 
-//Calls registered handlers
+/**
+ * @brief Calls registered handlers based on the received API frame type.
+ * 
+ * This function processes a received XBee API frame by calling the appropriate 
+ * handler function based on the frame's type. It supports handling AT responses, 
+ * modem status, transmit status, and received packet frames. For each frame type, 
+ * the corresponding handler function is invoked if it is registered in the XBee 
+ * virtual table (vtable). If the frame type is unknown, a debug message is printed.
+ * 
+ * @param[in] self Pointer to the XBee instance.
+ * @param[in] frame The received API frame to be handled.
+ * 
+ * @return void This function does not return a value.
+ */
 void api_handle_frame(XBee* self, xbee_api_frame_t frame){
     switch (frame.type) {
         case XBEE_API_TYPE_AT_RESPONSE:
@@ -262,8 +330,25 @@ void api_handle_frame(XBee* self, xbee_api_frame_t frame){
     }
 }
 
-//Sends AT Cmd via API frame and waits for response
-//Returns 0 if successful 
+/**
+ * @brief Sends an AT command via an API frame and waits for the response.
+ * 
+ * This function sends an AT command using an XBee API frame and then waits for a response 
+ * from the XBee module within a specified timeout period. The response is captured and 
+ * stored in the provided response buffer. The function continuously checks for incoming 
+ * frames and processes them until the expected AT response frame is received or the 
+ * timeout period elapses.
+ * 
+ * @param[in] self Pointer to the XBee instance.
+ * @param[in] command The AT command to be sent, specified as an `at_command_t` enum.
+ * @param[in] parameter Pointer to the parameter data to be included with the AT command (can be NULL).
+ * @param[out] response_buffer Pointer to a buffer where the AT command response will be stored.
+ * @param[out] response_length Pointer to a variable where the length of the response will be stored.
+ * @param[in] timeout_ms The timeout period in milliseconds within which the response must be received.
+ * 
+ * @return int Returns 0 (`API_SEND_SUCCESS`) if the AT command is successfully sent and a valid response is received, 
+ * or a non-zero error code if there is a failure (`API_SEND_AT_CMD_ERROR`, `API_SEND_AT_CMD_RESPONSE_TIMEOUT`, etc.).
+ */
 int api_send_at_command_and_get_response(XBee* self, at_command_t command, const char *parameter, uint8_t *response_buffer, 
     uint8_t *response_length, uint32_t timeout_ms) {
     // Send the AT command using API frame

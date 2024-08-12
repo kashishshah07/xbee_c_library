@@ -41,13 +41,42 @@
 static void SendJoinReqApiFrame(XBee* self);
 
 // XBeeLR specific implementations
+
+/**
+ * @brief Initializes the XBee LR module for communication.
+ * 
+ * This function initializes the XBee LR module by setting up the necessary 
+ * serial communication parameters, such as the baud rate and device path. 
+ * It relies on platform-specific UART initialization provided by the hardware 
+ * abstraction layer. The function returns true if initialization is successful.
+ * 
+ * @param[in] self Pointer to the XBee instance.
+ * @param[in] baudrate The baud rate for serial communication.
+ * @param[in] device The path to the serial device (e.g., "/dev/ttyUSB0").
+ * 
+ * @return bool Returns true if the initialization is successful, otherwise false.
+ */
 bool XBeeLR_Init(XBee* self, uint32_t baudrate, const char* device) {
     // Implement XBeeLR initialization
     return self->htable->PortUartInit(baudrate, device) == 0 ? true:false;
 }
 
-//Attempts to Connect to network
-//Blocking function. @todo: add option for non-blocking
+/**
+ * @brief Attempts to connect to the LoRaWAN network using the XBee LR module.
+ * 
+ * This function initiates the connection process to a LoRaWAN network by sending 
+ * a join request. The function is currently blocking, meaning it waits until 
+ * the connection attempt is completed before returning. A future enhancement (@todo) 
+ * could add support for non-blocking operation.
+ * 
+ * @param[in] self Pointer to the XBee instance.
+ * 
+ * @return bool Returns true if the connection process was initiated, though this 
+ * function currently does not check the modem status for successful connection.
+ * 
+ * @todo Add a mechanism to check the modem status and determine if the connection was successful.
+ * @todo Implement a non-blocking version of this function.
+ */
 bool XBeeLR_Connect(XBee* self) {
     // Implement XBeeLR specific connection logic using netConfig
     SendJoinReqApiFrame(self);
@@ -56,13 +85,38 @@ bool XBeeLR_Connect(XBee* self) {
     return true;
 }
 
+/**
+ * @brief Disconnects from the LoRaWAN network using the XBee LR module.
+ * 
+ * This function handles the disconnection process from a LoRaWAN network. It ensures 
+ * that the XBee LR module is properly disconnected and that any necessary cleanup 
+ * is performed. The function is currently blocking.
+ * 
+ * @param[in] self Pointer to the XBee instance.
+ * 
+ * @return bool Returns true if the disconnection process was initiated.
+ */
 bool XBeeLR_Disconnect(XBee* self) {
     // Implement XBeeLR specific disconnection logic
     return true;
 }
 
-//Sends data over network
-//Blocking function. @todo: add option for non-blocking
+/**
+ * @brief Sends data over the network using the XBee LR module.
+ * 
+ * This function constructs and sends a data packet over the network using an XBee LR module.
+ * The function is currently blocking, meaning it waits until the data is fully transmitted
+ * before returning. A future enhancement (@todo) could add support for non-blocking operation.
+ * 
+ * @param[in] self Pointer to the XBee instance.
+ * @param[in] data Pointer to the data to be sent, encapsulated in an XBeeLRPacket_t structure.
+ * 
+ * @return bool Returns true if the data was successfully sent, though this function
+ * currently does not check the transmission status for success.
+ * 
+ * @todo Add a mechanism to check the transmit status and determine if the transmission was successful.
+ * @todo Implement a non-blocking version of this function.
+ */
 bool XBeeLR_SendData(XBee* self, const void* data) {
     // Call the SendTxReqApiFrame function with the example payload
     XBeeLRPacket_t *packet = (XBeeLRPacket_t*) data;
@@ -92,7 +146,18 @@ void XBeeLR_HardReset(XBee* self) {
     // Implement XBeeLR specific hard reset logic
 }
 
-//Must be called continously
+/**
+ * @brief Processes incoming data and events for the XBee LR module.
+ * 
+ * This function must be called continuously in the main loop of the application. 
+ * It handles the reception and processing of API frames from the XBee LR module.
+ * The function checks for incoming frames, and if a frame is successfully received,
+ * it is processed accordingly. 
+ * 
+ * @param[in] self Pointer to the XBee instance.
+ * 
+ * @return void This function does not return a value.
+ */
 void XBeeLR_Process(XBee* self) {
     // Implement XBeeLR specific process logic
     xbee_api_frame_t frame;
@@ -104,8 +169,19 @@ void XBeeLR_Process(XBee* self) {
     }
 }
 
-//Check if connected to network
-//true if connected
+/**
+ * @brief Checks if the XBee LR module is connected to the LoRaWAN network.
+ * 
+ * This function sends an AT command (`AT_JS`) to the XBee LR module to query the 
+ * Join Status, determining whether the module is currently connected to the LoRaWAN network. 
+ * It returns true if the module is connected (i.e., has joined the network) and false otherwise. 
+ * The function also handles the communication with the module and provides debug output in case 
+ * of communication errors.
+ * 
+ * @param[in] self Pointer to the XBee instance.
+ * 
+ * @return bool Returns true if the XBee LR module is connected to the network, otherwise false.
+ */
 bool XBeeLR_Connected(XBee* self) {
     // Implement logic to check XBeeLR network connection
     uint8_t response = 0;
@@ -127,8 +203,19 @@ bool XBeeLR_Connected(XBee* self) {
 
 /* XBeeLR Specific Functions */
 
-//Sends ATAE cmd to set LoRaWAN AppEUI
-//Blocking function. Waits until get response or timeouts
+/**
+ * @brief Sends the AT_AE command to set the LoRaWAN AppEUI on the XBee LR module.
+ * 
+ * This function configures the LoRaWAN AppEUI (Application Identifier) on the XBee LR module 
+ * by sending the AT command `AT_AE` with the specified AppEUI value. The function is blocking, 
+ * meaning it waits for a response from the module or until a timeout occurs. If the command 
+ * fails to send or the module does not respond, a debug message is printed.
+ * 
+ * @param[in] self Pointer to the XBee instance.
+ * @param[in] value The AppEUI to be set, provided as a string.
+ * 
+ * @return bool Returns true if the AppEUI was successfully set, otherwise false.
+ */
 bool XBeeLR_SetAppEUI(XBee* self, const char* value) {
     uint8_t response[17];
     uint8_t response_length;
@@ -139,8 +226,19 @@ bool XBeeLR_SetAppEUI(XBee* self, const char* value) {
     return status;
 }
 
-//Sends ATAK cmd to set LoRaWAN AppKey
-//Blocking function. Waits until get response or timeouts
+/**
+ * @brief Sends the AT_AK command to set the LoRaWAN AppKey on the XBee LR module.
+ * 
+ * This function configures the LoRaWAN AppKey (Application Key) on the XBee LR module 
+ * by sending the AT command `AT_AK` with the specified AppKey value. The function is 
+ * blocking, meaning it waits for a response from the module or until a timeout occurs. 
+ * If the command fails to send or the module does not respond, a debug message is printed.
+ * 
+ * @param[in] self Pointer to the XBee instance.
+ * @param[in] value The AppKey to be set, provided as a string.
+ * 
+ * @return bool Returns true if the AppKey was successfully set, otherwise false.
+ */
 bool XBeeLR_SetAppKey(XBee* self, const char* value) {
     uint8_t response[33];
     uint8_t response_length;
@@ -151,8 +249,20 @@ bool XBeeLR_SetAppKey(XBee* self, const char* value) {
     return status;
 }
 
-//Sends ATNK cmd to set LoRaWAN NwkKey
-//Blocking function. Waits until get response or timeouts
+/**
+ * @brief Sends the AT_NK command to set the LoRaWAN NwkKey on the XBee LR module.
+ * 
+ * This function configures the LoRaWAN NwkKey (Network Key) on the XBee LR module 
+ * by sending the AT command `AT_NK` with the specified NwkKey value. The function 
+ * is blocking, meaning it waits for a response from the module or until a timeout 
+ * occurs. If the command fails to send or the module does not respond, a debug 
+ * message is printed.
+ * 
+ * @param[in] self Pointer to the XBee instance.
+ * @param[in] value The NwkKey to be set, provided as a string.
+ * 
+ * @return bool Returns true if the NwkKey was successfully set, otherwise false.
+ */
 bool XBeeLR_SetNwkKey(XBee* self, const char* value) {
     uint8_t response[33];
     uint8_t response_length;
@@ -163,8 +273,21 @@ bool XBeeLR_SetNwkKey(XBee* self, const char* value) {
     return status;
 }
 
-//Sends ATDE cmd to read LoRaWAN DevEUI
-//Blocking function. Waits until get response or timeouts
+/**
+ * @brief Sends the AT_DE command to read the LoRaWAN DevEUI from the XBee LR module.
+ * 
+ * This function retrieves the LoRaWAN DevEUI (Device Extended Unique Identifier) 
+ * from the XBee LR module by sending the AT command `AT_DE`. The function is 
+ * blocking, meaning it waits for a response from the module or until a timeout occurs. 
+ * If the command fails to send or the module does not respond, a debug message is printed. 
+ * The DevEUI is stored in the provided response buffer.
+ * 
+ * @param[in] self Pointer to the XBee instance.
+ * @param[out] response_buffer Buffer to store the retrieved DevEUI.
+ * @param[in] buffer_size Size of the response buffer (should be at least 17 bytes).
+ * 
+ * @return bool Returns true if the DevEUI was successfully retrieved, otherwise false.
+ */
 bool XBeeLR_GetDevEUI(XBee* self, uint8_t* response_buffer, uint8_t buffer_size) {
     // Clear buffer
     if(buffer_size < 17){
@@ -200,7 +323,21 @@ static void SendJoinReqApiFrame(XBee* self) {
     api_send_frame(self, XBEE_API_TYPE_LR_JOIN_REQUEST, &frame_id, 1);
 }
 
-//Parses RX_PACKET frame and calls recieve callback function
+/**
+ * @brief Parses an RX_PACKET frame and invokes the receive callback function.
+ * 
+ * This function processes a received RX_PACKET frame specific to the XBee LR module. 
+ * It parses the frame data, extracting relevant information such as the port number, 
+ * RSSI, SNR, and payload. If the frame is of type `XBEE_API_TYPE_LR_RX_PACKET` or 
+ * `XBEE_API_TYPE_LR_EXPLICIT_RX_PACKET`, the parsed data is stored in an `XBeeLRPacket_t` 
+ * structure, and the receive callback function (`OnReceiveCallback`) is called with this 
+ * data. The function ensures that the callback is only invoked if the receive data is valid.
+ * 
+ * @param[in] self Pointer to the XBee instance.
+ * @param[in] param Pointer to the received API frame data.
+ * 
+ * @return void This function does not return a value.
+ */
 static void XBeeLR_Handle_Rx_Packet(XBee* self, void *param) {
 
     if(param == NULL) return;
@@ -279,12 +416,28 @@ const XBeeVTable XBeeLR_VTable = {
     .handle_transmit_status_frame = XBeeLR_Handle_Transmit_Status,
 };
 
-
-// Constructor for XBeeLR
+/**
+ * @brief Constructor for creating an XBeeLR instance.
+ * 
+ * This function allocates memory for a new XBeeLR instance and initializes it 
+ * with the provided callback table (`cTable`) and handler table (`hTable`). 
+ * The function sets up the virtual table (`vtable`) for XBee LR-specific operations 
+ * and assigns the callback and handler tables to the instance. The newly created 
+ * instance is then returned to the caller.
+ * 
+ * @param[in] cTable Pointer to the callback table containing function pointers for handling XBee events.
+ * @param[in] hTable Pointer to the handler table containing platform-specific function implementations.
+ * 
+ * @return XBeeLR* Pointer to the newly created XBeeLR instance.
+ */
 XBeeLR* XBeeLR_Create(const XBeeCTable* cTable, const XBeeHTable* hTable) {
     XBeeLR* instance = (XBeeLR*)malloc(sizeof(XBeeLR));
     instance->base.vtable = &XBeeLR_VTable;
     instance->base.htable = hTable;
     instance->base.ctable = cTable;
     return instance;
+}
+
+void XBeeLR_Destroy(XBeeLR* self) {
+    free(self);
 }

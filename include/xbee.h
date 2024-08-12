@@ -33,7 +33,6 @@
  * @contact felix.galindo@digi.com
  */
 
-
 #ifndef XBEE_H
 #define XBEE_H
 
@@ -45,7 +44,16 @@
 // Abstract base class for XBee
 typedef struct XBee XBee;
 
-// Function pointers for methods in the base class
+/**
+ * @typedef XBeeVTable
+ * @brief Virtual table structure for platform-specific XBee operations.
+ * 
+ * This structure contains function pointers to XBee subclass specific implementations
+ * of various XBee operations, such as initialization, sending data, and receiving data.
+ * The use of a virtual table allows the XBee library to abstract XBee differences,
+ * enabling the same code to run on different hardware or operating systems by providing
+ * the appropriate function implementations for each platform.
+ */
 typedef struct {
     bool (*init)(XBee* self, uint32_t baudrate, const char* device);
     bool (*connect)(XBee* self);
@@ -59,7 +67,17 @@ typedef struct {
     void (*handle_transmit_status_frame)(XBee* self, void *frame);
 } XBeeVTable;
 
-// Function pointers for hardware abstraction methods in the base class
+
+/**
+ * @typedef XBeeHTable
+ * @brief Virtual table structure for platform-specific XBee operations.
+ * 
+ * This structure contains function pointers to hardware specific implementations
+ * of various XBee operations, such as uart reads & writes, delays, etc.
+ * The use of a virtual table allows the XBee library to abstract platform differences,
+ * enabling the same code to run on different hardware or operating systems by providing
+ * the appropriate function implementations for each platform.
+ */
 typedef struct {
     uart_status_t (*PortUartRead)(uint8_t *buf, int len, int *bytes_read);
     int (*PortUartWrite)(uint8_t *data, uint16_t len);
@@ -69,7 +87,16 @@ typedef struct {
     void (*PortDelay)(uint32_t ms);
 } XBeeHTable;
 
-// Function pointers for callback methods in the base class
+/**
+ * @typedef XBeeCTable
+ * @brief Callback table structure for XBee event handling.
+ * 
+ * This structure contains function pointers to callback functions that handle 
+ * various events related to the XBee module. These callbacks are invoked when 
+ * specific events occur, such as receiving data, connecting, disconnecting, 
+ * or sending data. The callback table allows the application to customize 
+ * the behavior of the XBee module by assigning appropriate functions to each event.
+ */
 typedef struct {
     void (*OnReceiveCallback)(XBee* self, void * data);
     void (*OnConnectCallback)(XBee* self);
@@ -77,6 +104,14 @@ typedef struct {
     void (*OnSendCallback)(XBee* self, void * data);
 } XBeeCTable;
 
+/**
+ * @typedef XBee
+ * @brief Represents an XBee device instance.
+ * 
+ * This structure contains the necessary methods for interacting
+ * with an XBee module, including connecting, sending data, and receiving data.
+ * Contains function pointers for XBee subclass specific operations.
+ */
 struct XBee {
     // Add common XBee attributes here
     const XBeeVTable* vtable;

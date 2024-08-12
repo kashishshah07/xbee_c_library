@@ -1,3 +1,37 @@
+/**
+ * @file example.c
+ * @brief Example application demonstrating the use of the XBee library on Unix.
+ * 
+ * This file contains a sample application that demonstrates how to use the XBee library 
+ * to communicate with XBee modules in a Unix environment. It showcases basic operations 
+ * such as initializing the XBee module, connecting to the network, and transmitting & receiving data.
+ * 
+ * @version 1.0
+ * @date 2024-08-08
+ * 
+ * @license MIT
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ * 
+ * @author Felix Galindo
+ * @contact felix.galindo@digi.com
+ */
+
 #include "xbee_api_frames.h"
 #include "xbee_at_cmds.h"
 #include "xbee_lr.h"
@@ -10,7 +44,18 @@
 #include <stdarg.h>
 #include <time.h>
 
-//Callback function that gets called by XBee instance when receiving a packet
+/**
+ * @brief Callback function triggered when data is received from the XBee module.
+ * 
+ * This function is called when the XBee module receives data. It processes the 
+ * incoming data, extracts relevant information, and handles it accordingly. 
+ * The function is typically registered as a callback to be executed automatically 
+ * upon data reception.
+ * 
+ * @param[in] frame Pointer to the received XBee API frame.
+ * 
+ * @return void This function does not return a value.
+ */
 void OnReceiveCallback(XBee* self, void* data){
     XBeeLRPacket_t* packet = (XBeeLRPacket_t*) data;
     port_debug_printf("Received Packet: ");
@@ -25,7 +70,19 @@ void OnReceiveCallback(XBee* self, void* data){
     port_debug_printf("Downlink Counter %lu\n", packet->counter);
 }
 
-//Callback function that gets called by XBee instance when is done sending a packet
+/**
+ * @brief Callback function triggered after data is sent from the XBee module.
+ * 
+ * This function is called when the XBee module completes sending data. It handles 
+ * any post-send operations, such as logging the transmission status or updating 
+ * the state of the application. The function is typically registered as a callback 
+ * to be executed automatically after data is transmitted.
+ * 
+ * @param[in] frameId The ID of the API frame that was sent.
+ * @param[in] status The status code indicating the result of the send operation.
+ * 
+ * @return void This function does not return a value.
+ */
 void OnSendCallback(XBee* self, void* data){
     XBeeLRPacket_t* packet = (XBeeLRPacket_t*) data;
     switch(packet->status){

@@ -97,26 +97,79 @@ bool XBee_SendData(XBee* self, const void* data) {
     return self->vtable->send_data(self, data);
 }
 
+/**
+ * @brief Performs a soft reset of the XBee module.
+ * 
+ * This function invokes the `soft_reset` method defined in the XBee subclass's 
+ * virtual table (vtable) to perform a soft reset of the XBee module. A soft reset 
+ * typically involves resetting the module's state without a full power cycle.
+ * 
+ * @param[in] self Pointer to the XBee instance.
+ * 
+ * @return bool Returns true if the soft reset is successful, otherwise false.
+ */
 bool XBee_SoftReset(XBee* self) {
     return self->vtable->soft_reset(self);
 }
 
+/**
+ * @brief Performs a hard reset of the XBee module.
+ * 
+ * This function invokes the `hard_reset` method defined in the XBee subclass's 
+ * virtual table (vtable) to perform a hard reset of the XBee module. A hard reset 
+ * usually involves a full power cycle or reset through rst pin, resetting the module completely.
+ * 
+ * @param[in] self Pointer to the XBee instance.
+ * 
+ * @return void This function does not return a value.
+ */
 void XBee_HardReset(XBee* self) {
     self->vtable->hard_reset(self);
 }
 
-//Calls XBee subclass Process implementation
-//Must be called continously
+/**
+ * @brief Calls the XBee subclass's process implementation.
+ * 
+ * This function invokes the `process` method defined in the XBee subclass's 
+ * virtual table (vtable). It is responsible for processing any ongoing tasks 
+ * or events related to the XBee module and must be called continuously in the 
+ * application's main loop to ensure proper operation.
+ * 
+ * @param[in] self Pointer to the XBee instance.
+ * 
+ * @return void This function does not return a value.
+ */
 void XBee_Process(XBee* self) {
     self->vtable->process(self);
 }
 
+/**
+ * @brief Checks if the XBee module is connected to the network.
+ * 
+ * This function calls the `connected` method defined in the XBee subclass's 
+ * virtual table (vtable) to determine if the XBee module is currently connected 
+ * to the network. It returns true if the module is connected, otherwise false.
+ * 
+ * @param[in] self Pointer to the XBee instance.
+ * 
+ * @return bool Returns true if the XBee module is connected, otherwise false.
+ */
 bool XBee_Connected(XBee* self) {
     return self->vtable->connected(self);
 }
 
-//Sends ATWR command
-//0 if successful
+/**
+ * @brief Sends the ATWR command to write the current configuration to the XBee module's non-volatile memory.
+ * 
+ * This function sends the ATWR command using an API frame to write the current configuration settings 
+ * to the XBee module's non-volatile memory. The function waits for a response from the module 
+ * to confirm that the command was successful. If the command fails or the module does not respond, 
+ * a debug message is printed.
+ * 
+ * @param[in] self Pointer to the XBee instance.
+ * 
+ * @return bool Returns true if the configuration was successfully written, otherwise false.
+ */
 bool XBee_WriteConfig(XBee* self) {
     uint8_t response[33];
     uint8_t response_length;
@@ -127,8 +180,18 @@ bool XBee_WriteConfig(XBee* self) {
     return status;
 }
 
-//Sends ATAC command
-//0 if successful
+/**
+ * @brief Sends the ATAC command to apply pending configuration changes on the XBee module.
+ * 
+ * This function sends the ATAC command using an API frame to apply any pending configuration changes 
+ * on the XBee module. The function waits for a response from the module to confirm that the command 
+ * was successful. If the command fails or the module does not respond, a debug message is printed.
+ * 
+ * @param[in] self Pointer to the XBee instance.
+ * 
+ * @return bool Returns true if the changes were successfully applied, otherwise false.
+ */
+
 bool XBee_ApplyChanges(XBee* self) {
     uint8_t response[33];
     uint8_t response_length;
