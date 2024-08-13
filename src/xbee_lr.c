@@ -42,6 +42,39 @@ static void SendJoinReqApiFrame(XBee* self);
 
 // XBeeLR specific implementations
 
+
+/**
+ * @brief Checks if the XBee LR module is connected to the LoRaWAN network.
+ * 
+ * This function sends an AT command (`AT_JS`) to the XBee LR module to query the 
+ * Join Status, determining whether the module is currently connected to the LoRaWAN network. 
+ * It returns true if the module is connected (i.e., has joined the network) and false otherwise. 
+ * The function also handles the communication with the module and provides debug output in case 
+ * of communication errors.
+ * 
+ * @param[in] self Pointer to the XBee instance.
+ * 
+ * @return bool Returns true if the XBee LR module is connected to the network, otherwise false.
+ */
+bool XBeeLR_Connected(XBee* self) {
+    // Implement logic to check XBeeLR network connection
+    uint8_t response = 0;
+    uint8_t response_length;
+    int status;
+
+    // Send the AT_JS command to query the Join Status
+    status = api_send_at_command_and_get_response(self, AT_JS, NULL, &response, &response_length, 5000);
+
+    if (status == API_SEND_SUCCESS) {
+        // Print the received reponse
+        // XBEE_DEBUG_PRINT_ENABLED("ATJS Resp: %u \n", response);
+        // XBEE_DEBUG_PRINT_ENABLED("Join Status: %s \n", response ? "Joined" : "Not Joined");
+    } else {
+        XBEE_DEBUG_PRINT_ENABLED("Failed to receive AT_JS response, error code: %d\n", status);
+    }
+    return response;  
+}
+
 /**
  * @brief Initializes the XBee LR module for communication.
  * 
@@ -58,8 +91,32 @@ static void SendJoinReqApiFrame(XBee* self);
  */
 bool XBeeLR_Init(XBee* self, uint32_t baudrate, const char* device) {
     // Implement XBeeLR initialization
-    return self->htable->PortUartInit(baudrate, device) == 0 ? true:false;
+    return (self->htable->PortUartInit(baudrate, device)) == UART_SUCCESS ? true:false;
 }
+
+/**
+ * @brief Processes incoming data and events for the XBee LR module.
+ * 
+ * This function must be called continuously in the main loop of the application. 
+ * It handles the reception and processing of API frames from the XBee LR module.
+ * The function checks for incoming frames, and if a frame is successfully received,
+ * it is processed accordingly. 
+ * 
+ * @param[in] self Pointer to the XBee instance.
+ * 
+ * @return void This function does not return a value.
+ */
+void XBeeLR_Process(XBee* self) {
+    // Implement XBeeLR specific process logic
+    xbee_api_frame_t frame;
+    int status = api_receive_api_frame(self,&frame);
+    if (status == API_SEND_SUCCESS) {
+        api_handle_frame(self,frame);
+    } else if (status != API_RECEIVE_ERROR_TIMEOUT_START_DELIMITER) {
+        XBEE_DEBUG_PRINT_ENABLED("Error receiving frame.\n");
+    }
+}
+
 
 /**
  * @brief Attempts to connect to the LoRaWAN network using the XBee LR module.
@@ -71,18 +128,27 @@ bool XBeeLR_Init(XBee* self, uint32_t baudrate, const char* device) {
  * 
  * @param[in] self Pointer to the XBee instance.
  * 
- * @return bool Returns true if the connection process was initiated, though this 
- * function currently does not check the modem status for successful connection.
+ * @return bool Returns true if the connection process was initiated
  * 
- * @todo Add a mechanism to check the modem status and determine if the connection was successful.
- * @todo Implement a non-blocking version of this function.
  */
 bool XBeeLR_Connect(XBee* self) {
-    // Implement XBeeLR specific connection logic using netConfig
+    // Implement XBeeLR specific connection logic 
     SendJoinReqApiFrame(self);
 
-    //@todo check modem status to determine of successful or not
-    return true;
+    // Start the timeout timer
+    uint32_t start_time = port_millis();
+
+    while ((port_millis() - start_time) < CONNECTION_TIMEOUT_MS) {
+        if (XBeeLR_Connected(self)) {
+            XBEE_DEBUG_PRINT_ENABLED("Successfully Joined\n");
+            return true; // Successfully joined
+        }
+
+        port_delay(500); // Delay between checks 
+    }
+
+    XBEE_DEBUG_PRINT_ENABLED("Failed to Join\n");
+    return false; // Timeout reached without successful join
 }
 
 /**
@@ -111,30 +177,48 @@ bool XBeeLR_Disconnect(XBee* self) {
  * @param[in] self Pointer to the XBee instance.
  * @param[in] data Pointer to the data to be sent, encapsulated in an XBeeLRPacket_t structure.
  * 
- * @return bool Returns true if the data was successfully sent, though this function
- * currently does not check the transmission status for success.
+ * @return xbee_delivery_status_t, 0 if successful
  * 
- * @todo Add a mechanism to check the transmit status and determine if the transmission was successful.
- * @todo Implement a non-blocking version of this function.
  */
-bool XBeeLR_SendData(XBee* self, const void* data) {
-    // Call the SendTxReqApiFrame function with the example payload
+uint8_t XBeeLR_SendData(XBee* self, const void* data) {
+    // Prepare and send the API frame
     XBeeLRPacket_t *packet = (XBeeLRPacket_t*) data;
-    uint8_t frame_data[128]; // Adjust size as needed based on the frame structure
-
-    // Example frame data for Tx Request
+    uint8_t frame_data[128];  // Adjust size as needed
     packet->frameId = self->frameIdCntr;
-    frame_data[0] = self->frameIdCntr;  // Frame ID
-    frame_data[1] = packet->port;  // LoRaWAN Port
-    frame_data[2] = packet->ack & 0x01;  // Transmit Options
-    // Add the payload to the frame data
+    frame_data[0] = self->frameIdCntr;
+    frame_data[1] = packet->port;
+    frame_data[2] = packet->ack & 0x01;
     memcpy(&frame_data[3], packet->payload, packet->payloadSize);
 
-    // Call the api_send_frame function to send the Tx Request API frame
-    api_send_frame(self, XBEE_API_TYPE_LR_TX_REQUEST, frame_data, 3 + packet->payloadSize);
+    // Send the frame
+    int send_status = api_send_frame(self, XBEE_API_TYPE_LR_TX_REQUEST, frame_data, 3 + packet->payloadSize);
+    if (send_status != API_SEND_SUCCESS) {
+        return false;  // Failed to send the frame
+    }
 
-    //@todo check transmit status to determine of successful or not
-    return true;
+    // Block and wait for the XBEE_API_TYPE_TX_STATUS frame
+    uint32_t start_time = port_millis();  // Get the current time in milliseconds
+
+    self->tx_status_received = false;  // Reset the status flag before waiting
+
+    while ((port_millis() - start_time) < SEND_DATA_TIMEOUT_MS) {
+        // Process incoming frames using XBeeLR_Process
+        XBeeLR_Process(self);
+
+        // Check if the status frame was received
+        if (self->tx_status_received) {
+            // Return the delivery status
+            XBEE_DEBUG_PRINT_ENABLED("TX Delivery Status 0x%02X\n", self->delivery_status );
+            return self->delivery_status;
+        }
+
+        // Add a small delay here to avoid busy-waiting
+        port_delay(10);  // Delay for 10 ms
+    }
+
+    // Timeout reached without receiving the expected frame
+    XBEE_DEBUG_PRINT_ENABLED("Failed to receive TX Request Status frame\n");
+    return 0xFF;  // Indicate failure or timeout
 }
 
 bool XBeeLR_SoftReset(XBee* self) {
@@ -144,61 +228,6 @@ bool XBeeLR_SoftReset(XBee* self) {
 
 void XBeeLR_HardReset(XBee* self) {
     // Implement XBeeLR specific hard reset logic
-}
-
-/**
- * @brief Processes incoming data and events for the XBee LR module.
- * 
- * This function must be called continuously in the main loop of the application. 
- * It handles the reception and processing of API frames from the XBee LR module.
- * The function checks for incoming frames, and if a frame is successfully received,
- * it is processed accordingly. 
- * 
- * @param[in] self Pointer to the XBee instance.
- * 
- * @return void This function does not return a value.
- */
-void XBeeLR_Process(XBee* self) {
-    // Implement XBeeLR specific process logic
-    xbee_api_frame_t frame;
-    int status = api_receive_api_frame(self,&frame);
-    if (status == API_SEND_SUCCESS) {
-        api_handle_frame(self,frame);
-    } else {
-        port_debug_printf("Error receiving frame.\n");
-    }
-}
-
-/**
- * @brief Checks if the XBee LR module is connected to the LoRaWAN network.
- * 
- * This function sends an AT command (`AT_JS`) to the XBee LR module to query the 
- * Join Status, determining whether the module is currently connected to the LoRaWAN network. 
- * It returns true if the module is connected (i.e., has joined the network) and false otherwise. 
- * The function also handles the communication with the module and provides debug output in case 
- * of communication errors.
- * 
- * @param[in] self Pointer to the XBee instance.
- * 
- * @return bool Returns true if the XBee LR module is connected to the network, otherwise false.
- */
-bool XBeeLR_Connected(XBee* self) {
-    // Implement logic to check XBeeLR network connection
-    uint8_t response = 0;
-    uint8_t response_length;
-    int status;
-
-    // Send the AT_JS command to query the Join Status
-    status = api_send_at_command_and_get_response(self, AT_JS, NULL, &response, &response_length, 5000);
-
-    if (status == API_SEND_SUCCESS) {
-        // Print the received reponse
-        // port_debug_printf("ATJS Resp: %u \n", response);
-        // port_debug_printf("Join Status: %s \n", response ? "Joined" : "Not Joined");
-    } else {
-        port_debug_printf("Failed to receive AT_JS response, error code: %d\n", status);
-    }
-    return response;  
 }
 
 /* XBeeLR Specific Functions */
@@ -221,7 +250,7 @@ bool XBeeLR_SetAppEUI(XBee* self, const char* value) {
     uint8_t response_length;
     int status = api_send_at_command_and_get_response(self, AT_AE, value, response, &response_length, 5000);
     if(status != API_SEND_SUCCESS){
-        port_debug_printf("Failed to set App EUI\n");
+        XBEE_DEBUG_PRINT_ENABLED("Failed to set App EUI\n");
     }
     return status;
 }
@@ -244,7 +273,7 @@ bool XBeeLR_SetAppKey(XBee* self, const char* value) {
     uint8_t response_length;
     int status = api_send_at_command_and_get_response(self, AT_AK, value, response, &response_length, 5000);
     if(status != API_SEND_SUCCESS){
-        port_debug_printf("Failed to set App Key\n");
+        XBEE_DEBUG_PRINT_ENABLED("Failed to set App Key\n");
     }
     return status;
 }
@@ -268,7 +297,7 @@ bool XBeeLR_SetNwkKey(XBee* self, const char* value) {
     uint8_t response_length;
     int status = api_send_at_command_and_get_response(self, AT_NK, value, response, &response_length, 5000);
     if(status != API_SEND_SUCCESS){
-        port_debug_printf("Failed to set Nwk Key\n");
+        XBEE_DEBUG_PRINT_ENABLED("Failed to set Nwk Key\n");
     }
     return status;
 }
@@ -300,7 +329,7 @@ bool XBeeLR_GetDevEUI(XBee* self, uint8_t* response_buffer, uint8_t buffer_size)
     int status = api_send_at_command_and_get_response(self, AT_DE, NULL, response_buffer, &response_length, 5000);
 
     if (status != API_SEND_SUCCESS) {
-        port_debug_printf("Failed to receive AT_DE response, error code: %d\n", status);
+        XBEE_DEBUG_PRINT_ENABLED("Failed to receive AT_DE response, error code: %d\n", status);
         return false;
     }
     return true;  
@@ -394,6 +423,12 @@ void XBeeLR_Handle_Transmit_Status(XBee* self, void *param) {
 
     packet->frameId = frame->data[1];
     packet->status = frame->data[2];
+
+    // Store the delivery status in the XBee instance
+    self->delivery_status = frame->data[2];  // Extract Delivery Status
+
+    // Set the tx_status_received flag to indicate the status frame was received
+    self->tx_status_received = true;
 
     if(self->ctable->OnSendCallback){
         self->ctable->OnSendCallback(self,packet);

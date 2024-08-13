@@ -1,10 +1,7 @@
 /**
- * @file port.h
- * @brief Platform-specific abstraction layer for hardware interfaces.
+ * @file config.h
+ * @brief Define library configurations
  * 
- * This file defines the platform-specific functions and macros used by the XBee library
- * to interface with hardware. It provides abstraction for serial communication, timing,
- * GPIO control, and other low-level operations required by the XBee modules.
  * 
  * @version 1.0
  * @date 2024-08-08
@@ -32,26 +29,28 @@
  * @contact felix.galindo@digi.com
  */
 
-#ifndef PORT_H
-#define PORT_H
+#ifndef CONFIG_H
+#define CONFIG_H
 
-#include <stdint.h>
+#include "port.h"
 
-// Enum for UART read status
-typedef enum {
-    UART_SUCCESS = 0,
-    UART_INIT_FAILED,
-    UART_ERROR_TIMEOUT,
-    UART_ERROR_OVERRUN,
-    UART_ERROR_UNKNOWN
-} uart_status_t;
+// Constants
+#define UART_READ_TIMEOUT_MS 3000   
+#define UART_WRITE_TIMEOUT_MS 10
 
-int port_uart_read(uint8_t *buffer, int length);
-int port_uart_write(const uint8_t *buf, uint16_t len);
-uint32_t port_millis(void);
-void port_flush_rx(void);
-int port_uart_init(uint32_t baudrate, const char *device);
-void port_delay(uint32_t ms);
-void port_debug_printf(const char *format, ...);
+#define API_FRAME_DEBUG_PRINT_ENABLED 0
+#if API_FRAME_DEBUG_PRINT_ENABLED
+#define API_FRAME_DEBUG_PRINT(...)             port_debug_printf(__VA_ARGS__)
+#else
+#define API_FRAME_DEBUG_PRINT(...)
+#endif
 
-#endif // UART_H
+#define XBEE_DEBUG_PRINT_ENABLED 1
+#if XBEE_DEBUG_PRINT_ENABLED
+#define XBEE_DEBUG_PRINT_ENABLED(...)             port_debug_printf(__VA_ARGS__)
+#else
+#define XBEE_DEBUG_PRINT_ENABLED(...)
+#endif
+
+
+#endif // CONFIG

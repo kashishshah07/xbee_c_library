@@ -123,8 +123,9 @@ int main() {
     XBeeLR * my_xbee_lr = XBeeLR_Create(&XBeeLR_CTable,&XBeeLR_HTable);
 
     //Init XBee
-    if(XBee_Init((XBee*)my_xbee_lr,B9600, "/dev/cu.usbserial-1120"))
+    if(!XBee_Init((XBee*)my_xbee_lr,B9600, "/dev/cu.usbserial-1120")){
         port_debug_printf("Failed to initialize XBee\n");
+    }
 
     //Read LoRaWAN DevEUI and print
     uint8_t dev_eui[17];
@@ -173,15 +174,22 @@ int main() {
                     port_debug_printf("%02X", example_payload[i]);
                 }
                 port_debug_printf("\n");
-                XBee_SendData((XBee*)my_xbee_lr, &packet);
+                if (XBee_SendData((XBee*)my_xbee_lr, &packet)) {
+                    printf("Failed to send data.\n");
+                } else {
+                    printf("Data sent successfully.\n");
+                }
 
                 //Update payload
                 packet.payload[0] = packet.payload[0] + 1; //change payload
-                port_debug_printf("Send Frame Id 0x%02X \n", packet.frameId); //XBee_SendData will update packet.frameId to allow tracking 
             }
             else{
                 port_debug_printf("Not connected. Connecting...\n");
-                XBee_Connect((XBee*)my_xbee_lr);
+                if (!XBee_Connect((XBee*)my_xbee_lr)) {
+                    printf("Failed to connect.\n");
+                } else {
+                    printf("Connected!\n");
+                }
             }
             // Reset the start time
             time(&start_time);

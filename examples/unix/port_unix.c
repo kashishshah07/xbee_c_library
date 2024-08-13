@@ -86,105 +86,57 @@ int port_uart_init(uint32_t baudrate, const char *device) {
     // Apply the options
     tcsetattr(uart_fd, TCSANOW, &options);
 
-    return 0;
-}
-
-/**
- * @brief Writes data to the serial port.
- * 
- * This function sends data to the XBee module over the serial port.
- * 
- * @param[in] fd File descriptor for the serial port.
- * @param[in] buffer Pointer to the buffer containing the data to send.
- * @param[in] length Number of bytes to write.
- * 
- * @return int 0 if successful, or a negative error code on failure.
- */
-int port_uart_write(uint8_t *data, uint16_t len) {
-    ssize_t written = write(uart_fd, data, len);
-
-    if (written == len) {
-        return 0;  // Success
-    } else {
-        return -1;  // UART failure
-    }
-}
-
-/**
- * @brief Reads data from the serial port.
- * 
- * This function reads data from the serial port connected to the XBee module.
- * It blocks until data is available or a timeout occurs.
- * 
- * @param[in] fd File descriptor for the serial port.
- * @param[out] buffer Pointer to the buffer where the received data will be stored.
- * @param[in] maxLength Maximum number of bytes to read.
- * 
- * @return int 0 if successful, or a negative error code on failure.
- */
-uart_status_t port_uart_read(uint8_t *buf, int len, int *bytes_read) {
-    *bytes_read = 0;
-    int result;
-    fd_set readfds;
-    struct timeval timeout;
-    int total_bytes_read = 0;
-    int bytes_left = len;
-    time_t start_time, current_time;
-
-    // Get the current time as the start time
-    time(&start_time);
-
-    while (bytes_left > 0) {
-        // Set the timeout value using UART_READ_TIMEOUT_MS
-        timeout.tv_sec = UART_READ_TIMEOUT_MS / 1000;
-        timeout.tv_usec = (UART_READ_TIMEOUT_MS % 1000) * 1000;
-
-        FD_ZERO(&readfds);
-        FD_SET(uart_fd, &readfds);
-
-        // Wait for data to become available or for the timeout to expire
-        result = select(uart_fd + 1, &readfds, NULL, NULL, &timeout);
-
-        if (result > 0) {
-            // Check if data is available to read
-            int available_bytes;
-            if (ioctl(uart_fd, FIONREAD, &available_bytes) < 0) {
-                perror("Error checking available bytes");
-                return UART_ERROR_UNKNOWN;
-            }
-
-            if (available_bytes > 0) {
-                // Read the available data, but no more than the remaining requested bytes
-                int bytes_to_read = (available_bytes < bytes_left) ? available_bytes : bytes_left;
-                int current_bytes_read = read(uart_fd, buf + total_bytes_read, bytes_to_read);
-                if (current_bytes_read < 0) {
-                    perror("Error reading from UART");
-                    return UART_ERROR_UNKNOWN;
-                }
-
-                total_bytes_read += current_bytes_read;
-                bytes_left -= current_bytes_read;
-
-                // Reset the start time after successfully reading some data
-                time(&start_time);
-            }
-        } else if (result == 0) {
-            // Timeout occurred for this select call, check if the overall timeout has elapsed
-            time(&current_time);
-            if (difftime(current_time, start_time) >= (UART_READ_TIMEOUT_MS / 1000)) {
-                return UART_ERROR_TIMEOUT;
-            }
-        } else {
-            // An error occurred
-            perror("Error with select()");
-            return UART_ERROR_UNKNOWN;
-        }
-    }
-
-    *bytes_read = total_bytes_read;
     return UART_SUCCESS;
 }
 
+/**
+ * @brief Writes data to the UART, ensuring all bytes are sent.
+ * 
+ * This function attempts to write the entire buffer to the UART. It will
+ * continue writing until all bytes are sent or an error occurs. It does not
+ * handle timeouts; this is expected to be managed by the calling function.
+ * 
+ * @param buf Pointer to the buffer containing the data to be sent.
+ * @param len Length of the data in bytes.
+ * @return int The number of bytes successfully written, or a negative error code.
+ */
+int port_uart_write(const uint8_t *buf, uint16_t len) {
+    uint16_t total_bytes_written = 0;
+
+    while (total_bytes_written < len) {
+        int bytes_written = write(uart_fd, buf + total_bytes_written, len - total_bytes_written);
+        if (bytes_written < 0) {
+            perror("Error writing to UART");
+            return UART_ERROR_UNKNOWN;  // Return error code if write fails
+        }
+
+        total_bytes_written += bytes_written;  // Accumulate the total bytes written
+    }
+
+    return total_bytes_written;  // Return the total number of bytes successfully written
+}
+
+
+/**
+ * @brief Reads up to `length` bytes from the UART.
+ * 
+ * This function reads up to `length` bytes from the UART and stores them in the provided `buffer`.
+ * It returns the number of bytes actually read. 
+ * 
+ * @param buffer Pointer to the buffer where the data will be stored.
+ * @param length Maximum number of bytes to read.
+ * @return int Number of bytes actually read, or -1 if an error occurs.
+ */
+int port_uart_read(uint8_t *buffer, int length) {
+    int bytes_read = read(uart_fd, buffer, length);
+    
+    if (bytes_read < 0) {
+        //perror("UART read error");
+        return -1;
+    }
+
+    return bytes_read; // Return the actual number of bytes read
+}
 /**
  * @brief Gets the current system time in milliseconds.
  * 

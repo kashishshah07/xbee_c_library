@@ -78,11 +78,11 @@ static uint8_t calculate_checksum(const uint8_t *frame, uint16_t len) {
  * @return int Returns 0 (`API_SEND_SUCCESS`) if the frame is successfully sent, 
  * or a non-zero error code (`API_SEND_ERROR_UART_FAILURE`) if there is a failure.
  */
-int api_send_frame(XBee* self,uint8_t frame_type, const uint8_t *data, uint16_t len) {
+int api_send_frame(XBee* self, uint8_t frame_type, const uint8_t *data, uint16_t len) {
     uint8_t frame[256];
     uint16_t frame_length = 0;
     self->frameIdCntr++;
-    if(self->frameIdCntr == 0) self->frameIdCntr = 1; //reset frame counter when 0
+    if (self->frameIdCntr == 0) self->frameIdCntr = 1; // Reset frame counter when 0
 
     // Start delimiter
     frame[frame_length++] = 0x7E;
@@ -109,15 +109,33 @@ int api_send_frame(XBee* self,uint8_t frame_type, const uint8_t *data, uint16_t 
     }
     API_FRAME_DEBUG_PRINT("\n");
 
-    // Send frame via UART
-    int uart_status = self->htable->PortUartWrite(frame, frame_length);
-    if (uart_status != 0) {
-        return API_SEND_ERROR_UART_FAILURE;
+    // Measure the time taken to send the frame
+    uint32_t start_time = port_millis();
+    int total_bytes_written = 0;
+
+    while (total_bytes_written < frame_length) {
+        int bytes_written = self->htable->PortUartWrite(frame + total_bytes_written, frame_length - total_bytes_written);
+        if (bytes_written < 0) {
+            return API_SEND_ERROR_UART_FAILURE;
+        }
+
+        total_bytes_written += bytes_written;
+
+        // Check for timeout
+        if ((port_millis() - start_time) > UART_WRITE_TIMEOUT_MS) {
+            API_FRAME_DEBUG_PRINT("Error: Frame sending timeout after %lu ms\n", port_millis() - start_time);
+            return API_SEND_ERROR_UART_FAILURE;
+        }
+        port_delay(1);
     }
+
+    uint32_t elapsed_time = port_millis() - start_time;
+    API_FRAME_DEBUG_PRINT("UART write completed in %lu ms\n", elapsed_time);
 
     // Return success if everything went well
     return API_SEND_SUCCESS;
 }
+
 
 /**
  * @brief Sends an AT command through an API frame.
@@ -181,97 +199,111 @@ int api_send_at_command(XBee* self,at_command_t command, const uint8_t *paramete
 }
 
 /**
+ * @brief Reads a specified number of bytes from the UART with a timeout mechanism.
+ * 
+ * This function attempts to read a specified number of bytes from the UART interface associated with
+ * the XBee instance. It continuously reads data until the requested length is received or a timeout occurs.
+ * If the UART read operation fails or the timeout is exceeded, the function returns an appropriate error code.
+ * 
+ * @param[in] self Pointer to the XBee instance, which contains the UART hardware table and other settings.
+ * @param[out] buffer Pointer to the buffer where the received bytes will be stored.
+ * @param[in] length The number of bytes to read from the UART.
+ * @param[in] timeout_ms The maximum time in milliseconds to wait for the complete data to be read.
+ * 
+ * @return api_receive_status_t Returns API_RECEIVE_SUCCESS if the specified number of bytes are successfully read.
+ *         Returns API_RECEIVE_ERROR_UART_FAILURE if the UART read operation fails.
+ *         Returns API_RECEIVE_ERROR_TIMEOUT_DATA if the timeout is exceeded before the required bytes are read.
+ */
+static api_receive_status_t read_bytes_with_timeout(XBee* self, uint8_t* buffer, int length, uint32_t timeout_ms) {
+    int total_bytes_received = 0;
+    int bytes_received = 0;
+    uint32_t start_time = port_millis();
+
+    while (total_bytes_received < length) {
+        bytes_received = self->htable->PortUartRead(buffer + total_bytes_received, length - total_bytes_received);
+        
+        if (bytes_received > 0) {
+            total_bytes_received += bytes_received;
+        }
+
+        // Check for timeout
+        if (port_millis() - start_time >= timeout_ms) {
+            return API_RECEIVE_ERROR_TIMEOUT_DATA;
+        }
+        port_delay(1);  // Add a 1 ms delay to prevent busy-waiting
+    }
+
+    return API_RECEIVE_SUCCESS;
+}
+
+/**
  * @brief Checks for and receives an XBee API frame, populating the provided frame pointer.
  * 
  * This function attempts to read and receive an XBee API frame from the UART interface. 
  * It validates the received data by checking the start delimiter, frame length, and checksum. 
  * If the frame is successfully received and validated, the frame structure is populated 
- * with the received data. The function returns 0 if successful, or a negative error code 
- * if any step in the process fails.
+ * with the received data. The function returns API_RECEIVE_SUCCESS if successful, or an 
+ * error code from `api_receive_status_t` if any step in the process fails, including timeout.
  * 
  * @param[in] self Pointer to the XBee instance.
  * @param[out] frame Pointer to an `xbee_api_frame_t` structure where the received frame data will be stored.
  * 
- * @return int Returns 0 if the frame is successfully received, or a negative error code indicating the type of failure.
+ * @return api_receive_status_t Returns API_RECEIVE_SUCCESS if the frame is successfully received, or an error code if a failure occurs.
  */
-int api_receive_api_frame(XBee* self,xbee_api_frame_t *frame) {
+api_receive_status_t api_receive_api_frame(XBee* self, xbee_api_frame_t *frame) {
     if (!frame) {
         API_FRAME_DEBUG_PRINT("Error: Invalid frame pointer. The frame pointer passed to the function is NULL.\n");
-        return -1;
+        return API_RECEIVE_ERROR_INVALID_POINTER;
     }
 
     memset(frame, 0, sizeof(xbee_api_frame_t));
 
-    // Attempt to read the start delimiter
+    // Attempt to read the start delimiter with timeout
     uint8_t start_delimiter;
-    int bytes_received;
-    uart_status_t status = self->htable->PortUartRead(&start_delimiter, 1, &bytes_received);
-
-    if (status != UART_SUCCESS || bytes_received <= 0) {
-        if (status == UART_ERROR_TIMEOUT) {
-            API_FRAME_DEBUG_PRINT("Error: Timeout occurred while waiting to read start delimiter. No data received within %d ms.\n", UART_READ_TIMEOUT_MS);
-        } else {
-            API_FRAME_DEBUG_PRINT("Error: Failed to read start delimiter. Status: %d, Bytes received: %d\n", status, bytes_received);
-        }
-        return -2;
+    api_receive_status_t result = read_bytes_with_timeout(self, &start_delimiter, 1, UART_READ_TIMEOUT_MS);
+    if (result != API_RECEIVE_SUCCESS) {
+        //API_FRAME_DEBUG_PRINT("Error: Timeout occurred while waiting to read start delimiter.\n");
+        return API_RECEIVE_ERROR_TIMEOUT_START_DELIMITER;
     }
     API_FRAME_DEBUG_PRINT("Start delimiter received: 0x%02X\n", start_delimiter);
 
     if (start_delimiter != 0x7E) {
         API_FRAME_DEBUG_PRINT("Error: Invalid start delimiter. Expected 0x7E, but received 0x%02X.\n", start_delimiter);
-        return -3;
+        return API_RECEIVE_ERROR_INVALID_START_DELIMITER;
     }
 
-    // Read length
+    // Read length with timeout
     uint8_t length_bytes[2];
-    status = self->htable->PortUartRead(length_bytes, 2, &bytes_received);
-
-    if (status != UART_SUCCESS || bytes_received != 2) {
-        if (status == UART_ERROR_TIMEOUT) {
-            API_FRAME_DEBUG_PRINT("Error: Timeout occurred while waiting to read frame length. No data received within %d ms.\n", UART_READ_TIMEOUT_MS);
-        } else {
-            API_FRAME_DEBUG_PRINT("Error: Failed to read frame length. Status: %d, Bytes received: %d\n", status, bytes_received);
-        }
-        return -4;
+    result = read_bytes_with_timeout(self, length_bytes, 2, UART_READ_TIMEOUT_MS);
+    if (result != API_RECEIVE_SUCCESS) {
+        API_FRAME_DEBUG_PRINT("Error: Timeout occurred while waiting to read frame length.\n");
+        return API_RECEIVE_ERROR_TIMEOUT_LENGTH;
     }
-
     uint16_t length = (length_bytes[0] << 8) | length_bytes[1];
     API_FRAME_DEBUG_PRINT("Frame length received: %d bytes\n", length);
 
     if (length > XBEE_MAX_FRAME_DATA_SIZE) {
-        API_FRAME_DEBUG_PRINT("Error: Frame length exceeds buffer size. Received length: %d bytes, but maximum allowed is %d bytes.\n", length, XBEE_MAX_FRAME_DATA_SIZE);
-        return -5;
+        API_FRAME_DEBUG_PRINT("Error: Frame length exceeds buffer size.\n");
+        return API_RECEIVE_ERROR_FRAME_TOO_LARGE;
     }
 
-    // Read the frame data
-    status = self->htable->PortUartRead(frame->data, length, &bytes_received);
-
-    if (status != UART_SUCCESS || bytes_received != length) {
-        if (status == UART_ERROR_TIMEOUT) {
-            API_FRAME_DEBUG_PRINT("Error: Timeout occurred while waiting to read frame data. Expected %d bytes, but received %d bytes within %d ms.\n", length, bytes_received, UART_READ_TIMEOUT_MS);
-        } else {
-            API_FRAME_DEBUG_PRINT("Error: Failed to read complete frame data. Status: %d, Expected: %d bytes, Received: %d bytes.\n", status, length, bytes_received);
-        }
-        return -6;
+    // Read the frame data with timeout
+    result = read_bytes_with_timeout(self, frame->data, length, UART_READ_TIMEOUT_MS);
+    if (result != API_RECEIVE_SUCCESS) {
+        API_FRAME_DEBUG_PRINT("Error: Timeout occurred while waiting to read frame data.\n");
+        return API_RECEIVE_ERROR_TIMEOUT_DATA;
     }
-
-    // Print the received frame data
     API_FRAME_DEBUG_PRINT("Complete frame data received: ");
-    for (int i = 0; i < bytes_received; i++) {
+    for (int i = 0; i < length; i++) {
         API_FRAME_DEBUG_PRINT("0x%02X ", frame->data[i]);
     }
     API_FRAME_DEBUG_PRINT("\n");
 
-    // Read the checksum
-    status = self->htable->PortUartRead(&(frame->checksum), 1, &bytes_received);
-
-    if (status != UART_SUCCESS || bytes_received != 1) {
-        if (status == UART_ERROR_TIMEOUT) {
-            API_FRAME_DEBUG_PRINT("Error: Timeout occurred while waiting to read checksum. Expected 1 byte, but received %d bytes within %d ms.\n", bytes_received, UART_READ_TIMEOUT_MS);
-        } else {
-            API_FRAME_DEBUG_PRINT("Error: Failed to read complete frame data. Status: %d, Expected: 1 bytes, Received: %d bytes.\n", status,bytes_received);
-        }
-        return -7;
+    // Read the checksum with timeout
+    result = read_bytes_with_timeout(self, &(frame->checksum), 1, UART_READ_TIMEOUT_MS);
+    if (result != API_RECEIVE_SUCCESS) {
+        API_FRAME_DEBUG_PRINT("Error: Timeout occurred while waiting to read checksum.\n");
+        return API_RECEIVE_ERROR_TIMEOUT_CHECKSUM;
     }
 
     // Populate frame structure
@@ -280,16 +312,17 @@ int api_receive_api_frame(XBee* self,xbee_api_frame_t *frame) {
 
     // Check and verify the checksum
     uint8_t checksum = frame->checksum;
-    for (int i = 0; i < (length); i++) {
+    for (int i = 0; i < length; i++) {
         checksum += frame->data[i];
     }
     if (checksum != 0xFF) {
         API_FRAME_DEBUG_PRINT("Error: Invalid checksum. Expected 0xFF, but calculated 0x%02X.\n", checksum);
-        return -8;
+        return API_RECEIVE_ERROR_INVALID_CHECKSUM;
     }
 
-    return 0; // Successfully received a frame
+    return API_RECEIVE_SUCCESS; // Successfully received a frame
 }
+
 
 /**
  * @brief Calls registered handlers based on the received API frame type.

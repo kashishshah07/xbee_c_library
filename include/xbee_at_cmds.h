@@ -39,14 +39,17 @@
 
 /**
  * @enum at_command_t
- * @brief Enumeration of common XBee AT commands.
+ * @brief Enumeration of common and module-specific XBee AT commands.
  *
- * This enum defines the AT commands supported by the XBee module. Each command
+ * This enum defines the AT commands supported by various XBee modules. Each command
  * corresponds to a specific configuration or control operation within the module.
+ *
+ * AT commands allow users to configure the XBee module, control its behavior,
+ * and query various parameters such as network status, signal strength, and device settings.
  */
 typedef enum {
     /**< XBee Common AT Commands */
-    AT_,
+    AT_,     /**< Placeholder for unspecified commands */
     AT_CN,   /**< Exit Command Mode */
     AT_AP,   /**< API Enable */
     AT_BD,   /**< Baud Rate */
@@ -55,6 +58,77 @@ typedef enum {
     AT_VR,   /**< Firmware Version */
     AT_AC,   /**< Apply Changes */
     AT_NR,   /**< Network Reset */
+    AT_DD,   /**< Device Type Identifier */
+    AT_ID,   /**< PAN ID */
+    AT_NI,   /**< Node Identifier */
+    AT_DL,   /**< Destination Address Low */
+    AT_DH,   /**< Destination Address High */
+    AT_SH,   /**< Serial Number High */
+    AT_SL,   /**< Serial Number Low */
+    AT_PL,   /**< Power Level */
+    AT_AI,   /**< Association Indication */
+    AT_RP,   /**< RSSI PWM Timer */
+    AT_RN,   /**< Random Delay Slots */
+    AT_RR,   /**< Retries */
+    AT_ND,   /**< Node Discover */
+    AT_NO,   /**< Network Discovery Options */
+    AT_RO,   /**< Packetization Timeout */
+    AT_SM,   /**< Sleep Mode */
+    AT_SO,   /**< Sleep Options */
+    AT_SP,   /**< Sleep Period */
+    AT_ST,   /**< Time Before Sleep */
+    AT_IS,   /**< Force Sample (IO) */
+    AT_P0,   /**< DIO0/AD0 Configuration */
+    AT_P1,   /**< DIO1/AD1 Configuration */
+    AT_P2,   /**< DIO2/AD2 Configuration */
+    AT_P3,   /**< DIO3/AD3 Configuration */
+    AT_P4,   /**< DIO4 Configuration */
+    AT_P5,   /**< DIO5 Configuration */
+    AT_P6,   /**< DIO6 Configuration */
+    AT_P7,   /**< DIO7 Configuration */
+    AT_P8,   /**< DIO8 Configuration */
+    AT_PR,   /**< Pull-up Resistor Enable */
+    AT_RI,   /**< Ring Indicator */
+    AT_CT,   /**< Command Mode Timeout */
+    AT_GT,   /**< Guard Times */
+    AT_SB,   /**< Stop Bits */
+    AT_D7,   /**< DIO7 Configuration */
+    AT_D8,   /**< DIO8 Configuration */
+    AT_D9,   /**< DIO9 Configuration */
+    AT_DA,   /**< DIO10 Configuration */
+    AT_DB,   /**< RSSI for Last Hop */
+    AT_DC,   /**< DIO Change Detect */
+    AT_FT,   /**< Flow Control Threshold */
+    AT_GU,   /**< DIO Pull-up Resistor Enable */
+    AT_HS,   /**< Hardware Sleep Control */
+    AT_IT,   /**< RSSI Timer */
+    AT_NJ,   /**< Node Join Time */
+    AT_JN,   /**< Join Notification */
+    AT_JT,   /**< Join Time */
+    AT_JV,   /**< Channel Verification */
+    AT_LD,   /**< Node Discovery Time */
+
+    /**< XBee 3 RF Specific AT Commands */
+    AT_CE,   /**< Coordinator Enable */
+    AT_SE,   /**< Source Endpoint */
+    AT_DE_RF,/**< Destination Endpoint (RF specific) */
+    AT_CI,   /**< Cluster Identifier */
+    AT_BH,   /**< Broadcast Hops */
+    AT_YS,   /**< Sleep Status */
+    AT_WR_RF,/**< Write to non-volatile memory (RF specific) */
+
+    /**< XBee 3 Cellular Specific AT Commands */
+    AT_IP,   /**< IP Address */
+    AT_MA,   /**< MAC Address */
+    AT_OK,   /**< Cellular OK Command */
+    AT_RI_CELL, /**< Ring Indicator (Cellular Specific) */
+    AT_SR,   /**< Serial Number */
+    AT_TD,   /**< Transmit Delay */
+    AT_TR,   /**< Transmission Retry Count */
+    AT_TS,   /**< Transmission Status */
+    AT_UK,   /**< Unlock Password */
+    AT_VE,   /**< Voltage Supply */
+    AT_VL,   /**< Cellular Module Version */
 
     /**< XBee LR Specific AT Commands */
     AT_DE,   /**< LoRaWAN Device EUI */
@@ -67,8 +141,8 @@ typedef enum {
 
     // ... (other existing AT commands) ...
 
-
 } at_command_t;
+
 
 /**
  * @brief Converts an AT command enum to its corresponding string representation.

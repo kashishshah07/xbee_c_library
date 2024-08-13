@@ -39,6 +39,9 @@
 
 #include "xbee.h"
 
+#define CONNECTION_TIMEOUT_MS 6000
+#define SEND_DATA_TIMEOUT_MS 10000
+
 // Structure for XBee LR LoRaWAN packet
 typedef struct XBeeLRPacket_s{
     uint8_t port;

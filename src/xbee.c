@@ -91,9 +91,9 @@ bool XBee_Disconnect(XBee* self) {
  * 
  * @param[in] self Pointer to the XBee instance.
  * 
- * @return True if the data was sent successfully, otherwise false.
+ * @return xbee_delivery_status_t, 0 if successful
  */
-bool XBee_SendData(XBee* self, const void* data) {
+uint8_t XBee_SendData(XBee* self, const void* data) {
     return self->vtable->send_data(self, data);
 }
 
@@ -175,7 +175,7 @@ bool XBee_WriteConfig(XBee* self) {
     uint8_t response_length;
     int status = api_send_at_command_and_get_response(self, AT_WR, NULL, response, &response_length, 5000);
     if(status != API_SEND_SUCCESS){
-        port_debug_printf("Failed to Write Config\n");
+        XBEE_DEBUG_PRINT_ENABLED("Failed to Write Config\n");
     }
     return status;
 }
@@ -197,7 +197,7 @@ bool XBee_ApplyChanges(XBee* self) {
     uint8_t response_length;
     int status = api_send_at_command_and_get_response(self, AT_AC, NULL, response, &response_length, 5000);
     if(status != API_SEND_SUCCESS){
-        port_debug_printf("Failed to Apply Changes\n");
+        XBEE_DEBUG_PRINT_ENABLED("Failed to Apply Changes\n");
     }
     return status;
 }

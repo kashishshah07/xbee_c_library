@@ -50,18 +50,100 @@
  */
 const char* at_command_to_string(at_command_t command) {
     switch (command) {
-        case AT_: return "AT";
-        case AT_DE: return "DE";
-        case AT_FQ: return "FQ";
-        case AT_BD: return "BD";
-        case AT_AK: return "AK";
-        case AT_AE: return "AE";
-        case AT_NK: return "NK";
-        case AT_JS: return "JS";
-        case AT_WR: return "WR";
-        case AT_AC: return "AC";
-        default: return NULL;
+        /**< XBee Common AT Commands */
+        case AT_: return "AT";              ///< Placeholder for unspecified commands
+        case AT_CN: return "CN";            ///< Exit Command Mode
+        case AT_AP: return "AP";            ///< API Enable
+        case AT_BD: return "BD";            ///< Baud Rate
+        case AT_WR: return "WR";            ///< Write to non-volatile memory
+        case AT_RE: return "RE";            ///< Restore factory defaults
+        case AT_VR: return "VR";            ///< Firmware Version
+        case AT_AC: return "AC";            ///< Apply Changes
+        case AT_NR: return "NR";            ///< Network Reset
+        case AT_DD: return "DD";            ///< Device Type Identifier
+        case AT_ID: return "ID";            ///< PAN ID
+        case AT_NI: return "NI";            ///< Node Identifier
+        case AT_DL: return "DL";            ///< Destination Address Low
+        case AT_DH: return "DH";            ///< Destination Address High
+        case AT_SH: return "SH";            ///< Serial Number High
+        case AT_SL: return "SL";            ///< Serial Number Low
+        case AT_PL: return "PL";            ///< Power Level
+        case AT_AI: return "AI";            ///< Association Indication
+        case AT_RP: return "RP";            ///< RSSI PWM Timer
+        case AT_RN: return "RN";            ///< Random Delay Slots
+        case AT_RR: return "RR";            ///< Retries
+        case AT_ND: return "ND";            ///< Node Discover
+        case AT_NO: return "NO";            ///< Network Discovery Options
+        case AT_RO: return "RO";            ///< Packetization Timeout
+        case AT_SM: return "SM";            ///< Sleep Mode
+        case AT_SO: return "SO";            ///< Sleep Options
+        case AT_SP: return "SP";            ///< Sleep Period
+        case AT_ST: return "ST";            ///< Time Before Sleep
+        case AT_IS: return "IS";            ///< Force Sample (IO)
+        case AT_P0: return "P0";            ///< DIO0/AD0 Configuration
+        case AT_P1: return "P1";            ///< DIO1/AD1 Configuration
+        case AT_P2: return "P2";            ///< DIO2/AD2 Configuration
+        case AT_P3: return "P3";            ///< DIO3/AD3 Configuration
+        case AT_P4: return "P4";            ///< DIO4 Configuration
+        case AT_P5: return "P5";            ///< DIO5 Configuration
+        case AT_P6: return "P6";            ///< DIO6 Configuration
+        case AT_P7: return "P7";            ///< DIO7 Configuration
+        case AT_P8: return "P8";            ///< DIO8 Configuration
+        case AT_PR: return "PR";            ///< Pull-up Resistor Enable
+        case AT_RI: return "RI";            ///< Ring Indicator
+        case AT_CT: return "CT";            ///< Command Mode Timeout
+        case AT_GT: return "GT";            ///< Guard Times
+        case AT_SB: return "SB";            ///< Stop Bits
+        case AT_D7: return "D7";            ///< DIO7 Configuration
+        case AT_D8: return "D8";            ///< DIO8 Configuration
+        case AT_D9: return "D9";            ///< DIO9 Configuration
+        case AT_DA: return "DA";            ///< DIO10 Configuration
+        case AT_DB: return "DB";            ///< RSSI for Last Hop
+        case AT_DC: return "DC";            ///< DIO Change Detect
+        case AT_FT: return "FT";            ///< Flow Control Threshold
+        case AT_GU: return "GU";            ///< DIO Pull-up Resistor Enable
+        case AT_HS: return "HS";            ///< Hardware Sleep Control
+        case AT_IT: return "IT";            ///< RSSI Timer
+        case AT_NJ: return "NJ";            ///< Node Join Time
+        case AT_JN: return "JN";            ///< Join Notification
+        case AT_JT: return "JT";            ///< Join Time
+        case AT_JV: return "JV";            ///< Channel Verification
+        case AT_LD: return "LD";            ///< Node Discovery Time
+
+        /**< XBee 3 RF Specific AT Commands */
+        case AT_CE: return "CE";            ///< Coordinator Enable
+        case AT_SE: return "SE";            ///< Source Endpoint
+        case AT_DE_RF: return "DE";         ///< Destination Endpoint (RF specific)
+        case AT_CI: return "CI";            ///< Cluster Identifier
+        case AT_BH: return "BH";            ///< Broadcast Hops
+        case AT_YS: return "YS";            ///< Sleep Status
+        case AT_WR_RF: return "WR";         ///< Write to non-volatile memory (RF specific)
+
+        /**< XBee 3 Cellular Specific AT Commands */
+        case AT_IP: return "IP";            ///< IP Address
+        case AT_MA: return "MA";            ///< MAC Address
+        case AT_OK: return "OK";            ///< Cellular OK Command
+        case AT_RI_CELL: return "RI";       ///< Ring Indicator (Cellular Specific)
+        case AT_SR: return "SR";            ///< Serial Number
+        case AT_TD: return "TD";            ///< Transmit Delay
+        case AT_TR: return "TR";            ///< Transmission Retry Count
+        case AT_TS: return "TS";            ///< Transmission Status
+        case AT_UK: return "UK";            ///< Unlock Password
+        case AT_VE: return "VE";            ///< Voltage Supply
+        case AT_VL: return "VL";            ///< Cellular Module Version
+
+        /**< XBee LR Specific AT Commands */
+        case AT_DE: return "DE";            ///< LoRaWAN Device EUI
+        case AT_AK: return "AK";            ///< LoRaWAN Application Key
+        case AT_AE: return "AE";            ///< LoRaWAN Application EUI
+        case AT_NK: return "NK";            ///< LoRaWAN Network Key
+        case AT_JS: return "JS";            ///< LoRaWAN Join Status
+        case AT_FQ: return "FQ";            ///< Test Configuration Frequency
+        case AT_PW: return "PW";            ///< Test Configuration Power
+
+        default: return NULL;               ///< Unknown command
     }
 }
+
 
 

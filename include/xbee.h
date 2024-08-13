@@ -39,6 +39,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include "config.h"
 #include "port.h"
 
 // Abstract base class for XBee
@@ -58,7 +59,7 @@ typedef struct {
     bool (*init)(XBee* self, uint32_t baudrate, const char* device);
     bool (*connect)(XBee* self);
     bool (*disconnect)(XBee* self);
-    bool (*send_data)(XBee* self, const void* data);
+    uint8_t (*send_data)(XBee* self, const void* data);
     bool (*soft_reset)(XBee* self);
     void (*hard_reset)(XBee* self);
     void (*process)(XBee* self);
@@ -79,8 +80,8 @@ typedef struct {
  * the appropriate function implementations for each platform.
  */
 typedef struct {
-    uart_status_t (*PortUartRead)(uint8_t *buf, int len, int *bytes_read);
-    int (*PortUartWrite)(uint8_t *data, uint16_t len);
+    int (*PortUartRead)(uint8_t *buffer, int length);
+    int (*PortUartWrite)(const uint8_t *buf, uint16_t len);
     uint32_t (*PortMillis)(void);
     void (*PortFlushRx)(void);
     int (*PortUartInit)(uint32_t baudrate, const char *device);
@@ -118,13 +119,16 @@ struct XBee {
     const XBeeHTable* htable;
     const XBeeCTable* ctable;
     uint8_t frameIdCntr;
+    bool tx_status_received;        ///< Flag to indicate if TX Status frame was received
+    uint8_t delivery_status;        ///< Stores the delivery status of the transmitted frame
+
 };
 
 // Interface functions to call the methods
 bool XBee_Init(XBee* self, uint32_t baudrate, const char* device);
 bool XBee_Connect(XBee* self);
 bool XBee_Disconnect(XBee* self);
-bool XBee_SendData(XBee* self, const void*);
+uint8_t XBee_SendData(XBee* self, const void*);
 bool XBee_SoftReset(XBee* self);
 void XBee_HardReset(XBee* self);
 void XBee_Process(XBee* self);
