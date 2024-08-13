@@ -1,10 +1,9 @@
 /**
- * @file example.c
- * @brief Example application demonstrating the use of the XBee library on RP2040 (Raspberry Pi Pico).
+ * @file port_rp2350.c
+ * @brief Platform-specific implementation of hardware abstraction functions for RP2350 (Raspberry Pi Pico).
  * 
- * This file contains a sample application that demonstrates how to use the XBee library 
- * to communicate with XBee modules on an RP2040 platform. It showcases basic operations 
- * such as initializing the XBee module, connecting to the network, and transmitting & receiving data.
+ * This file provides the necessary functions to interface with the hardware on the RP2350 platform,
+ * including UART initialization, data transmission, data reception, and timekeeping.
  * 
  * @version 1.0
  * @date 2024-08-13
@@ -27,18 +26,17 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- * 
- * @author Felix Galindo
- * @contact felix.galindo@digi.com
  */
 
-#include "xbee_api_frames.h"
-#include "xbee_at_cmds.h"
-#include "xbee_lr.h"
-#include "port.h"
 #include "hardware/uart.h"
 #include "hardware/gpio.h"
 #include "pico/stdlib.h"
+#include "port.h"
+
+#define COMM_UART uart1       ///< UART used for communication with XBee or other devices
+#define COMM_BAUDRATE 9600    ///< Baud rate for the communication UART
+#define COMM_TX_PIN 4         ///< TX pin for UART1 (adjust as needed)
+#define COMM_RX_PIN 5         ///< RX pin for UART1 (adjust as needed)
 
 #define DEBUG_UART uart0      ///< UART used for debugging output (printf redirection)
 #define DEBUG_BAUDRATE 115200 ///< Baud rate for the debug UART
@@ -46,169 +44,106 @@
 #define DEBUG_RX_PIN 1        ///< RX pin for UART0 (adjust as needed)
 
 /**
- * @brief Initialize the debug UART and configure `printf` to use it.
+ * @brief Initializes the UART for communication on the RP2040 platform.
  * 
- * This function initializes the debug UART (e.g., `uart0`) and sets up `printf` 
- * to use this UART for debugging output.
+ * This function sets up the communication UART (e.g., uart1) with the specified baud rate.
+ * 
+ * @param baudrate The baud rate for UART communication.
+ * @param device Unused parameter on the RP2040 platform; pass NULL.
+ * 
+ * @return int Returns 0 on success, -1 on failure.
  */
-void Debug_UART_Init() {
-    uart_init(DEBUG_UART, DEBUG_BAUDRATE);
-    gpio_set_function(DEBUG_TX_PIN, GPIO_FUNC_UART);
-    gpio_set_function(DEBUG_RX_PIN, GPIO_FUNC_UART);
-
-    // Configure stdio to use the debug UART
-    stdio_uart_init_full(DEBUG_UART, DEBUG_TX_PIN, DEBUG_RX_PIN, DEBUG_BAUDRATE);
+int port_uart_init(uint32_t baudrate, const char *device) {
+    uart_init(COMM_UART, baudrate);
+    gpio_set_function(COMM_TX_PIN, GPIO_FUNC_UART);
+    gpio_set_function(COMM_RX_PIN, GPIO_FUNC_UART);
+    return 0;  // Initialization successful
 }
 
-int main() {
-    // Initialize the standard I/O library for I/O operations (required by the SDK)
-    stdio_init_all();
-
-    // Initialize the debug UART for printf redirection
-    Debug_UART_Init();
-
-    printf("Debug UART initialized. Starting XBee example...\n");
-
-    // Harware Abstraction Function Pointer Table for XBeeLR
-    const XBeeHTable XBeeLR_HTable = {
-        .PortUartRead = port_uart_read,
-        .PortUartWrite = port_uart_write,
-        .PortMillis = port_millis,
-        .PortFlushRx = port_flush_rx,
-        .PortUartInit = port_uart_init,
-        .PortDelay = port_delay,
-    };
-
-    // Callback Function Pointer Table for XBeeLR
-    const XBeeCTable XBeeLR_CTable = {
-        .OnReceiveCallback = OnReceiveCallback, // You can set this to NULL if no callbacks are needed
-        .OnSendCallback = OnSendCallback,       // You can set this to NULL if no callbacks are needed
-    };
-
-    // Create an instance of the XBeeLR class
-    XBeeLR* my_xbee_lr = XBeeLR_Create(&XBeeLR_CTable, &XBeeLR_HTable);
-
-    // Initialize the communication UART (uart1) for the XBee module
-    if (!XBee_Init((XBee*)my_xbee_lr, COMM_BAUDRATE, NULL)) {
-        printf("Failed to initialize XBee communication UART\n");
-        return -1;
+/**
+ * @brief Writes data to the communication UART.
+ * 
+ * This function sends the specified number of bytes from the provided buffer over the communication UART.
+ * 
+ * @param data Pointer to the data to be written.
+ * @param length Number of bytes to write.
+ * 
+ * @return int Returns the number of bytes successfully written.
+ */
+int port_uart_write(const uint8_t *data, int length) {
+    for (int i = 0; i < length; i++) {
+        uart_putc_raw(COMM_UART, data[i]);
     }
+    return length;  // Return the number of bytes written
+}
 
-    // Read and print the LoRaWAN Device EUI
-    uint8_t dev_eui[17];
-    XBeeLR_GetDevEUI((XBee*)my_xbee_lr, dev_eui, sizeof(dev_eui));
-    printf("DEVEUI: %s\n", dev_eui);
-
-    // Set LoRaWAN network settings
-    printf("Configuring LoRaWAN network settings...\n");
-    XBeeLR_SetAppEUI((XBee*)my_xbee_lr, "37D56A3F6CDCF0A5");
-    XBeeLR_SetAppKey((XBee*)my_xbee_lr, "CD32AAB41C54175E9060D86F3A8B7F48");
-    XBeeLR_SetNwkKey((XBee*)my_xbee_lr, "CD32AAB41C54175E9060D86F3A8B7F48");
-    XBee_WriteConfig((XBee*)my_xbee_lr);
-    XBee_ApplyChanges((XBee*)my_xbee_lr);
-
-    // Connect to the LoRaWAN network
-    printf("Connecting to LoRaWAN network...\n");
-    if (!XBee_Connect((XBee*)my_xbee_lr)) {
-        printf("Failed to connect to LoRaWAN network.\n");
-        return -1;
-    } else {
-        printf("Connected to LoRaWAN network!\n");
-    }
-
-    // Prepare the XBeeLR payload to send
-    uint8_t example_payload[] = {0xC0, 0xC0, 0xC0, 0xFF, 0xEE};
-    uint16_t payload_len = sizeof(example_payload) / sizeof(example_payload[0]);
-    XBeeLRPacket_t packet = {
-        .payload = example_payload,
-        .payloadSize = payload_len,
-        .port = 2,
-        .ack = 0,
-    };
-
-    uint32_t start_time = port_millis();
-    while (1) {
-        // Process any incoming data from the XBee module
-        XBee_Process((XBee*)my_xbee_lr);
-
-        // Check if 10 seconds have passed
-        if (port_millis() - start_time >= 10000) {
-            if (XBee_Connected((XBee*)my_xbee_lr)) {
-                printf("Sending data: 0x");
-                for (int i = 0; i < payload_len; i++) {
-                    printf("%02X", example_payload[i]);
-                }
-                printf("\n");
-
-                if (XBee_SendData((XBee*)my_xbee_lr, &packet)) {
-                    printf("Failed to send data.\n");
-                } else {
-                    printf("Data sent successfully.\n");
-                }
-
-                // Update payload for the next transmission
-                packet.payload[0] = packet.payload[0] + 1; // Increment payload
-            } else {
-                printf("Not connected. Attempting to reconnect...\n");
-                if (!XBee_Connect((XBee*)my_xbee_lr)) {
-                    printf("Failed to reconnect.\n");
-                }
-            }
-            // Reset the start time
-            start_time = port_millis();
+/**
+ * @brief Reads data from the communication UART.
+ * 
+ * This function reads up to the specified number of bytes from the communication UART and stores them in the provided buffer.
+ * It blocks until the requested number of bytes have been read or a timeout/error occurs.
+ * 
+ * @param buffer Pointer to the buffer where the data will be stored.
+ * @param length Maximum number of bytes to read.
+ * 
+ * @return int Returns the number of bytes actually read.
+ */
+int port_uart_read(uint8_t *buffer, int length) {
+    int bytes_read = 0;
+    while (bytes_read < length) {
+        if (uart_is_readable(COMM_UART)) {
+            buffer[bytes_read++] = uart_getc(COMM_UART);
+        } else {
+            break;  // No more data to read, exit loop
         }
     }
-
-    return 0;
+    return bytes_read;  // Return the number of bytes read
 }
 
 /**
- * @brief Callback function triggered when data is received from the XBee module.
+ * @brief Flushes the communication UART receive buffer.
  * 
- * This function is called when the XBee module receives data. It processes the 
- * incoming data, extracts relevant information, and handles it accordingly. 
- * The function is typically registered as a callback to be executed automatically 
- * upon data reception.
- * 
- * @param[in] self Pointer to the XBee instance that received the data.
- * @param[in] data Pointer to the received data.
- * 
- * @return void This function does not return a value.
+ * This function clears any data that may be present in the UART's receive buffer.
  */
-void OnReceiveCallback(XBee* self, void* data) {
-    XBeeLRPacket_t* packet = (XBeeLRPacket_t*) data;
-    printf("Received Packet: ");
-    for (int i = 1; i < packet->payloadSize; i++) {
-        printf("%02X ", packet->payload[i]);
-    }
-    printf("\nAck: %u\nPort: %u\nRSSI: %d\nSNR: %d\nDownlink Counter: %lu\n", 
-            packet->ack, packet->port, packet->rssi, packet->snr, packet->counter);
+void port_flush_rx() {
+    uart_set_hw_flow(COMM_UART, false, false);
 }
 
 /**
- * @brief Callback function triggered after data is sent from the XBee module.
+ * @brief Returns the number of milliseconds since the program started.
  * 
- * This function is called when the XBee module completes sending data. It handles 
- * any post-send operations, such as logging the transmission status or updating 
- * the state of the application. The function is typically registered as a callback 
- * to be executed automatically after data is transmitted.
+ * This function uses the SDK to return the time elapsed since the device was powered on.
  * 
- * @param[in] self Pointer to the XBee instance that sent the data.
- * @param[in] data Pointer to the data structure containing the sent data.
- * 
- * @return void This function does not return a value.
+ * @return uint32_t The number of milliseconds since startup.
  */
-void OnSendCallback(XBee* self, void* data) {
-    XBeeLRPacket_t* packet = (XBeeLRPacket_t*) data;
-    switch (packet->status) {
-        case 0:
-            printf("Send successful (frameId: 0x%02X)\n", packet->frameId);
-            break;
-        case 0x01:
-            printf("Send failed (frameId: 0x%02X) (reason: Ack Failed)\n", packet->frameId);
-            break;
-        default:
-            printf("Send failed (frameId: 0x%02X) (reason: 0x%02X)\n", packet->frameId, packet->status);
-            break;
-    }
+uint32_t port_millis() {
+    return to_ms_since_boot(get_absolute_time());
+}
+
+/**
+ * @brief Delays execution for a specified number of milliseconds.
+ * 
+ * This function pauses execution for the specified duration using the SDK.
+ * 
+ * @param ms The number of milliseconds to delay.
+ */
+void port_delay(uint32_t ms) {
+    sleep_ms(ms);
+}
+
+/**
+ * @brief Prints debug information to the debug UART output.
+ * 
+ * This function provides a formatted print capability for debugging purposes, similar to printf.
+ * 
+ * @param format The format string (same as printf).
+ * @param ... The values to print.
+ */
+void port_debug_printf(const char *format, ...) {
+    char buffer[128];
+    va_list args;
+    va_start(args, format);
+    vsnprintf(buffer, sizeof(buffer), format, args);
+    va_end(args);
+    uart_puts(DEBUG_UART, buffer);  // Use DEBUG_UART for debug output
 }
