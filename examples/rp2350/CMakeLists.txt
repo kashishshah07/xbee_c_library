@@ -2,13 +2,14 @@
 cmake_minimum_required(VERSION 3.13)
 
 # Set project name
-project(xbee_example_project)
+project(xbee_example_project C CXX ASM)
 
 # Include the Pico SDK
-include(${PICO_SDK_PATH}/external/pico_sdk_import.cmake)
+include(/Users/felix/Projects/Code/pico-sdk/external/pico_sdk_import.cmake)
 
 # Set the project to use C
 set(CMAKE_C_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 
 # Initialize the Pico SDK
 pico_sdk_init()

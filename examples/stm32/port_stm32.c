@@ -28,16 +28,18 @@
  * SOFTWARE.
  */
 
+#include "stm32f4xx_hal.h"
 #include "port.h"
-#include "stm32f4xx_hal.h"  // Include STM32 HAL header for the target device
+#include "usb_device.h"
+#include "usbd_cdc_if.h"
 
-UART_HandleTypeDef huart1;      // Define the UART handle for USART1
-UART_HandleTypeDef huart_debug; // Define the UART handle for the debug UART (e.g., USART2)
+extern UART_HandleTypeDef huart1;  ///< Handle for the communication UART (e.g., huart1)
+extern UART_HandleTypeDef huart2;  ///< Handle for the debugging UART (e.g., huart2 or VCOM port)
 
 /**
  * @brief Initializes the UART for communication on the STM32 platform.
  * 
- * This function sets up the UART peripheral with the specified baud rate.
+ * This function sets up the communication UART (e.g., huart1) with the specified baud rate.
  * 
  * @param baudrate The baud rate for UART communication.
  * @param device Unused parameter on the STM32 platform; pass NULL.
@@ -45,14 +47,9 @@ UART_HandleTypeDef huart_debug; // Define the UART handle for the debug UART (e.
  * @return int Returns 0 on success, -1 on failure.
  */
 int port_uart_init(uint32_t baudrate, const char *device) {
-    huart1.Instance = USART1;  // Use USART1
+    // Assuming huart1 is pre-configured for communication with the XBee module
+    // UART initialization can include baudrate setup here if necessary
     huart1.Init.BaudRate = baudrate;
-    huart1.Init.WordLength = UART_WORDLENGTH_8B;
-    huart1.Init.StopBits = UART_STOPBITS_1;
-    huart1.Init.Parity = UART_PARITY_NONE;
-    huart1.Init.Mode = UART_MODE_TX_RX;
-    huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-    huart1.Init.OverSampling = UART_OVERSAMPLING_16;
     if (HAL_UART_Init(&huart1) != HAL_OK) {
         return -1;  // Initialization failed
     }
@@ -60,9 +57,9 @@ int port_uart_init(uint32_t baudrate, const char *device) {
 }
 
 /**
- * @brief Writes data to the UART.
+ * @brief Writes data to the communication UART.
  * 
- * This function sends the specified number of bytes from the provided buffer over the UART.
+ * This function sends the specified number of bytes from the provided buffer over the communication UART.
  * 
  * @param data Pointer to the data to be written.
  * @param length Number of bytes to write.
@@ -70,26 +67,32 @@ int port_uart_init(uint32_t baudrate, const char *device) {
  * @return int Returns the number of bytes successfully written.
  */
 int port_uart_write(const uint8_t *data, int length) {
-    return HAL_UART_Transmit(&huart1, (uint8_t *)data, length, HAL_MAX_DELAY);
+    if (HAL_UART_Transmit(&huart1, (uint8_t *)data, length, HAL_MAX_DELAY) == HAL_OK) {
+        return length;  // Return the number of bytes written
+    }
+    return -1;  // Transmission failed
 }
 
 /**
- * @brief Reads data from the UART.
+ * @brief Reads data from the communication UART.
  * 
- * This function reads up to the specified number of bytes from the UART and stores them in the provided buffer.
- * It blocks until the requested number of bytes has been read or an error occurs.
+ * This function reads up to the specified number of bytes from the communication UART and stores them in the provided buffer.
+ * It blocks until the requested number of bytes have been read or a timeout/error occurs.
  * 
  * @param buffer Pointer to the buffer where the data will be stored.
  * @param length Maximum number of bytes to read.
  * 
- * @return int Returns the number of bytes actually read.
+ * @return int Returns the number of bytes actually read, or -1 if an error occurred.
  */
 int port_uart_read(uint8_t *buffer, int length) {
-    return HAL_UART_Receive(&huart1, buffer, length, HAL_MAX_DELAY);
+    if (HAL_UART_Receive(&huart1, buffer, length, HAL_MAX_DELAY) == HAL_OK) {
+        return length;  // Return the number of bytes read
+    }
+    return -1;  // Reception failed
 }
 
 /**
- * @brief Flushes the UART receive buffer.
+ * @brief Flushes the communication UART receive buffer.
  * 
  * This function clears any data that may be present in the UART's receive buffer.
  */
@@ -100,7 +103,7 @@ void port_flush_rx() {
 /**
  * @brief Returns the number of milliseconds since the program started.
  * 
- * This function uses the HAL library to return the time elapsed since the device was powered on.
+ * This function uses the HAL tick to return the time elapsed since the device was powered on.
  * 
  * @return uint32_t The number of milliseconds since startup.
  */
@@ -111,7 +114,7 @@ uint32_t port_millis() {
 /**
  * @brief Delays execution for a specified number of milliseconds.
  * 
- * This function pauses execution for the specified duration using the HAL library.
+ * This function pauses execution for the specified duration using HAL_Delay.
  * 
  * @param ms The number of milliseconds to delay.
  */
@@ -120,9 +123,10 @@ void port_delay(uint32_t ms) {
 }
 
 /**
- * @brief Prints debug information to the debug UART output.
+ * @brief Prints debug information to the VCOM port.
  * 
- * This function provides a formatted print capability for debugging purposes, similar to printf.
+ * This function provides a formatted print capability for debugging purposes, similar to printf,
+ * and sends the output through the VCOM port (e.g., USB CDC).
  * 
  * @param format The format string (same as printf).
  * @param ... The values to print.
@@ -133,5 +137,7 @@ void port_debug_printf(const char *format, ...) {
     va_start(args, format);
     vsnprintf(buffer, sizeof(buffer), format, args);
     va_end(args);
-    HAL_UART_Transmit(&huart_debug, (uint8_t *)buffer, strlen(buffer), HAL_MAX_DELAY);
+
+    // Transmit the formatted string over the VCOM port
+    CDC_Transmit_FS((uint8_t*)buffer, strlen(buffer));
 }
