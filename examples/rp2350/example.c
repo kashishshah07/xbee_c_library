@@ -122,7 +122,7 @@ int main() {
     XBeeLR* my_xbee_lr = XBeeLR_Create(&XBeeLR_CTable, &XBeeLR_HTable);
 
     // Initialize the XBee module
-    if (!XBee_Init((XBee*)my_xbee_lr, UART_BAUD_RATE, NULL)) {
+    if (!XBee_Init((XBee*)my_xbee_lr, 9600, NULL)) {
         port_debug_printf("Failed to initialize XBee\n");
         return -1;
     }
@@ -144,7 +144,6 @@ int main() {
     port_debug_printf("Connecting...\n");
     if (!XBee_Connect((XBee*)my_xbee_lr)) {
         port_debug_printf("Failed to connect.\n");
-        return -1;
     } else {
         port_debug_printf("Connected!\n");
     }

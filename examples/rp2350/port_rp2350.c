@@ -32,31 +32,34 @@
 #include "hardware/gpio.h"
 #include "pico/stdlib.h"
 #include "port.h"
+#include <stdio.h>
 
-#define COMM_UART uart1       ///< UART used for communication with XBee or other devices
-#define COMM_BAUDRATE 9600    ///< Baud rate for the communication UART
-#define COMM_TX_PIN 4         ///< TX pin for UART1 (adjust as needed)
-#define COMM_RX_PIN 5         ///< RX pin for UART1 (adjust as needed)
-
-#define DEBUG_UART uart0      ///< UART used for debugging output (printf redirection)
-#define DEBUG_BAUDRATE 115200 ///< Baud rate for the debug UART
-#define DEBUG_TX_PIN 0        ///< TX pin for UART0 (adjust as needed)
-#define DEBUG_RX_PIN 1        ///< RX pin for UART0 (adjust as needed)
+#define COMM_UART uart0        ///< UART used for communication with XBee
+#define COMM_TX_PIN 18         ///< TX pin for UART0 (adjust as needed)
+#define COMM_RX_PIN 19         ///< RX pin for UART0 (adjust as needed)
 
 /**
- * @brief Initializes the UART for communication on the RP2040 platform.
+ * @brief Initializes the UART for communication on the RP2350 platform.
  * 
  * This function sets up the communication UART (e.g., uart1) with the specified baud rate.
  * 
  * @param baudrate The baud rate for UART communication.
- * @param device Unused parameter on the RP2040 platform; pass NULL.
+ * @param device Unused parameter on the RP2350 platform; pass NULL.
  * 
  * @return int Returns 0 on success, -1 on failure.
  */
 int port_uart_init(uint32_t baudrate, const char *device) {
-    uart_init(COMM_UART, baudrate);
     gpio_set_function(COMM_TX_PIN, GPIO_FUNC_UART);
     gpio_set_function(COMM_RX_PIN, GPIO_FUNC_UART);
+
+    uart_init(COMM_UART, baudrate);
+
+   // Set UART parameters (optional, depending on your needs)
+    uart_set_format(uart0, 8, 1, UART_PARITY_NONE); // 8 data bits, 1 stop bit, no parity
+
+    // Enable UART
+    uart_set_hw_flow(uart0, false, false); // Disable flow control, if not needed
+    uart_set_fifo_enabled(uart0, true);    // Enable FIFO
     return 0;  // Initialization successful
 }
 
@@ -66,15 +69,21 @@ int port_uart_init(uint32_t baudrate, const char *device) {
  * This function sends the specified number of bytes from the provided buffer over the communication UART.
  * 
  * @param data Pointer to the data to be written.
- * @param length Number of bytes to write.
+ * @param len Number of bytes to write.
  * 
  * @return int Returns the number of bytes successfully written.
  */
-int port_uart_write(const uint8_t *data, int length) {
-    for (int i = 0; i < length; i++) {
-        uart_putc_raw(COMM_UART, data[i]);
+int port_uart_write(const uint8_t *buf, uint16_t len) {
+    int bytes_written = 0;
+    for (int i = 0; i < len; i++) {
+        if(uart_is_writable(COMM_UART)){
+            uart_putc_raw(COMM_UART, buf[i]);
+            bytes_written++;
+        }else{
+            break;
+        }
     }
-    return length;  // Return the number of bytes written
+    return bytes_written;  // Return the number of bytes written
 }
 
 /**
@@ -143,7 +152,6 @@ void port_debug_printf(const char *format, ...) {
     char buffer[128];
     va_list args;
     va_start(args, format);
-    vsnprintf(buffer, sizeof(buffer), format, args);
+    vprintf(format, args);
     va_end(args);
-    uart_puts(DEBUG_UART, buffer);  // Use DEBUG_UART for debug output
 }

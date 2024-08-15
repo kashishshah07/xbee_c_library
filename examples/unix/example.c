@@ -123,7 +123,7 @@ int main() {
     XBeeLR * my_xbee_lr = XBeeLR_Create(&XBeeLR_CTable,&XBeeLR_HTable);
 
     //Init XBee
-    if(!XBee_Init((XBee*)my_xbee_lr,B9600, "/dev/cu.usbserial-1120")){
+    if(!XBee_Init((XBee*)my_xbee_lr,B9600, "/dev/cu.usbserial-11430")){
         port_debug_printf("Failed to initialize XBee\n");
     }
 
