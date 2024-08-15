@@ -121,6 +121,8 @@ int main() {
     // Create an instance of the XBeeLR class
     XBeeLR* my_xbee_lr = XBeeLR_Create(&XBeeLR_CTable, &XBeeLR_HTable);
 
+    port_delay(20000); //workaround to give time for debug usb port connection after booting
+
     // Initialize the XBee module
     if (!XBee_Init((XBee*)my_xbee_lr, 9600, NULL)) {
         port_debug_printf("Failed to initialize XBee\n");
@@ -129,7 +131,9 @@ int main() {
 
     // Read LoRaWAN DevEUI and print
     uint8_t dev_eui[17];
-    XBeeLR_GetDevEUI((XBee*)my_xbee_lr, dev_eui, sizeof(dev_eui));
+    if(!XBeeLR_GetDevEUI((XBee*)my_xbee_lr, dev_eui, sizeof(dev_eui))){
+        XBeeLR_GetDevEUI((XBee*)my_xbee_lr, dev_eui, sizeof(dev_eui));
+    }
     port_debug_printf("DEVEUI: %s\n", dev_eui);
 
     // Set LoRaWAN Network Settings
@@ -192,6 +196,7 @@ int main() {
             // Reset the start time
             start_time = port_millis();
         }
+        port_delay(1);
     }
     return 0;
 }

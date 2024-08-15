@@ -49,17 +49,9 @@
  * @return int Returns 0 on success, -1 on failure.
  */
 int port_uart_init(uint32_t baudrate, const char *device) {
-    gpio_set_function(COMM_TX_PIN, GPIO_FUNC_UART);
-    gpio_set_function(COMM_RX_PIN, GPIO_FUNC_UART);
-
+    gpio_set_function(COMM_TX_PIN, GPIO_FUNC_UART_AUX);
+    gpio_set_function(COMM_RX_PIN, GPIO_FUNC_UART_AUX);
     uart_init(COMM_UART, baudrate);
-
-   // Set UART parameters (optional, depending on your needs)
-    uart_set_format(uart0, 8, 1, UART_PARITY_NONE); // 8 data bits, 1 stop bit, no parity
-
-    // Enable UART
-    uart_set_hw_flow(uart0, false, false); // Disable flow control, if not needed
-    uart_set_fifo_enabled(uart0, true);    // Enable FIFO
     return 0;  // Initialization successful
 }
 
