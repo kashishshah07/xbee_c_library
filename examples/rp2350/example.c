@@ -118,10 +118,13 @@ int main() {
         .OnSendCallback = NULL,                 // can be left as all NULL if no callbacks needed
     };
 
+    port_delay(20000); //workaround to give time for debug usb port connection after booting
+
+    port_debug_printf("XBee LR Example App\n");
+
     // Create an instance of the XBeeLR class
     XBeeLR* my_xbee_lr = XBeeLR_Create(&XBeeLR_CTable, &XBeeLR_HTable);
 
-    port_delay(20000); //workaround to give time for debug usb port connection after booting
 
     // Initialize the XBee module
     if (!XBee_Init((XBee*)my_xbee_lr, 9600, NULL)) {
