@@ -173,7 +173,7 @@ bool XBee_Connected(XBee* self) {
 bool XBee_WriteConfig(XBee* self) {
     uint8_t response[33];
     uint8_t response_length;
-    int status = api_send_at_command_and_get_response(self, AT_WR, NULL, response, &response_length, 5000);
+    int status = api_send_at_command_and_get_response(self, AT_WR, NULL, 0, response, &response_length, 5000);
     if(status != API_SEND_SUCCESS){
         XBEE_DEBUG_PRINT_ENABLED("Failed to Write Config\n");
     }
@@ -195,11 +195,34 @@ bool XBee_WriteConfig(XBee* self) {
 bool XBee_ApplyChanges(XBee* self) {
     uint8_t response[33];
     uint8_t response_length;
-    int status = api_send_at_command_and_get_response(self, AT_AC, NULL, response, &response_length, 5000);
+    int status = api_send_at_command_and_get_response(self, AT_AC, NULL, 0, response, &response_length, 5000);
     if(status != API_SEND_SUCCESS){
         XBEE_DEBUG_PRINT_ENABLED("Failed to Apply Changes\n");
     }
     return status;
 }
 
+/**
+ * @brief Sends the AT_AO command to set API Options.
+ * 
+ * This function configures the API Options on the XBee module 
+ * by sending the AT command `AT_AO` with the specified API Options value. The function 
+ * is blocking, meaning it waits for a response from the module or until a timeout 
+ * occurs. If the command fails to send or the module does not respond, a debug 
+ * message is printed.
+ * 
+ * @param[in] self Pointer to the XBee instance.
+ * @param[in] value The API Options to be set, provided as a string.
+ * 
+ * @return bool Returns true if the API Options was successfully set, otherwise false.
+ */
+bool XBeeLR_SetAPIOptions(XBee* self, const uint8_t* value) {
+    uint8_t response[33];
+    uint8_t response_length;
+    int status = api_send_at_command_and_get_response(self, AT_AO, value, 1, response, &response_length, 5000);
+    if(status != API_SEND_SUCCESS){
+        XBEE_DEBUG_PRINT_ENABLED("Failed to set API Options\n");
+    }
+    return status;
+}
 

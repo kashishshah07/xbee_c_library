@@ -63,7 +63,7 @@ bool XBeeLR_Connected(XBee* self) {
     int status;
 
     // Send the AT_JS command to query the Join Status
-    status = api_send_at_command_and_get_response(self, AT_JS, NULL, &response, &response_length, 5000);
+    status = api_send_at_command_and_get_response(self, AT_JS, NULL, 0, &response, &response_length, 5000);
 
     if (status == API_SEND_SUCCESS) {
         // Print the received reponse
@@ -208,7 +208,9 @@ uint8_t XBeeLR_SendData(XBee* self, const void* data) {
         // Check if the status frame was received
         if (self->tx_status_received) {
             // Return the delivery status
-            XBEE_DEBUG_PRINT_ENABLED("TX Delivery Status 0x%02X\n", self->delivery_status );
+            if(self->delivery_status){
+                XBEE_DEBUG_PRINT_ENABLED("TX Delivery Status 0x%02X\n", self->delivery_status );
+            }
             return self->delivery_status;
         }
 
@@ -248,7 +250,8 @@ void XBeeLR_HardReset(XBee* self) {
 bool XBeeLR_SetAppEUI(XBee* self, const char* value) {
     uint8_t response[17];
     uint8_t response_length;
-    int status = api_send_at_command_and_get_response(self, AT_AE, value, response, &response_length, 5000);
+    uint8_t param_length = (value != NULL) ? strlen(value) : 0;
+    int status = api_send_at_command_and_get_response(self, AT_AE, value, param_length, response, &response_length, 5000);
     if(status != API_SEND_SUCCESS){
         XBEE_DEBUG_PRINT_ENABLED("Failed to set App EUI\n");
     }
@@ -271,7 +274,8 @@ bool XBeeLR_SetAppEUI(XBee* self, const char* value) {
 bool XBeeLR_SetAppKey(XBee* self, const char* value) {
     uint8_t response[33];
     uint8_t response_length;
-    int status = api_send_at_command_and_get_response(self, AT_AK, value, response, &response_length, 5000);
+    uint8_t param_length = (value != NULL) ? strlen(value) : 0;
+    int status = api_send_at_command_and_get_response(self, AT_AK, value, param_length, response, &response_length, 5000);
     if(status != API_SEND_SUCCESS){
         XBEE_DEBUG_PRINT_ENABLED("Failed to set App Key\n");
     }
@@ -295,7 +299,8 @@ bool XBeeLR_SetAppKey(XBee* self, const char* value) {
 bool XBeeLR_SetNwkKey(XBee* self, const char* value) {
     uint8_t response[33];
     uint8_t response_length;
-    int status = api_send_at_command_and_get_response(self, AT_NK, value, response, &response_length, 5000);
+    uint8_t param_length = (value != NULL) ? strlen(value) : 0;
+    int status = api_send_at_command_and_get_response(self, AT_NK, value, param_length, response, &response_length, 5000);
     if(status != API_SEND_SUCCESS){
         XBEE_DEBUG_PRINT_ENABLED("Failed to set Nwk Key\n");
     }
@@ -326,7 +331,7 @@ bool XBeeLR_GetDevEUI(XBee* self, uint8_t* response_buffer, uint8_t buffer_size)
 
     // Send the AT_DE command to query the DevEUI
     uint8_t response_length;
-    int status = api_send_at_command_and_get_response(self, AT_DE, NULL, response_buffer, &response_length, 5000);
+    int status = api_send_at_command_and_get_response(self, AT_DE, NULL, 0, response_buffer, &response_length, 5000);
 
     if (status != API_SEND_SUCCESS) {
         XBEE_DEBUG_PRINT_ENABLED("Failed to receive AT_DE response, error code: %d\n", status);
@@ -377,9 +382,9 @@ static void XBeeLR_Handle_Rx_Packet(XBee* self, void *param) {
     XBeeLRPacket_t * packet = (XBeeLRPacket_t*)malloc(sizeof(XBeeLRPacket_t));
     memset(packet,0,sizeof(XBeeLRPacket_t));
 
-    API_FRAME_DEBUG_PRINT("Received Packet: ");
-    for (int i = 1; i < frame->length; i++) {
-        API_FRAME_DEBUG_PRINT("%02X ", frame->data[i]);
+    API_FRAME_DEBUG_PRINT("RX Packet Data: ");
+    for (int i = 0; i < frame->length; i++) {
+        API_FRAME_DEBUG_PRINT("0x%02X ", frame->data[i]);
     }
     API_FRAME_DEBUG_PRINT("\n");
 
@@ -389,19 +394,30 @@ static void XBeeLR_Handle_Rx_Packet(XBee* self, void *param) {
         packet->snr = frame->data[3];
         packet->dr = frame->data[4];
         packet->counter = frame->data[5] << 24 | frame->data[6] << 16 | frame->data[7] << 8 | frame->data[8];
-        packet->payload = &(frame->data[9]);
-        packet->payloadSize = frame->length - 9;
+        packet->payloadSize = frame->length - 10;
+        packet->payload = &(frame->data[10]);//(uint8_t *)malloc(packet->payloadSize);
+        // memset(packet->payload,0,packet->payloadSize);
+        // memcpy(packet->payload,&(frame->data[9]),packet->payloadSize);
     }else{
         packet->port = frame->data[1];
-        packet->payload = &(frame->data[2]);
         packet->payloadSize = frame->length - 2;
+        packet->payload = &(frame->data[2]);//(uint8_t *)malloc(packet->payloadSize);
+        // memset(packet->payload,0,packet->payloadSize);
+        // memcpy(packet->payload,&(frame->data[2]),packet->payloadSize);
     }
+
 
     if(self->ctable->OnReceiveCallback){
         self->ctable->OnReceiveCallback(self,packet);
     }
+ 
+    // if(packet->payload){
+    //     free(packet->payload);
+    // }
 
-    free(packet);
+    if(packet){
+        free(packet);
+    }
     // Add further processing as needed
 }
 

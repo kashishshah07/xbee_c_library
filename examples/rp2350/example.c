@@ -55,8 +55,8 @@
 void OnReceiveCallback(XBee* self, void* data) {
     XBeeLRPacket_t* packet = (XBeeLRPacket_t*) data;
     port_debug_printf("Received Packet: ");
-    for (int i = 1; i < packet->payloadSize; i++) {
-        port_debug_printf("%02X ", packet->payload[i]);
+    for (int i = 0; i < packet->payloadSize; i++) {
+        port_debug_printf("0x%02X ", packet->payload[i]);
     }
     port_debug_printf("\n");
     port_debug_printf("Ack %u\n", packet->ack);
@@ -144,6 +144,7 @@ int main() {
     XBeeLR_SetAppEUI((XBee*)my_xbee_lr, "37D56A3F6CDCF0A5");
     XBeeLR_SetAppKey((XBee*)my_xbee_lr, "CD32AAB41C54175E9060D86F3A8B7F48");
     XBeeLR_SetNwkKey((XBee*)my_xbee_lr, "CD32AAB41C54175E9060D86F3A8B7F48");
+    XBeeLR_SetAPIOptions((XBee*)my_xbee_lr, (const uint8_t[]){0x01});
     XBee_WriteConfig((XBee*)my_xbee_lr);
     XBee_ApplyChanges((XBee*)my_xbee_lr);
 

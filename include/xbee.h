@@ -135,5 +135,6 @@ void XBee_Process(XBee* self);
 bool XBee_Connected(XBee* self);
 bool XBee_WriteConfig(XBee* self);
 bool XBee_ApplyChanges(XBee* self);
+bool XBeeLR_SetAPIOptions(XBee* self, const uint8_t* value);
 
 #endif // XBEE_H

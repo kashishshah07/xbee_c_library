@@ -59,8 +59,8 @@
 void OnReceiveCallback(XBee* self, void* data){
     XBeeLRPacket_t* packet = (XBeeLRPacket_t*) data;
     port_debug_printf("Received Packet: ");
-    for (int i = 1; i < packet->payloadSize; i++) {
-        port_debug_printf("%02X ", packet->payload[i]);
+    for (int i = 0; i < packet->payloadSize; i++) {
+        port_debug_printf("0x%02X ", packet->payload[i]);
     }
     port_debug_printf("\n");
     port_debug_printf("Ack %u\n", packet->ack);
@@ -119,11 +119,13 @@ int main() {
         .OnSendCallback = NULL, //can be left as all NULL if no callbacks needed
     };
 
+    port_debug_printf("XBee LR Example App\n");
+
    // Create an instance of the XBeeLR class
     XBeeLR * my_xbee_lr = XBeeLR_Create(&XBeeLR_CTable,&XBeeLR_HTable);
 
     //Init XBee
-    if(!XBee_Init((XBee*)my_xbee_lr,B9600, "/dev/cu.usbserial-11430")){
+    if(!XBee_Init((XBee*)my_xbee_lr,B9600, "/dev/cu.usbserial-1120")){
         port_debug_printf("Failed to initialize XBee\n");
     }
 
@@ -137,6 +139,7 @@ int main() {
     XBeeLR_SetAppEUI((XBee*)my_xbee_lr, "37D56A3F6CDCF0A5");
     XBeeLR_SetAppKey((XBee*)my_xbee_lr, "CD32AAB41C54175E9060D86F3A8B7F48");
     XBeeLR_SetNwkKey((XBee*)my_xbee_lr, "CD32AAB41C54175E9060D86F3A8B7F48");
+    XBeeLR_SetAPIOptions((XBee*)my_xbee_lr, (const uint8_t[]){0x01});
     XBee_WriteConfig((XBee*)my_xbee_lr);
     XBee_ApplyChanges((XBee*)my_xbee_lr);
 

@@ -109,6 +109,7 @@ const char* at_command_to_string(at_command_t command) {
         case AT_JT: return "JT";            ///< Join Time
         case AT_JV: return "JV";            ///< Channel Verification
         case AT_LD: return "LD";            ///< Node Discovery Time
+        case AT_AO: return "AO";            ///< API Options
 
         /**< XBee 3 RF Specific AT Commands */
         case AT_CE: return "CE";            ///< Coordinator Enable

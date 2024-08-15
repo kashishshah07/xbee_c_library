@@ -107,6 +107,7 @@ typedef enum {
     AT_JT,   /**< Join Time */
     AT_JV,   /**< Channel Verification */
     AT_LD,   /**< Node Discovery Time */
+    AT_AO,   /**< API Options */
 
     /**< XBee 3 RF Specific AT Commands */
     AT_CE,   /**< Coordinator Enable */

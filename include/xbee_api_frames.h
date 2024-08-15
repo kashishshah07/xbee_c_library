@@ -301,7 +301,8 @@ typedef struct {
 api_receive_status_t api_receive_api_frame(XBee* self, xbee_api_frame_t *frame);
 int api_send_at_command(XBee* self,at_command_t command, const uint8_t *parameter, uint8_t param_length);
 int api_send_frame(XBee* self,uint8_t frame_type, const uint8_t *data, uint16_t len);
-int api_send_at_command_and_get_response(XBee* self,at_command_t command, const char *parameter, uint8_t *response_buffer, uint8_t *response_length, uint32_t timeout_ms);
+int api_send_at_command_and_get_response(XBee* self, at_command_t command, const uint8_t *parameter, 
+    uint8_t param_length, uint8_t *response_buffer, uint8_t *response_length, uint32_t timeout_ms);
 void api_handle_frame(XBee* self,xbee_api_frame_t frame);
 void xbee_handle_at_response(XBee* self,xbee_api_frame_t *frame);
 void xbee_handle_modem_status(XBee* self,xbee_api_frame_t *frame);

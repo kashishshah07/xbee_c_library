@@ -382,10 +382,9 @@ void api_handle_frame(XBee* self, xbee_api_frame_t frame){
  * @return int Returns 0 (`API_SEND_SUCCESS`) if the AT command is successfully sent and a valid response is received, 
  * or a non-zero error code if there is a failure (`API_SEND_AT_CMD_ERROR`, `API_SEND_AT_CMD_RESPONSE_TIMEOUT`, etc.).
  */
-int api_send_at_command_and_get_response(XBee* self, at_command_t command, const char *parameter, uint8_t *response_buffer, 
+int api_send_at_command_and_get_response(XBee* self, at_command_t command, const uint8_t *parameter, uint8_t param_length, uint8_t *response_buffer, 
     uint8_t *response_length, uint32_t timeout_ms) {
     // Send the AT command using API frame
-    uint8_t param_length = (parameter != NULL) ? strlen(parameter) : 0;
     api_send_at_command(self, command, (const uint8_t *)parameter, param_length);
 
     // Get the start time using the platform-specific function
