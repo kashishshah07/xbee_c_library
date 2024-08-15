@@ -168,8 +168,7 @@ int main() {
     // Create the XBee LR instance with hardware and command tables
     my_xbee_lr = XBeeLR_Create(&XBeeLR_HTable, &XBeeLR_CTable);
     if (my_xbee_lr == NULL) {
-        printf("Failed to create XBee LR instance.
-");
+        printf("Failed to create XBee LR instance.");
         return -1;
     }
 
@@ -203,15 +202,12 @@ After creating the XBee LR instance, initialize the XBee LR module, configure th
     XBee_ApplyChanges((XBee*)my_xbee_lr);
 
     // Connect to the LoRaWAN network
-    port_debug_printf("Connecting...
-");
+    port_debug_printf("Connecting...");
     XBee_Connect((XBee*)my_xbee_lr);
 
-    printf("XBee LR module initialized and connected.
-");
+    printf("XBee LR module initialized and connected.");
 
     // Proceed with other operations...
-}
 ```
 
 ### Sending Data
