@@ -133,7 +133,7 @@ Calls the subclass's process implementation, which is responsible for handling o
 These methods provide a foundational interface for working with XBee modules, supporting various operations like initialization, connection management, data transmission, and both soft and hard resets.
 
 
-## Usage Example: Communicating with XBee LR Modules
+## Usage Example: XBee LR Example 
 
 This section provides an example of how to use the XBee class, specifically for the XBee LR (LoRaWAN) module. The example covers creating an instance of the XBee LR class, initializing the module, setting up the hardware and command tables, configuring network settings, connecting to a network, sending data, and handling received data.
 
@@ -229,7 +229,7 @@ XBeeLRPacket_t packet = {
     .ack = 0,
 };
 
-if (!XBeeLR_SendData(my_xbee_lr, &packet)) {
+if (!XBee_SendData(my_xbee_lr, &packet)) {
     printf("Failed to send data.
 ");
 } else {
@@ -259,7 +259,7 @@ void OnReceiveCallback(XBee* self, void* data){
 
 // Assuming a continuous loop to process incoming data
 while (1) {
-    XBeeLR_Process(my_xbee_lr);
+    XBee_Process(my_xbee_lr);
     usleep(10000);  // Sleep for 10ms to avoid busy-waiting
 }
 ```
@@ -269,9 +269,9 @@ while (1) {
 After completing your operations, disconnect the XBee LR module, clean up resources, and free the XBee LR instance:
 
 ```c
-XBeeLR_Disconnect(my_xbee_lr);
-XBeeLR_Close(my_xbee_lr);
-XBeeLR_Destroy(my_xbee_lr);  // Free the XBee LR instance
+XBee_Disconnect(my_xbee_lr);
+XBee_Close(my_xbee_lr);
+XBee_Destroy(my_xbee_lr);  // Free the XBee LR instance
 printf("XBee LR module disconnected and resources cleaned up.
 ");
 ```
@@ -356,7 +356,7 @@ int main() {
         .ack = 0,
     };
 
-    if (!XBeeLR_SendData(my_xbee_lr, &packet)) {
+    if (!XBee_SendData(my_xbee_lr, &packet)) {
         printf("Failed to send data.");
     } else {
         printf("Data sent successfully.");
@@ -364,13 +364,13 @@ int main() {
 
     // Main loop to process incoming data
     while (1) {
-        XBeeLR_Process(my_xbee_lr);
+        XBee_Process(my_xbee_lr);
         usleep(10000);  // Sleep for 10ms
     }
 
-    XBeeLR_Disconnect(my_xbee_lr);
-    XBeeLR_Close(my_xbee_lr);
-    XBeeLR_Destroy(my_xbee_lr);  // Free the XBee LR instance
+    XBee_Disconnect(my_xbee_lr);
+    XBee_Close(my_xbee_lr);
+    XBee_Destroy(my_xbee_lr);  // Free the XBee LR instance
     printf("XBee LR module disconnected and resources cleaned up.");
 
     return 0;
