@@ -64,7 +64,7 @@ Initializes the XBee module by setting up the initial frame ID counter and calli
 ### `XBee_Connect`
 
 **Purpose**:  
-Connects the XBee module to the network by invoking the connection implementation defined in the subclass.
+Connects the XBee module to the network by invoking the connection implementation defined in the subclass. This is a blocking function.
 
 **Parameters**:
 - `self`: Pointer to the XBee instance.
@@ -75,7 +75,7 @@ Connects the XBee module to the network by invoking the connection implementatio
 ### `XBee_Disconnect`
 
 **Purpose**:  
-Disconnects the XBee module from the network using the subclass-specific disconnection routine.
+Disconnects the XBee module from the network using the subclass-specific disconnection routine. This is a blocking function.
 
 **Parameters**:
 - `self`: Pointer to the XBee instance.
@@ -134,6 +134,7 @@ These methods provide a foundational interface for working with XBee modules, su
 
 
 ## Usage Example: XBee LR Example 
+
 
 This section provides an example of how to use the XBee class, specifically for the XBee LR (LoRaWAN) module. The example covers creating an instance of the XBee LR class, initializing the module, setting up the hardware and command tables, configuring network settings, connecting to a network, sending data, and handling received data.
 
@@ -226,11 +227,9 @@ XBeeLRPacket_t packet = {
 };
 
 if (!XBee_SendData(my_xbee_lr, &packet)) {
-    printf("Failed to send data.
-");
+    printf("Failed to send data.");
 } else {
-    printf("Data sent successfully.
-");
+    printf("Data sent successfully.");
 }
 ```
 
@@ -268,8 +267,7 @@ After completing your operations, disconnect the XBee LR module, clean up resour
 XBee_Disconnect(my_xbee_lr);
 XBee_Close(my_xbee_lr);
 XBee_Destroy(my_xbee_lr);  // Free the XBee LR instance
-printf("XBee LR module disconnected and resources cleaned up.
-");
+printf("XBee LR module disconnected and resources cleaned up.");
 ```
 
 ### Full Example
