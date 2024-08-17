@@ -152,12 +152,12 @@ int main() {
         .ack = 0,
     };
 
-    uint32_t start_time = port_millis();
+    uint32_t start_time = portMillis();
     while (1) {
         XBeeProcess((XBee*)my_xbee_lr);
 
         // Check if 10 seconds have passed
-        if (port_millis() - start_time >= 10000) {
+        if (portMillis() - start_time >= 10000) {
             if (XBeeConnected((XBee*)my_xbee_lr)) {
                 printf("Sending 0x");
                 for (int i = 0; i < payload_len; i++) {
@@ -179,7 +179,7 @@ int main() {
                     printf("Failed to reconnect.\n");
                 }
             }
-            start_time = port_millis();  // Reset the start time
+            start_time = portMillis();  // Reset the start time
         }
     }
 }

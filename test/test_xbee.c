@@ -5,32 +5,32 @@ void setUp(void) {}
 
 void tearDown(void) {}
 
-void test_xbee_init(void) {
+void testXbeeInit(void) {
     xbee_t xbee;
-    xbee_init(&xbee);
+    xbeeInit(&xbee);
 
-    TEST_ASSERT_EQUAL(0, xbee.status); // Replace with actual status checks
+    TESTAssertEqual(0, xbee.status); // Replace with actual status checks
 }
 
-void test_xbee_send_frame(void) {
+void testXbeeSendFrame(void) {
     xbee_t xbee;
-    xbee_init(&xbee);
+    xbeeInit(&xbee);
 
     uint8_t data[] = { 0x01, 0x02 };
-    int result = xbee_send_frame(&xbee, data, sizeof(data));
+    int result = xbeeSendFrame(&xbee, data, sizeof(data));
 
-    TEST_ASSERT_EQUAL(0, result); // Expecting a successful send
+    TESTAssertEqual(0, result); // Expecting a successful send
 }
 
-void test_xbee_to_string(void) {
+void testXbeeToString(void) {
     xbee_t xbee;
-    xbee_init(&xbee);
+    xbeeInit(&xbee);
 
-    const char* result = xbee_to_string(&xbee);
-    TEST_ASSERT_NOT_NULL(result); // Expecting a valid string
+    const char* result = xbeeToString(&xbee);
+    TESTAssertNotNull(result); // Expecting a valid string
 }
 
-void test_at_command_to_string(void) {
-    const char* result = at_command_to_string(AT_DE);
-    TEST_ASSERT_EQUAL_STRING("DE", result); // Replace with expected command string
+void testAtCommandToString(void) {
+    const char* result = atCommandToString(AT_DE);
+    TESTAssertEqualString("DE", result); // Replace with expected command string
 }

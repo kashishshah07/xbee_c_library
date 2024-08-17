@@ -154,7 +154,7 @@ typedef enum {
  * @param command The AT command enum to convert.
  * @return const char* The string representation of the AT command.
  */
-const char* at_command_to_string(at_command_t command);
+const char* atCommandToString(at_command_t command);
 
 #endif // XBEE_AT_H
 

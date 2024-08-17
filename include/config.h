@@ -40,16 +40,16 @@
 
 #define API_FRAME_DEBUG_PRINT_ENABLED 0
 #if API_FRAME_DEBUG_PRINT_ENABLED
-#define API_FRAME_DEBUG_PRINT(...)             port_debug_printf(__VA_ARGS__)
+#define APIFrameDebugPrint(...)             portDebugPrintf(__VA_ARGS__)
 #else
-#define API_FRAME_DEBUG_PRINT(...)
+#define APIFrameDebugPrint(...)
 #endif
 
 #define XBEE_DEBUG_PRINT_ENABLED 1
 #if XBEE_DEBUG_PRINT_ENABLED
-#define XBEE_DEBUG_PRINT_ENABLED(...)             port_debug_printf(__VA_ARGS__)
+#define XBEEDebugPrintEnabled(...)             portDebugPrintf(__VA_ARGS__)
 #else
-#define XBEE_DEBUG_PRINT_ENABLED(...)
+#define XBEEDebugPrintEnabled(...)
 #endif
 
 

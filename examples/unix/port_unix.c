@@ -57,7 +57,7 @@ static int uart_fd = -1;
  * 
  * @return int Returns 0 on success, or a negative error code on failure.
  */
-int port_uart_init(uint32_t baudrate, const char *device) {
+int portUartInit(uint32_t baudrate, const char *device) {
     struct termios options;
 
     // Open the UART device file
@@ -100,7 +100,7 @@ int port_uart_init(uint32_t baudrate, const char *device) {
  * @param len Length of the data in bytes.
  * @return int The number of bytes successfully written, or a negative error code.
  */
-int port_uart_write(const uint8_t *buf, uint16_t len) {
+int portUartWrite(const uint8_t *buf, uint16_t len) {
     uint16_t total_bytes_written = 0;
 
     while (total_bytes_written < len) {
@@ -127,7 +127,7 @@ int port_uart_write(const uint8_t *buf, uint16_t len) {
  * @param length Maximum number of bytes to read.
  * @return int Number of bytes actually read, or -1 if an error occurs.
  */
-int port_uart_read(uint8_t *buffer, int length) {
+int portUartRead(uint8_t *buffer, int length) {
     int bytes_read = read(uart_fd, buffer, length);
     
     if (bytes_read < 0) {
@@ -145,7 +145,7 @@ int port_uart_read(uint8_t *buffer, int length) {
  * 
  * @return uint32_t The current system time in milliseconds.
  */
-uint32_t port_millis(void) {
+uint32_t portMillis(void) {
     struct timeval tv;
     gettimeofday(&tv, NULL);
     return (uint32_t)(tv.tv_sec * 1000 + tv.tv_usec / 1000);
@@ -162,7 +162,7 @@ uint32_t port_millis(void) {
  * 
  * @return void
  */
-void port_flush_rx(void) {
+void portFlushRx(void) {
     tcflush(uart_fd, TCIFLUSH);
 }
 
@@ -175,7 +175,7 @@ void port_flush_rx(void) {
  * 
  * @return void This function does not return a value.
  */
-void port_delay(uint32_t ms) {
+void portDelay(uint32_t ms) {
     usleep(ms * 1000);  // POSIX or bare metal delay (microseconds)
 }
 
@@ -193,7 +193,7 @@ void port_delay(uint32_t ms) {
  * 
  * @return void This function does not return a value.
  */
-void port_debug_printf(const char *format, ...) {
+void portDebugPrintf(const char *format, ...) {
     va_list args;
     va_start(args, format);
     vprintf(format, args);  // Standard POSIX vprintf function

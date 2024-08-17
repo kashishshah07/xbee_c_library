@@ -46,7 +46,7 @@ extern UART_HandleTypeDef huart2;  ///< Handle for the debugging UART (e.g., hua
  * 
  * @return int Returns 0 on success, -1 on failure.
  */
-int port_uart_init(uint32_t baudrate, const char *device) {
+int portUartInit(uint32_t baudrate, const char *device) {
     // Assuming huart1 is pre-configured for communication with the XBee module
     // UART initialization can include baudrate setup here if necessary
     huart1.Init.BaudRate = baudrate;
@@ -66,8 +66,8 @@ int port_uart_init(uint32_t baudrate, const char *device) {
  * 
  * @return int Returns the number of bytes successfully written.
  */
-int port_uart_write(const uint8_t *data, int length) {
     if (HAL_UART_Transmit(&huart1, (uint8_t *)data, length, HAL_MAX_DELAY) == HAL_OK) {
+int portUartWrite(const uint8_t *data, int length) {
         return length;  // Return the number of bytes written
     }
     return -1;  // Transmission failed
@@ -84,8 +84,8 @@ int port_uart_write(const uint8_t *data, int length) {
  * 
  * @return int Returns the number of bytes actually read, or -1 if an error occurred.
  */
-int port_uart_read(uint8_t *buffer, int length) {
     if (HAL_UART_Receive(&huart1, buffer, length, HAL_MAX_DELAY) == HAL_OK) {
+int portUartRead(uint8_t *buffer, int length) {
         return length;  // Return the number of bytes read
     }
     return -1;  // Reception failed
@@ -96,8 +96,8 @@ int port_uart_read(uint8_t *buffer, int length) {
  * 
  * This function clears any data that may be present in the UART's receive buffer.
  */
-void port_flush_rx() {
     __HAL_UART_FLUSH_DRREGISTER(&huart1);
+void portFlushRx() {
 }
 
 /**
@@ -107,8 +107,8 @@ void port_flush_rx() {
  * 
  * @return uint32_t The number of milliseconds since startup.
  */
-uint32_t port_millis() {
     return HAL_GetTick();
+uint32_t portMillis() {
 }
 
 /**
@@ -118,8 +118,8 @@ uint32_t port_millis() {
  * 
  * @param ms The number of milliseconds to delay.
  */
-void port_delay(uint32_t ms) {
     HAL_Delay(ms);
+void portDelay(uint32_t ms) {
 }
 
 /**
@@ -131,7 +131,7 @@ void port_delay(uint32_t ms) {
  * @param format The format string (same as printf).
  * @param ... The values to print.
  */
-void port_debug_printf(const char *format, ...) {
+void portDebugPrintf(const char *format, ...) {
     char buffer[128];
     va_list args;
     va_start(args, format);

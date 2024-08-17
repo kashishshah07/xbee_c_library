@@ -59,13 +59,13 @@ typedef struct {
     bool (*init)(XBee* self, uint32_t baudrate, const char* device);
     bool (*connect)(XBee* self);
     bool (*disconnect)(XBee* self);
-    uint8_t (*send_data)(XBee* self, const void* data);
-    bool (*soft_reset)(XBee* self);
-    void (*hard_reset)(XBee* self);
+    uint8_t (*sendData)(XBee* self, const void* data);
+    bool (*softReset)(XBee* self);
+    void (*hardReset)(XBee* self);
     void (*process)(XBee* self);
     bool (*connected)(XBee* self);
-    void (*handle_rx_packet_frame)(XBee* self, void *frame);
-    void (*handle_transmit_status_frame)(XBee* self, void *frame);
+    void (*handleRxPacketFrame)(XBee* self, void *frame);
+    void (*handleTransmitStatusFrame)(XBee* self, void *frame);
 } XBeeVTable;
 
 

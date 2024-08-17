@@ -44,10 +44,10 @@
  * 
  * @return int Returns 0 on success, -1 on failure.
  */
-int port_uart_init(uint32_t baudrate, const char *device) {
+int portUartInit(uint32_t baudrate, const char *device) {
     // Initialize the UART for communication with the XBee module
-    RETARGET_SerialInit();  // Initialize the serial communication for EFM32
-    RETARGET_SerialCrLf(1); // Enable automatic CR to LF conversion
+    RETARGETSerialinit();  // Initialize the serial communication for EFM32
+    RETARGETSerialcrlf(1); // Enable automatic CR to LF conversion
     return 0;
 }
 
@@ -61,9 +61,9 @@ int port_uart_init(uint32_t baudrate, const char *device) {
  * 
  * @return int Returns the number of bytes successfully written.
  */
-int port_uart_write(const uint8_t *data, int length) {
+int portUartWrite(const uint8_t *data, int length) {
     for (int i = 0; i < length; i++) {
-        RETARGET_WriteChar(data[i]);
+        RETARGETWritechar(data[i]);
     }
     return length;
 }
@@ -79,9 +79,9 @@ int port_uart_write(const uint8_t *data, int length) {
  * 
  * @return int Returns the number of bytes actually read.
  */
-int port_uart_read(uint8_t *buffer, int length) {
+int portUartRead(uint8_t *buffer, int length) {
     for (int i = 0; i < length; i++) {
-        buffer[i] = RETARGET_ReadChar();
+        buffer[i] = RETARGETReadchar();
     }
     return length;
 }
@@ -91,10 +91,10 @@ int port_uart_read(uint8_t *buffer, int length) {
  * 
  * This function clears any data that may be present in the UART's receive buffer.
  */
-void port_flush_rx() {
+void portFlushRx() {
     // EFM32 does not have a specific function for flushing UART,
     // so we'll clear the buffer manually by reading any available data.
-    while (RETARGET_ReadChar() != -1);
+    while (RETARGETReadchar() != -1);
 }
 
 /**
@@ -104,7 +104,7 @@ void port_flush_rx() {
  * 
  * @return uint32_t The number of milliseconds since startup.
  */
-uint32_t port_millis() {
+uint32_t portMillis() {
     return msTicks;  // Ensure msTicks is incremented in SysTick_Handler
 }
 
@@ -115,9 +115,9 @@ uint32_t port_millis() {
  * 
  * @param ms The number of milliseconds to delay.
  */
-void port_delay(uint32_t ms) {
-    uint32_t start = port_millis();
-    while (port_millis() - start < ms);
+void portDelay(uint32_t ms) {
+    uint32_t start = portMillis();
+    while (portMillis() - start < ms);
 }
 
 /**
@@ -128,13 +128,13 @@ void port_delay(uint32_t ms) {
  * @param format The format string (same as printf).
  * @param ... The values to print.
  */
-void port_debug_printf(const char *format, ...) {
+void portDebugPrintf(const char *format, ...) {
     char buffer[128];
     va_list args;
-    va_start(args, format);
+    vaStart(args, format);
     vsnprintf(buffer, sizeof(buffer), format, args);
-    va_end(args);
+    vaEnd(args);
     for (int i = 0; buffer[i] != '\0'; i++) {
-        RETARGET_WriteChar(buffer[i]);
+        RETARGETWritechar(buffer[i]);
     }
 }

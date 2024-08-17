@@ -46,12 +46,12 @@ typedef enum {
     UART_ERROR_UNKNOWN
 } uart_status_t;
 
-int port_uart_read(uint8_t *buffer, int length);
-int port_uart_write(const uint8_t *buf, uint16_t len);
-uint32_t port_millis(void);
-void port_flush_rx(void);
-int port_uart_init(uint32_t baudrate, const char *device);
-void port_delay(uint32_t ms);
-void port_debug_printf(const char *format, ...);
+int portUartRead(uint8_t *buffer, int length);
+int portUartWrite(const uint8_t *buf, uint16_t len);
+uint32_t portMillis(void);
+void portFlushRx(void);
+int portUartInit(uint32_t baudrate, const char *device);
+void portDelay(uint32_t ms);
+void portDebugPrintf(const char *format, ...);
 
 #endif // UART_H

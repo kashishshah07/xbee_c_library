@@ -94,7 +94,7 @@ bool XBeeDisconnect(XBee* self) {
  * @return xbee_delivery_status_t, 0 if successful
  */
 uint8_t XBeeSendData(XBee* self, const void* data) {
-    return self->vtable->send_data(self, data);
+    return self->vtable->sendData(self, data);
 }
 
 /**
@@ -109,7 +109,7 @@ uint8_t XBeeSendData(XBee* self, const void* data) {
  * @return bool Returns true if the soft reset is successful, otherwise false.
  */
 bool XBeeSoftReset(XBee* self) {
-    return self->vtable->soft_reset(self);
+    return self->vtable->softReset(self);
 }
 
 /**
@@ -124,7 +124,7 @@ bool XBeeSoftReset(XBee* self) {
  * @return void This function does not return a value.
  */
 void XBeeHardReset(XBee* self) {
-    self->vtable->hard_reset(self);
+    self->vtable->hardReset(self);
 }
 
 /**
@@ -173,9 +173,9 @@ bool XBeeConnected(XBee* self) {
 bool XBeeWriteConfig(XBee* self) {
     uint8_t response[33];
     uint8_t response_length;
-    int status = api_send_at_command_and_get_response(self, AT_WR, NULL, 0, response, &response_length, 5000);
+    int status = apiSendAtCommandAndGetResponse(self, AT_WR, NULL, 0, response, &response_length, 5000);
     if(status != API_SEND_SUCCESS){
-        XBEE_DEBUG_PRINT_ENABLED("Failed to Write Config\n");
+        XBEEDebugPrintEnabled("Failed to Write Config\n");
     }
     return status;
 }
@@ -195,9 +195,9 @@ bool XBeeWriteConfig(XBee* self) {
 bool XBeeApplyChanges(XBee* self) {
     uint8_t response[33];
     uint8_t response_length;
-    int status = api_send_at_command_and_get_response(self, AT_AC, NULL, 0, response, &response_length, 5000);
+    int status = apiSendAtCommandAndGetResponse(self, AT_AC, NULL, 0, response, &response_length, 5000);
     if(status != API_SEND_SUCCESS){
-        XBEE_DEBUG_PRINT_ENABLED("Failed to Apply Changes\n");
+        XBEEDebugPrintEnabled("Failed to Apply Changes\n");
     }
     return status;
 }
@@ -219,9 +219,9 @@ bool XBeeApplyChanges(XBee* self) {
 bool XBeeSetAPIOptions(XBee* self, const uint8_t* value) {
     uint8_t response[33];
     uint8_t response_length;
-    int status = api_send_at_command_and_get_response(self, AT_AO, value, 1, response, &response_length, 5000);
+    int status = apiSendAtCommandAndGetResponse(self, AT_AO, value, 1, response, &response_length, 5000);
     if(status != API_SEND_SUCCESS){
-        XBEE_DEBUG_PRINT_ENABLED("Failed to set API Options\n");
+        XBEEDebugPrintEnabled("Failed to set API Options\n");
     }
     return status;
 }

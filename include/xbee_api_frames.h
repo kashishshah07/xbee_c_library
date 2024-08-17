@@ -286,7 +286,7 @@ typedef enum {
  * frame.type = XBEE_API_TYPE_TX_REQUEST;
  * frame.length = 10;
  * frame.data[0] = 0x01; // Example payload data
- * frame.checksum = calculate_checksum(frame.data, frame.length);
+ * frame.checksum = calculateChecksum(frame.data, frame.length);
  * @endcode
  */
 typedef struct {
@@ -298,15 +298,15 @@ typedef struct {
 
 
 // Function prototypes
-api_receive_status_t api_receive_api_frame(XBee* self, xbee_api_frame_t *frame);
-int api_send_at_command(XBee* self,at_command_t command, const uint8_t *parameter, uint8_t param_length);
-int api_send_frame(XBee* self,uint8_t frame_type, const uint8_t *data, uint16_t len);
-int api_send_at_command_and_get_response(XBee* self, at_command_t command, const uint8_t *parameter, 
+api_receive_status_t apiReceiveApiFrame(XBee* self, xbee_api_frame_t *frame);
+int apiSendAtCommand(XBee* self,at_command_t command, const uint8_t *parameter, uint8_t param_length);
+int apiSendFrame(XBee* self,uint8_t frame_type, const uint8_t *data, uint16_t len);
+int apiSendAtCommandAndGetResponse(XBee* self, at_command_t command, const uint8_t *parameter, 
     uint8_t param_length, uint8_t *response_buffer, uint8_t *response_length, uint32_t timeout_ms);
-void api_handle_frame(XBee* self,xbee_api_frame_t frame);
-void xbee_handle_at_response(XBee* self,xbee_api_frame_t *frame);
-void xbee_handle_modem_status(XBee* self,xbee_api_frame_t *frame);
-void xbee_handle_rx_packet(XBee* self,xbee_api_frame_t *frame);
+void apiHandleFrame(XBee* self,xbee_api_frame_t frame);
+void xbeeHandleAtResponse(XBee* self,xbee_api_frame_t *frame);
+void xbeeHandleModemStatus(XBee* self,xbee_api_frame_t *frame);
+void xbeeHandleRxPacket(XBee* self,xbee_api_frame_t *frame);
 
 
 #endif // XBEE_FRAMES_H

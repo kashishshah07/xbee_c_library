@@ -53,7 +53,7 @@
  * 
  * @return uint8_t The calculated checksum value.
  */
-static uint8_t calculate_checksum(const uint8_t *frame, uint16_t len) {
+static uint8_t calculateChecksum(const uint8_t *frame, uint16_t len) {
     uint8_t sum = 0;
     for (uint16_t i = 3; i < len; i++) {
         sum += frame[i];
@@ -78,7 +78,7 @@ static uint8_t calculate_checksum(const uint8_t *frame, uint16_t len) {
  * @return int Returns 0 (`API_SEND_SUCCESS`) if the frame is successfully sent, 
  * or a non-zero error code (`API_SEND_ERROR_UART_FAILURE`) if there is a failure.
  */
-int api_send_frame(XBee* self, uint8_t frame_type, const uint8_t *data, uint16_t len) {
+int apiSendFrame(XBee* self, uint8_t frame_type, const uint8_t *data, uint16_t len) {
     uint8_t frame[256];
     uint16_t frame_length = 0;
     self->frameIdCntr++;
@@ -99,18 +99,18 @@ int api_send_frame(XBee* self, uint8_t frame_type, const uint8_t *data, uint16_t
     frame_length += len;
 
     // Calculate and add checksum
-    frame[frame_length] = calculate_checksum(frame, frame_length);
+    frame[frame_length] = calculateChecksum(frame, frame_length);
     frame_length++;
 
     // Print the API frame in hex format
-    API_FRAME_DEBUG_PRINT("Sending API Frame: ");
+    APIFrameDebugPrint("Sending API Frame: ");
     for (uint16_t i = 0; i < frame_length; i++) {
-        API_FRAME_DEBUG_PRINT("0x%02X ", frame[i]);
+        APIFrameDebugPrint("0x%02X ", frame[i]);
     }
-    API_FRAME_DEBUG_PRINT("\n");
+    APIFrameDebugPrint("\n");
 
     // Measure the time taken to send the frame
-    uint32_t start_time = port_millis();
+    uint32_t start_time = portMillis();
     int total_bytes_written = 0;
 
     while (total_bytes_written < frame_length) {
@@ -122,15 +122,15 @@ int api_send_frame(XBee* self, uint8_t frame_type, const uint8_t *data, uint16_t
         total_bytes_written += bytes_written;
 
         // Check for timeout
-        if ((port_millis() - start_time) > UART_WRITE_TIMEOUT_MS) {
-            API_FRAME_DEBUG_PRINT("Error: Frame sending timeout after %lu ms\n", port_millis() - start_time);
+        if ((portMillis() - start_time) > UART_WRITE_TIMEOUT_MS) {
+            APIFrameDebugPrint("Error: Frame sending timeout after %lu ms\n", portMillis() - start_time);
             return API_SEND_ERROR_UART_FAILURE;
         }
-        port_delay(1);
+        portDelay(1);
     }
 
-    uint32_t elapsed_time = port_millis() - start_time;
-    API_FRAME_DEBUG_PRINT("UART write completed in %lu ms\n", elapsed_time);
+    uint32_t elapsed_time = portMillis() - start_time;
+    APIFrameDebugPrint("UART write completed in %lu ms\n", elapsed_time);
 
     // Return success if everything went well
     return API_SEND_SUCCESS;
@@ -155,7 +155,7 @@ int api_send_frame(XBee* self, uint8_t frame_type, const uint8_t *data, uint16_t
  * or a non-zero error code if there is a failure (`API_SEND_ERROR_FRAME_TOO_LARGE`, 
  * `API_SEND_ERROR_INVALID_COMMAND`, etc.).
  */
-int api_send_at_command(XBee* self,at_command_t command, const uint8_t *parameter, uint8_t param_length) {
+int apiSendAtCommand(XBee* self,at_command_t command, const uint8_t *parameter, uint8_t param_length) {
     uint8_t frame_data[128];
     uint16_t frame_length = 0;
 
@@ -168,7 +168,7 @@ int api_send_at_command(XBee* self,at_command_t command, const uint8_t *paramete
     frame_data[frame_length++] = self->frameIdCntr;
 
     // AT Command (2 bytes)
-    const char *cmd_str = at_command_to_string(command);
+    const char *cmd_str = atCommandToString(command);
     frame_data[frame_length++] = cmd_str[0];
     frame_data[frame_length++] = cmd_str[1];
 
@@ -183,19 +183,19 @@ int api_send_at_command(XBee* self,at_command_t command, const uint8_t *paramete
     }
 
     // Print the AT command and parameter in a readable format
-    API_FRAME_DEBUG_PRINT("Sending AT Command: %s\n", cmd_str);
+    APIFrameDebugPrint("Sending AT Command: %s\n", cmd_str);
     if (param_length > 0) {
-        API_FRAME_DEBUG_PRINT("Parameter: ");
+        APIFrameDebugPrint("Parameter: ");
         for (uint8_t i = 0; i < param_length; i++) {
-            API_FRAME_DEBUG_PRINT("0x%02X ", parameter[i]);
+            APIFrameDebugPrint("0x%02X ", parameter[i]);
         }
-        API_FRAME_DEBUG_PRINT("\n");
+        APIFrameDebugPrint("\n");
     } else {
-        API_FRAME_DEBUG_PRINT("No Parameters\n");
+        APIFrameDebugPrint("No Parameters\n");
     }
 
     // Use api_send_frame to send the complete frame
-    return api_send_frame(self, XBEE_API_TYPE_AT_COMMAND, frame_data, frame_length);
+    return apiSendFrame(self, XBEE_API_TYPE_AT_COMMAND, frame_data, frame_length);
 }
 
 /**
@@ -214,10 +214,10 @@ int api_send_at_command(XBee* self,at_command_t command, const uint8_t *paramete
  *         Returns API_RECEIVE_ERROR_UART_FAILURE if the UART read operation fails.
  *         Returns API_RECEIVE_ERROR_TIMEOUT_DATA if the timeout is exceeded before the required bytes are read.
  */
-static api_receive_status_t read_bytes_with_timeout(XBee* self, uint8_t* buffer, int length, uint32_t timeout_ms) {
+static api_receive_status_t readBytesWithTimeout(XBee* self, uint8_t* buffer, int length, uint32_t timeout_ms) {
     int total_bytes_received = 0;
     int bytes_received = 0;
-    uint32_t start_time = port_millis();
+    uint32_t start_time = portMillis();
 
     while (total_bytes_received < length) {
         bytes_received = self->htable->PortUartRead(buffer + total_bytes_received, length - total_bytes_received);
@@ -227,10 +227,10 @@ static api_receive_status_t read_bytes_with_timeout(XBee* self, uint8_t* buffer,
         }
 
         // Check for timeout
-        if (port_millis() - start_time >= timeout_ms) {
+        if (portMillis() - start_time >= timeout_ms) {
             return API_RECEIVE_ERROR_TIMEOUT_DATA;
         }
-        port_delay(1);  // Add a 1 ms delay to prevent busy-waiting
+        portDelay(1);  // Add a 1 ms delay to prevent busy-waiting
     }
 
     return API_RECEIVE_SUCCESS;
@@ -250,9 +250,9 @@ static api_receive_status_t read_bytes_with_timeout(XBee* self, uint8_t* buffer,
  * 
  * @return api_receive_status_t Returns API_RECEIVE_SUCCESS if the frame is successfully received, or an error code if a failure occurs.
  */
-api_receive_status_t api_receive_api_frame(XBee* self, xbee_api_frame_t *frame) {
+api_receive_status_t apiReceiveApiFrame(XBee* self, xbee_api_frame_t *frame) {
     if (!frame) {
-        API_FRAME_DEBUG_PRINT("Error: Invalid frame pointer. The frame pointer passed to the function is NULL.\n");
+        APIFrameDebugPrint("Error: Invalid frame pointer. The frame pointer passed to the function is NULL.\n");
         return API_RECEIVE_ERROR_INVALID_POINTER;
     }
 
@@ -260,49 +260,49 @@ api_receive_status_t api_receive_api_frame(XBee* self, xbee_api_frame_t *frame) 
 
     // Attempt to read the start delimiter with timeout
     uint8_t start_delimiter;
-    api_receive_status_t result = read_bytes_with_timeout(self, &start_delimiter, 1, UART_READ_TIMEOUT_MS);
+    api_receive_status_t result = readBytesWithTimeout(self, &start_delimiter, 1, UART_READ_TIMEOUT_MS);
     if (result != API_RECEIVE_SUCCESS) {
-        //API_FRAME_DEBUG_PRINT("Error: Timeout occurred while waiting to read start delimiter.\n");
+        //APIFrameDebugPrint("Error: Timeout occurred while waiting to read start delimiter.\n");
         return API_RECEIVE_ERROR_TIMEOUT_START_DELIMITER;
     }
-    API_FRAME_DEBUG_PRINT("Start delimiter received: 0x%02X\n", start_delimiter);
+    APIFrameDebugPrint("Start delimiter received: 0x%02X\n", start_delimiter);
 
     if (start_delimiter != 0x7E) {
-        API_FRAME_DEBUG_PRINT("Error: Invalid start delimiter. Expected 0x7E, but received 0x%02X.\n", start_delimiter);
+        APIFrameDebugPrint("Error: Invalid start delimiter. Expected 0x7E, but received 0x%02X.\n", start_delimiter);
         return API_RECEIVE_ERROR_INVALID_START_DELIMITER;
     }
 
     // Read length with timeout
     uint8_t length_bytes[2];
-    result = read_bytes_with_timeout(self, length_bytes, 2, UART_READ_TIMEOUT_MS);
+    result = readBytesWithTimeout(self, length_bytes, 2, UART_READ_TIMEOUT_MS);
     if (result != API_RECEIVE_SUCCESS) {
-        API_FRAME_DEBUG_PRINT("Error: Timeout occurred while waiting to read frame length.\n");
+        APIFrameDebugPrint("Error: Timeout occurred while waiting to read frame length.\n");
         return API_RECEIVE_ERROR_TIMEOUT_LENGTH;
     }
     uint16_t length = (length_bytes[0] << 8) | length_bytes[1];
-    API_FRAME_DEBUG_PRINT("Frame length received: %d bytes\n", length);
+    APIFrameDebugPrint("Frame length received: %d bytes\n", length);
 
     if (length > XBEE_MAX_FRAME_DATA_SIZE) {
-        API_FRAME_DEBUG_PRINT("Error: Frame length exceeds buffer size.\n");
+        APIFrameDebugPrint("Error: Frame length exceeds buffer size.\n");
         return API_RECEIVE_ERROR_FRAME_TOO_LARGE;
     }
 
     // Read the frame data with timeout
-    result = read_bytes_with_timeout(self, frame->data, length, UART_READ_TIMEOUT_MS);
+    result = readBytesWithTimeout(self, frame->data, length, UART_READ_TIMEOUT_MS);
     if (result != API_RECEIVE_SUCCESS) {
-        API_FRAME_DEBUG_PRINT("Error: Timeout occurred while waiting to read frame data.\n");
+        APIFrameDebugPrint("Error: Timeout occurred while waiting to read frame data.\n");
         return API_RECEIVE_ERROR_TIMEOUT_DATA;
     }
-    API_FRAME_DEBUG_PRINT("Complete frame data received: ");
+    APIFrameDebugPrint("Complete frame data received: ");
     for (int i = 0; i < length; i++) {
-        API_FRAME_DEBUG_PRINT("0x%02X ", frame->data[i]);
+        APIFrameDebugPrint("0x%02X ", frame->data[i]);
     }
-    API_FRAME_DEBUG_PRINT("\n");
+    APIFrameDebugPrint("\n");
 
     // Read the checksum with timeout
-    result = read_bytes_with_timeout(self, &(frame->checksum), 1, UART_READ_TIMEOUT_MS);
+    result = readBytesWithTimeout(self, &(frame->checksum), 1, UART_READ_TIMEOUT_MS);
     if (result != API_RECEIVE_SUCCESS) {
-        API_FRAME_DEBUG_PRINT("Error: Timeout occurred while waiting to read checksum.\n");
+        APIFrameDebugPrint("Error: Timeout occurred while waiting to read checksum.\n");
         return API_RECEIVE_ERROR_TIMEOUT_CHECKSUM;
     }
 
@@ -316,7 +316,7 @@ api_receive_status_t api_receive_api_frame(XBee* self, xbee_api_frame_t *frame) 
         checksum += frame->data[i];
     }
     if (checksum != 0xFF) {
-        API_FRAME_DEBUG_PRINT("Error: Invalid checksum. Expected 0xFF, but calculated 0x%02X.\n", checksum);
+        APIFrameDebugPrint("Error: Invalid checksum. Expected 0xFF, but calculated 0x%02X.\n", checksum);
         return API_RECEIVE_ERROR_INVALID_CHECKSUM;
     }
 
@@ -338,27 +338,27 @@ api_receive_status_t api_receive_api_frame(XBee* self, xbee_api_frame_t *frame) 
  * 
  * @return void This function does not return a value.
  */
-void api_handle_frame(XBee* self, xbee_api_frame_t frame){
+void apiHandleFrame(XBee* self, xbee_api_frame_t frame){
     switch (frame.type) {
         case XBEE_API_TYPE_AT_RESPONSE:
-            xbee_handle_at_response(self, &frame);
+            xbeeHandleAtResponse(self, &frame);
             break;
         case XBEE_API_TYPE_MODEM_STATUS:
-            xbee_handle_modem_status(self, &frame);
+            xbeeHandleModemStatus(self, &frame);
             break;
         case XBEE_API_TYPE_TX_STATUS:
-            if(self->vtable->handle_transmit_status_frame){
-                self->vtable->handle_transmit_status_frame(self, &frame);
+            if(self->vtable->handleTransmitStatusFrame){
+                self->vtable->handleTransmitStatusFrame(self, &frame);
             }
             break;
         case XBEE_API_TYPE_LR_RX_PACKET:
         case XBEE_API_TYPE_LR_EXPLICIT_RX_PACKET:
-            if(self->vtable->handle_rx_packet_frame){
-                self->vtable->handle_rx_packet_frame(self, &frame);
+            if(self->vtable->handleRxPacketFrame){
+                self->vtable->handleRxPacketFrame(self, &frame);
             }
             break;
         default:
-            API_FRAME_DEBUG_PRINT("Received unknown frame type: 0x%02X\n", frame.type);
+            APIFrameDebugPrint("Received unknown frame type: 0x%02X\n", frame.type);
             break;
     }
 }
@@ -382,10 +382,10 @@ void api_handle_frame(XBee* self, xbee_api_frame_t frame){
  * @return int Returns 0 (`API_SEND_SUCCESS`) if the AT command is successfully sent and a valid response is received, 
  * or a non-zero error code if there is a failure (`API_SEND_AT_CMD_ERROR`, `API_SEND_AT_CMD_RESPONSE_TIMEOUT`, etc.).
  */
-int api_send_at_command_and_get_response(XBee* self, at_command_t command, const uint8_t *parameter, uint8_t param_length, uint8_t *response_buffer, 
+int apiSendAtCommandAndGetResponse(XBee* self, at_command_t command, const uint8_t *parameter, uint8_t param_length, uint8_t *response_buffer, 
     uint8_t *response_length, uint32_t timeout_ms) {
     // Send the AT command using API frame
-    api_send_at_command(self, command, (const uint8_t *)parameter, param_length);
+    apiSendAtCommand(self, command, (const uint8_t *)parameter, param_length);
 
     // Get the start time using the platform-specific function
     uint32_t start_time = self->htable->PortMillis();
@@ -396,7 +396,7 @@ int api_send_at_command_and_get_response(XBee* self, at_command_t command, const
 
     while (1) {
         // Attempt to receive the API frame
-        status = api_receive_api_frame(self, &frame);
+        status = apiReceiveApiFrame(self, &frame);
 
         // Check if a valid frame was received
         if (status == 0) {
@@ -405,13 +405,13 @@ int api_send_at_command_and_get_response(XBee* self, at_command_t command, const
 
                 // Extract the AT command response
                 *response_length = frame.length - 5;  // Subtract the frame ID and AT command bytes
-                API_FRAME_DEBUG_PRINT("response_length: %u\n", *response_length);
+                APIFrameDebugPrint("response_length: %u\n", *response_length);
                 if(frame.data[4] == 0){
                     if((response_buffer != NULL) && (*response_length)){
                         memcpy(response_buffer, &frame.data[5], *response_length);
                     }
                 }else{
-                    API_FRAME_DEBUG_PRINT("API Frame AT CMD Error.\n");
+                    APIFrameDebugPrint("API Frame AT CMD Error.\n");
                     return API_SEND_AT_CMD_ERROR;
                 }
             
@@ -419,13 +419,13 @@ int api_send_at_command_and_get_response(XBee* self, at_command_t command, const
                 return API_SEND_SUCCESS;
             } 
             else{
-                api_handle_frame(self, frame);
+                apiHandleFrame(self, frame);
             }
         }
 
         // Check if the timeout period has elapsed using platform-specific time
         if ((self->htable->PortMillis() - start_time) >= timeout_ms) {
-            API_FRAME_DEBUG_PRINT("Timeout waiting for AT response.\n");
+            APIFrameDebugPrint("Timeout waiting for AT response.\n");
             return API_SEND_AT_CMD_RESONSE_TIMEOUT;
         }
         
@@ -434,7 +434,7 @@ int api_send_at_command_and_get_response(XBee* self, at_command_t command, const
 }
 
 //Print out AT Response
-void xbee_handle_at_response(XBee* self, xbee_api_frame_t *frame) {
+void xbeeHandleAtResponse(XBee* self, xbee_api_frame_t *frame) {
     // The first byte of frame->data is the Frame ID
     uint8_t frame_id = frame->data[1];
 
@@ -448,25 +448,25 @@ void xbee_handle_at_response(XBee* self, xbee_api_frame_t *frame) {
     uint8_t command_status = frame->data[4];
 
     // Print the basic information
-    API_FRAME_DEBUG_PRINT("AT Response:\n");
-    API_FRAME_DEBUG_PRINT("  Frame ID: %d\n", frame_id);
-    API_FRAME_DEBUG_PRINT("  AT Command: %s\n", at_command);
-    API_FRAME_DEBUG_PRINT("  Command Status: %d\n", command_status);
+    APIFrameDebugPrint("AT Response:\n");
+    APIFrameDebugPrint("  Frame ID: %d\n", frame_id);
+    APIFrameDebugPrint("  AT Command: %s\n", at_command);
+    APIFrameDebugPrint("  Command Status: %d\n", command_status);
 
     // Check if there is additional data in the frame
     if (frame->length > 5) {
-        API_FRAME_DEBUG_PRINT("  Data: ");
+        APIFrameDebugPrint("  Data: ");
         // Print the remaining data bytes
-        API_FRAME_DEBUG_PRINT("%s\n", &(frame->data[5]));
+        APIFrameDebugPrint("%s\n", &(frame->data[5]));
     } else {
-        API_FRAME_DEBUG_PRINT("  No additional data.\n");
+        APIFrameDebugPrint("  No additional data.\n");
     }
 }
 
 //Should be moved to be handled by user?
-void xbee_handle_modem_status(XBee* self, xbee_api_frame_t *frame) {
+void xbeeHandleModemStatus(XBee* self, xbee_api_frame_t *frame) {
     if (frame->type != XBEE_API_TYPE_MODEM_STATUS) return;
 
-    API_FRAME_DEBUG_PRINT("Modem Status: %d\n", frame->data[1]);
+    APIFrameDebugPrint("Modem Status: %d\n", frame->data[1]);
     // Add further processing as needed
 }

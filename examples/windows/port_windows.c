@@ -44,7 +44,7 @@ HANDLE hSerial;  // Handle for the serial port
  * 
  * @return int Returns 0 on success, -1 on failure.
  */
-int port_uart_init(uint32_t baudrate, const char *device) {
+int portUartInit(uint32_t baudrate, const char *device) {
     hSerial = CreateFile(device, GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
     if (hSerial == INVALID_HANDLE_VALUE) {
         printf("Error opening serial port %s\n", device);
@@ -90,7 +90,7 @@ int port_uart_init(uint32_t baudrate, const char *device) {
  * 
  * @return int Returns the number of bytes successfully written.
  */
-int port_uart_write(const uint8_t *data, int length) {
+int portUartWrite(const uint8_t *data, int length) {
     DWORD bytes_written;
     if (!WriteFile(hSerial, data, length, &bytes_written, NULL)) {
         printf("Error writing data to serial port\n");
@@ -110,7 +110,7 @@ int port_uart_write(const uint8_t *data, int length) {
  * 
  * @return int Returns the number of bytes actually read.
  */
-int port_uart_read(uint8_t *buffer, int length) {
+int portUartRead(uint8_t *buffer, int length) {
     DWORD bytes_read;
     if (!ReadFile(hSerial, buffer, length, &bytes_read, NULL)) {
         printf("Error reading data from serial port\n");
@@ -124,7 +124,7 @@ int port_uart_read(uint8_t *buffer, int length) {
  * 
  * This function clears any data that may be present in the UART's receive buffer.
  */
-void port_flush_rx() {
+void portFlushRx() {
     PurgeComm(hSerial, PURGE_RXCLEAR | PURGE_RXABORT);
 }
 
@@ -135,7 +135,7 @@ void port_flush_rx() {
  * 
  * @return uint32_t The number of milliseconds since startup.
  */
-uint32_t port_millis() {
+uint32_t portMillis() {
     return GetTickCount();
 }
 
@@ -146,7 +146,7 @@ uint32_t port_millis() {
  * 
  * @param ms The number of milliseconds to delay.
  */
-void port_delay(uint32_t ms) {
+void portDelay(uint32_t ms) {
     Sleep(ms);
 }
 
@@ -158,7 +158,7 @@ void port_delay(uint32_t ms) {
  * @param format The format string (same as printf).
  * @param ... The values to print.
  */
-void port_debug_printf(const char *format, ...) {
+void portDebugPrintf(const char *format, ...) {
     char buffer[128];
     va_list args;
     va_start(args, format);

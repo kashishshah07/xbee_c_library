@@ -44,7 +44,7 @@
  * 
  * @return int Returns 0 on success.
  */
-int port_uart_init(uint32_t baudrate, const char *device) {
+int portUartInit(uint32_t baudrate, const char *device) {
     XBEE_SERIAL_PORT.begin(baudrate);
     while (!XBEE_SERIAL_PORT) {
         ; // Wait for the serial port to connect (for Leonardo or similar boards)
@@ -62,7 +62,7 @@ int port_uart_init(uint32_t baudrate, const char *device) {
  * 
  * @return int Returns the number of bytes successfully written.
  */
-int port_uart_write(const uint8_t *data, int length) {
+int portUartWrite(const uint8_t *data, int length) {
     return XBEE_SERIAL_PORT.write(data, length);
 }
 
@@ -77,7 +77,7 @@ int port_uart_write(const uint8_t *data, int length) {
  * 
  * @return int Returns the number of bytes actually read.
  */
-int port_uart_read(uint8_t *buffer, int length) {
+int portUartRead(uint8_t *buffer, int length) {
     int bytes_read = 0;
 
     while (bytes_read < length) {
@@ -98,7 +98,7 @@ int port_uart_read(uint8_t *buffer, int length) {
  * 
  * This function clears any data that may be present in the UART's receive buffer.
  */
-void port_flush_rx() {
+void portFlushRx() {
     while (XBEE_SERIAL_PORT.available()) {
         XBEE_SERIAL_PORT.read();
     }
@@ -111,7 +111,7 @@ void port_flush_rx() {
  * 
  * @return uint32_t The number of milliseconds since startup.
  */
-uint32_t port_millis() {
+uint32_t portMillis() {
     return millis();
 }
 
@@ -122,7 +122,7 @@ uint32_t port_millis() {
  * 
  * @param ms The number of milliseconds to delay.
  */
-void port_delay(uint32_t ms) {
+void portDelay(uint32_t ms) {
     delay(ms);
 }
 
@@ -134,11 +134,11 @@ void port_delay(uint32_t ms) {
  * @param format The format string (same as printf).
  * @param ... The values to print.
  */
-void port_debug_printf(const char *format, ...) {
+void portDebugPrintf(const char *format, ...) {
     char buffer[128];
     va_list args;
-    va_start(args, format);
+    vaStart(args, format);
     vsnprintf(buffer, sizeof(buffer), format, args);
-    va_end(args);
+    vaEnd(args);
     Serial.print(buffer);
 }

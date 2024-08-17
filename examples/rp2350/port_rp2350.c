@@ -48,10 +48,10 @@
  * 
  * @return int Returns 0 on success, -1 on failure.
  */
-int port_uart_init(uint32_t baudrate, const char *device) {
     gpio_set_function(COMM_TX_PIN, GPIO_FUNC_UART_AUX);
     gpio_set_function(COMM_RX_PIN, GPIO_FUNC_UART_AUX);
     uart_init(COMM_UART, baudrate);
+int portUartInit(uint32_t baudrate, const char *device) {
     return 0;  // Initialization successful
 }
 
@@ -65,7 +65,7 @@ int port_uart_init(uint32_t baudrate, const char *device) {
  * 
  * @return int Returns the number of bytes successfully written.
  */
-int port_uart_write(const uint8_t *buf, uint16_t len) {
+int portUartWrite(const uint8_t *buf, uint16_t len) {
     int bytes_written = 0;
     for (int i = 0; i < len; i++) {
         if(uart_is_writable(COMM_UART)){
@@ -89,7 +89,7 @@ int port_uart_write(const uint8_t *buf, uint16_t len) {
  * 
  * @return int Returns the number of bytes actually read.
  */
-int port_uart_read(uint8_t *buffer, int length) {
+int portUartRead(uint8_t *buffer, int length) {
     int bytes_read = 0;
     while (bytes_read < length) {
         if (uart_is_readable(COMM_UART)) {
@@ -106,8 +106,8 @@ int port_uart_read(uint8_t *buffer, int length) {
  * 
  * This function clears any data that may be present in the UART's receive buffer.
  */
-void port_flush_rx() {
     uart_set_hw_flow(COMM_UART, false, false);
+void portFlushRx() {
 }
 
 /**
@@ -117,8 +117,8 @@ void port_flush_rx() {
  * 
  * @return uint32_t The number of milliseconds since startup.
  */
-uint32_t port_millis() {
     return to_ms_since_boot(get_absolute_time());
+uint32_t portMillis() {
 }
 
 /**
@@ -128,8 +128,8 @@ uint32_t port_millis() {
  * 
  * @param ms The number of milliseconds to delay.
  */
-void port_delay(uint32_t ms) {
     sleep_ms(ms);
+void portDelay(uint32_t ms) {
 }
 
 /**
@@ -140,7 +140,7 @@ void port_delay(uint32_t ms) {
  * @param format The format string (same as printf).
  * @param ... The values to print.
  */
-void port_debug_printf(const char *format, ...) {
+void portDebugPrintf(const char *format, ...) {
     char buffer[128];
     va_list args;
     va_start(args, format);

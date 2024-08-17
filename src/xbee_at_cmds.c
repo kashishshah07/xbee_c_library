@@ -48,7 +48,7 @@
  * 
  * @return The string representation of the AT command.
  */
-const char* at_command_to_string(at_command_t command) {
+const char* atCommandToString(at_command_t command) {
     switch (command) {
         /**< XBee Common AT Commands */
         case AT_: return "AT";              ///< Placeholder for unspecified commands
