@@ -46,92 +46,21 @@ See MIT-LICENSE.txt file
 
 ## Overview of the XBee Class Methods
 
-The `xbee.c` file implements a set of methods that provide an interface for interacting with XBee modules through the use of a virtual table (vtable). These methods allow for initialization, connection, data transmission, and reset operations. Below is a detailed overview of the key methods:
+This section provides an overview of the key methods available in the XBee class, which are used to interact with XBee modules.
 
-### `XBee_Init`
+- `XBeeInit()`: Initializes the XBee module.
+- `XBeeConnect()`: Connects the XBee module to a network.
+- `XBeeDisconnect()`: Disconnects the XBee module from the network.
+- `XBeeSendData()`: Sends data through the XBee module.
+- `XBeeSoftReset()`: Performs a soft reset on the XBee module.
+- `XBeeHardReset()`: Performs a hard reset on the XBee module.
+- `XBeeProcess()`: Processes incoming and outgoing data for the XBee module.
+- `XBeeConnected()`: Checks if the XBee module is connected to a network.
+- `XBeeWriteConfig()`: Writes configuration settings to the XBee module.
+- `XBeeApplyChanges()`: Applies changes to the configuration of the XBee module.
+- `XBeeLRSetApiOptions()`: Sets API options for long-range communication.
 
-**Purpose**:  
-Initializes the XBee module by setting up the initial frame ID counter and calling the subclass-specific initialization routine.
-
-**Parameters**:
-- `self`: Pointer to the XBee instance.
-- `baudrate`: The baud rate for serial communication.
-- `device`: The path to the serial device (e.g., `/dev/ttyUSB0`).
-
-**Returns**:  
-`True` if the initialization is successful; otherwise, `False`.
-
-### `XBee_Connect`
-
-**Purpose**:  
-Connects the XBee module to the network by invoking the connection implementation defined in the subclass. This is a blocking function.
-
-**Parameters**:
-- `self`: Pointer to the XBee instance.
-
-**Returns**:  
-`True` if the connection is successful; otherwise, `False`.
-
-### `XBee_Disconnect`
-
-**Purpose**:  
-Disconnects the XBee module from the network using the subclass-specific disconnection routine. This is a blocking function.
-
-**Parameters**:
-- `self`: Pointer to the XBee instance.
-
-**Returns**:  
-`True` if the disconnection is successful; otherwise, `False`.
-
-### `XBee_SendData`
-
-**Purpose**:  
-Sends data over the network by calling the subclass-specific data transmission method. This is a blocking function.
-
-**Parameters**:
-- `self`: Pointer to the XBee instance.
-- `data`: The data to be sent.
-
-**Returns**:  
-`True` if the data was sent successfully; otherwise, `False`.
-
-### `XBee_SoftReset`
-
-**Purpose**:  
-Performs a soft reset of the XBee module by invoking the `soft_reset` method in the subclass's virtual table. A soft reset typically resets the module's state without a full power cycle.
-
-**Parameters**:
-- `self`: Pointer to the XBee instance.
-
-**Returns**:  
-`True` if the soft reset is successful; otherwise, `False`.
-
-### `XBee_HardReset`
-
-**Purpose**:  
-Performs a hard reset of the XBee module by invoking the `hard_reset` method in the subclass's virtual table. This typically involves a full power cycle or reset through the reset pin.
-
-**Parameters**:
-- `self`: Pointer to the XBee instance.
-
-**Returns**:  
-`Void` - This function does not return a value.
-
-### `XBee_Process`
-
-**Purpose**:  
-Calls the subclass's process implementation, which is responsible for handling ongoing tasks or events related to the XBee module. This method should be called continuously in the application's main loop to ensure proper operation.
-
-**Parameters**:
-- `self`: Pointer to the XBee instance.
-
-**Returns**:  
-`Void` - This function does not return a value.
-
----
-
-These methods provide a foundational interface for working with XBee modules, supporting various operations like initialization, connection management, data transmission, and both soft and hard resets.
-
+Each of these methods provides essential functionality for managing and communicating with XBee devices within a network. Ensure that you refer to these methods when developing applications that involve XBee modules.
 
 ## Usage Example: XBee LR Example 
 
@@ -140,7 +69,7 @@ This section provides an example of how to use the XBee class, specifically for 
 
 ### Creating the XBee LR Instance
 
-To create an instance of the XBee LR class, you need to pass the hardware and command tables to the `XBeeLR_Create` function:
+To create an instance of the XBee LR class, you need to pass the hardware and command tables to the `XBeeLRCreate` function:
 
 ```c
 #include "xbee_lr.h"
@@ -150,7 +79,7 @@ To create an instance of the XBee LR class, you need to pass the hardware and co
 XBeeLR* my_xbee_lr;
 
 // Hardware Abstraction Function Pointer Table for XBeeLR
-const XBeeHTable XBeeLR_HTable = {
+const XBeeHTable XBeeLRHTable = {
     .PortUartRead = port_uart_read,
     .PortUartWrite = port_uart_write,
     .PortMillis = port_millis,
@@ -160,14 +89,14 @@ const XBeeHTable XBeeLR_HTable = {
 };
 
 // Callback Function Pointer Table for XBeeLR
-const XBeeCTable XBeeLR_CTable = {
+const XBeeCTable XBeeLRCTable = {
     .OnReceiveCallback = OnReceiveCallback, // Callback for receiving data
     .OnSendCallback = NULL,                 // Can be left as NULL if no callbacks are needed
 };
 
 int main() {
     // Create the XBee LR instance with hardware and command tables
-    my_xbee_lr = XBeeLR_Create(&XBeeLR_HTable, &XBeeLR_CTable);
+    my_xbee_lr = XBeeLRCreate(&XBeeLRHTable, &XBeeLRCTable);
     if (my_xbee_lr == NULL) {
         printf("Failed to create XBee LR instance.");
         return -1;
@@ -183,7 +112,7 @@ After creating the XBee LR instance, initialize the XBee LR module, configure th
 
 ```c
     // Initialize the XBee LR module
-    if (!XBeeLR_Init(my_xbee_lr, 9600, "COM3")) {  // Replace "COM3" with the appropriate serial port for your platform
+    if (!XBeeLRInit(my_xbee_lr, 9600, "COM3")) {  // Replace "COM3" with the appropriate serial port for your platform
         printf("Failed to initialize XBee LR module.
 ");
         return -1;
@@ -191,20 +120,20 @@ After creating the XBee LR instance, initialize the XBee LR module, configure th
 
     // Read LoRaWAN DevEUI and print it
     uint8_t dev_eui[17];
-    XBeeLR_GetDevEUI((XBee*)my_xbee_lr, dev_eui, sizeof(dev_eui));
+    XBeeLRGetDevEUI((XBee*)my_xbee_lr, dev_eui, sizeof(dev_eui));
     port_debug_printf("DEVEUI: %s", dev_eui);
 
     // Set LoRaWAN Network Settings
     port_debug_printf("Configuring...");
-    XBeeLR_SetAppEUI((XBee*)my_xbee_lr, "37D56A3F6CDCF0A5");
-    XBeeLR_SetAppKey((XBee*)my_xbee_lr, "CD32AAB41C54175E9060D86F3A8B7F48");
-    XBeeLR_SetNwkKey((XBee*)my_xbee_lr, "CD32AAB41C54175E9060D86F3A8B7F48");
-    XBee_WriteConfig((XBee*)my_xbee_lr);
-    XBee_ApplyChanges((XBee*)my_xbee_lr);
+    XBeeLRSetAppEUI((XBee*)my_xbee_lr, "37D56A3F6CDCF0A5");
+    XBeeLRSetAppKey((XBee*)my_xbee_lr, "CD32AAB41C54175E9060D86F3A8B7F48");
+    XBeeLRSetNwkKey((XBee*)my_xbee_lr, "CD32AAB41C54175E9060D86F3A8B7F48");
+    XBeeWriteConfig((XBee*)my_xbee_lr);
+    XBeeApplyChanges((XBee*)my_xbee_lr);
 
     // Connect to the LoRaWAN network
     port_debug_printf("Connecting...");
-    XBee_Connect((XBee*)my_xbee_lr);
+    XBeeConnect((XBee*)my_xbee_lr);
 
     printf("XBee LR module initialized and connected.");
 
@@ -213,7 +142,7 @@ After creating the XBee LR instance, initialize the XBee LR module, configure th
 
 ### Sending Data
 
-To send data over the XBee LR network, use the `XBeeLR_SendData` method. Here's an example of preparing and sending a payload:
+To send data over the XBee LR network, use the `XBeeLRSendData` method. Here's an example of preparing and sending a payload:
 
 ```c
 // XBeeLR payload to send
@@ -226,7 +155,7 @@ XBeeLRPacket_t packet = {
     .ack = 0,
 };
 
-if (!XBee_SendData(my_xbee_lr, &packet)) {
+if (!XBeeSendData(my_xbee_lr, &packet)) {
     printf("Failed to send data.");
 } else {
     printf("Data sent successfully.");
@@ -254,7 +183,7 @@ void OnReceiveCallback(XBee* self, void* data){
 
 // Assuming a continuous loop to process incoming data
 while (1) {
-    XBee_Process(my_xbee_lr);
+    XBeeProcess(my_xbee_lr);
     usleep(10000);  // Sleep for 10ms to avoid busy-waiting
 }
 ```
@@ -264,9 +193,9 @@ while (1) {
 After completing your operations, disconnect the XBee LR module, clean up resources, and free the XBee LR instance:
 
 ```c
-XBee_Disconnect(my_xbee_lr);
-XBee_Close(my_xbee_lr);
-XBee_Destroy(my_xbee_lr);  // Free the XBee LR instance
+XBeeDisconnect(my_xbee_lr);
+XBeeClose(my_xbee_lr);
+XBeeDestroy(my_xbee_lr);  // Free the XBee LR instance
 printf("XBee LR module disconnected and resources cleaned up.");
 ```
 
@@ -281,7 +210,7 @@ Here is the full example code combining the steps mentioned above:
 XBeeLR* my_xbee_lr;
 
 // Hardware Abstraction Function Pointer Table for XBeeLR
-const XBeeHTable XBeeLR_HTable = {
+const XBeeHTable XBeeLRHTable = {
     .PortUartRead = port_uart_read,
     .PortUartWrite = port_uart_write,
     .PortMillis = port_millis,
@@ -291,7 +220,7 @@ const XBeeHTable XBeeLR_HTable = {
 };
 
 // Callback Function Pointer Table for XBeeLR
-const XBeeCTable XBeeLR_CTable = {
+const XBeeCTable XBeeLRCTable = {
     .OnReceiveCallback = OnReceiveCallback, // Callback for receiving data
     .OnSendCallback = NULL,                 // Can be left as NULL if no callbacks are needed
 };
@@ -312,34 +241,34 @@ void OnReceiveCallback(XBee* self, void* data){
 
 int main() {
     // Create the XBee LR instance with hardware and command tables
-    my_xbee_lr = XBeeLR_Create(&XBeeLR_HTable, &XBeeLR_CTable);
+    my_xbee_lr = XBeeLRCreate(&XBeeLRHTable, &XBeeLRCTable);
     if (my_xbee_lr == NULL) {
         printf("Failed to create XBee LR instance.");
         return -1;
     }
 
     // Initialize the XBee LR module
-    if (!XBeeLR_Init(my_xbee_lr, 9600, "COM3")) {  // Replace "COM3" with the appropriate serial port
+    if (!XBeeLRInit(my_xbee_lr, 9600, "COM3")) {  // Replace "COM3" with the appropriate serial port
         printf("Failed to initialize XBee LR module.");
         return -1;
     }
 
     // Read LoRaWAN DevEUI and print it
     uint8_t dev_eui[17];
-    XBeeLR_GetDevEUI((XBee*)my_xbee_lr, dev_eui, sizeof(dev_eui));
+    XBeeLRGetDevEUI((XBee*)my_xbee_lr, dev_eui, sizeof(dev_eui));
     port_debug_printf("DEVEUI: %s", dev_eui);
 
     // Set LoRaWAN Network Settings
     port_debug_printf("Configuring...");
-    XBeeLR_SetAppEUI((XBee*)my_xbee_lr, "37D56A3F6CDCF0A5");
-    XBeeLR_SetAppKey((XBee*)my_xbee_lr, "CD32AAB41C54175E9060D86F3A8B7F48");
-    XBeeLR_SetNwkKey((XBee*)my_xbee_lr, "CD32AAB41C54175E9060D86F3A8B7F48");
-    XBee_WriteConfig((XBee*)my_xbee_lr);
-    XBee_ApplyChanges((XBee*)my_xbee_lr);
+    XBeeLRSetAppEUI((XBee*)my_xbee_lr, "37D56A3F6CDCF0A5");
+    XBeeLRSetAppKey((XBee*)my_xbee_lr, "CD32AAB41C54175E9060D86F3A8B7F48");
+    XBeeLRSetNwkKey((XBee*)my_xbee_lr, "CD32AAB41C54175E9060D86F3A8B7F48");
+    XBeeWriteConfig((XBee*)my_xbee_lr);
+    XBeeApplyChanges((XBee*)my_xbee_lr);
 
     // Connect to the LoRaWAN network
     port_debug_printf("Connecting...");
-    XBee_Connect((XBee*)my_xbee_lr);
+    XBeeConnect((XBee*)my_xbee_lr);
 
     uint8_t example_payload[] = {0xC0, 0xC0, 0xC0, 0xFF, 0xEE};
     uint16_t payload_len = sizeof(example_payload) / sizeof(example_payload[0]);
@@ -350,7 +279,7 @@ int main() {
         .ack = 0,
     };
 
-    if (!XBee_SendData(my_xbee_lr, &packet)) {
+    if (!XBeeSendData(my_xbee_lr, &packet)) {
         printf("Failed to send data.");
     } else {
         printf("Data sent successfully.");
@@ -358,13 +287,13 @@ int main() {
 
     // Main loop to process incoming data
     while (1) {
-        XBee_Process(my_xbee_lr);
+        XBeeProcess(my_xbee_lr);
         usleep(10000);  // Sleep for 10ms
     }
 
-    XBee_Disconnect(my_xbee_lr);
-    XBee_Close(my_xbee_lr);
-    XBee_Destroy(my_xbee_lr);  // Free the XBee LR instance
+    XBeeDisconnect(my_xbee_lr);
+    XBeeClose(my_xbee_lr);
+    XBeeDestroy(my_xbee_lr);  // Free the XBee LR instance
     printf("XBee LR module disconnected and resources cleaned up.");
 
     return 0;
@@ -467,8 +396,8 @@ static const XBeeVTable XBeeNew_VTable = {
     .connect = XBeeNew_Connect,
     .disconnect = XBeeNew_Disconnect,
     .send_data = XBeeNew_SendData,
-    .soft_reset = XBee_SoftReset,
-    .hard_reset = XBee_HardReset,
+    .soft_reset = XBeeSoftReset,
+    .hard_reset = XBeeHardReset,
     .connected = XBeeNew_Connected,
     .handle_rx_packet_frame = XBeeNew_Handle_Rx_Packet,
     .handle_transmit_status_frame = XBeeNew_Handle_Transmit_Status,
@@ -533,3 +462,62 @@ After defining and implementing your subclass, you can use it in your applicatio
 ### 4. Customize the Subclass as Needed
 
 Depending on the specific features and requirements of your new XBee module, you may need to add or modify methods and behaviors in the subclass. The provided structure and functions offer a flexible framework that can be easily extended to support additional features.
+
+## Contributing Guidelines
+
+Thank you for considering contributing to our project! To ensure a smooth and consistent development process, please follow these guidelines when contributing:
+
+### Coding Style
+
+- **Google C++ Style Guide**: Our codebase follows the [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html). Please ensure your contributions adhere to these guidelines.
+  - **Naming Conventions**:
+    - **Functions and Variables**: Use `lowerCamelCase` for function and variable names.
+    - **Class and Struct Names**: Use `UpperCamelCase`.
+    - **Macros**: Use `UPPER_SNAKE_CASE`.
+    - **Enum Names**: Enum type names should use `UpperCamelCase`, and enum values should use `kUpperCamelCase`.
+  - **File Names**:
+    - All file names should be in lowercase with words separated by underscores (`_`).
+    - Use `.h` for header files and `.c` for C implementation files.
+  - **Indentation**: Use 2 spaces for indentation. Do not use tabs.
+
+### Version of C
+
+- **C Standard**: This project adheres to the C99 standard. Ensure your code is compatible with C99 to maintain consistency and compatibility across the codebase.
+  - Use `stdint.h` for fixed-width integer types.
+  - Avoid using non-standard extensions or compiler-specific features unless absolutely necessary.
+
+### Considerations for Embedded Devices
+
+When developing for embedded systems, it's important to be mindful of the resource constraints inherent in such environments:
+
+- **Memory Usage**: Embedded devices typically have limited memory (both RAM and ROM). Avoid using large libraries or functions that require significant memory. For example:
+  - **Avoid `sprintf`**: Instead of `sprintf`, consider using more memory-efficient alternatives like `snprintf` or custom formatting functions.
+  - **Avoid Dynamic Memory Allocation**: Minimize or avoid the use of dynamic memory allocation (e.g., `malloc`, `free`) to prevent memory fragmentation and leaks.
+- **Performance**: Optimize for low power consumption and execution speed. This includes minimizing CPU cycles, reducing the complexity of algorithms, and leveraging hardware-specific features where possible.
+- **Code Size**: Keep the code size small to fit within the limited flash memory. This may involve stripping out unnecessary features or using compiler optimization flags specific to size reduction.
+
+
+### Submitting Contributions
+
+1. **Fork the Repository**: Start by forking the repository to your own GitHub account.
+2. **Create a Branch**: Create a new branch for your feature or bug fix.
+   - Use descriptive branch names (e.g., `feature/add-new-api` or `bugfix/fix-crash`).
+3. **Make Your Changes**: Implement your changes in the codebase, ensuring they adhere to the coding style guidelines mentioned above.
+4. **Test Your Changes**: Thoroughly test your code to ensure it functions correctly and does not introduce any regressions.
+5. **Commit and Push**: Commit your changes with clear and concise commit messages, then push them to your forked repository.
+6. **Create a Pull Request**: Open a pull request against the main repository's `main` branch. Include a detailed description of your changes and any relevant issue numbers.
+
+### Testing and Documentation
+
+- **Unit Tests**: If your changes introduce new functionality, please include corresponding unit tests to verify the behavior.
+- **Documentation**: Update the documentation if your changes affect the public API or usage instructions.
+
+### Code Review
+
+- Your pull request will be reviewed by one or more maintainers. Please be responsive to feedback and make any necessary changes promptly.
+
+### Licensing
+
+- By contributing to this project, you agree that your contributions will be licensed under the project's existing license.
+
+We appreciate your contributions and thank you for helping to improve this project!

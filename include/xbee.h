@@ -125,16 +125,16 @@ struct XBee {
 };
 
 // Interface functions to call the methods
-bool XBee_Init(XBee* self, uint32_t baudrate, const char* device);
-bool XBee_Connect(XBee* self);
-bool XBee_Disconnect(XBee* self);
-uint8_t XBee_SendData(XBee* self, const void*);
-bool XBee_SoftReset(XBee* self);
-void XBee_HardReset(XBee* self);
-void XBee_Process(XBee* self);
-bool XBee_Connected(XBee* self);
-bool XBee_WriteConfig(XBee* self);
-bool XBee_ApplyChanges(XBee* self);
-bool XBeeLR_SetAPIOptions(XBee* self, const uint8_t* value);
+bool XBeeInit(XBee* self, uint32_t baudrate, const char* device);
+bool XBeeConnect(XBee* self);
+bool XBeeDisconnect(XBee* self);
+uint8_t XBeeSendData(XBee* self, const void*);
+bool XBeeSoftReset(XBee* self);
+void XBeeHardReset(XBee* self);
+void XBeeProcess(XBee* self);
+bool XBeeConnected(XBee* self);
+bool XBeeWriteConfig(XBee* self);
+bool XBeeApplyChanges(XBee* self);
+bool XBeeSetAPIOptions(XBee* self, const uint8_t* value);
 
 #endif // XBEE_H

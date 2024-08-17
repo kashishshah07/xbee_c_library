@@ -50,13 +50,13 @@
  * 
  * @return True if initialization is successful, otherwise false.
  */
-bool XBee_Init(XBee* self, uint32_t baudrate, const char* device) {
+bool XBeeInit(XBee* self, uint32_t baudrate, const char* device) {
     self->frameIdCntr = 1;
     return self->vtable->init(self, baudrate, device);
 }
 
 /**
- * @brief Connects the XBeeto the network.
+ * @brief Connects the XBee to the network.
  * 
  * This function connects to the network by calling the XBee subclass specific 
  * connection implementation provided by the XBee subclass. This is a blocking function.
@@ -65,7 +65,7 @@ bool XBee_Init(XBee* self, uint32_t baudrate, const char* device) {
  * 
  * @return True if the connection is successful, otherwise false.
  */
-bool XBee_Connect(XBee* self) {
+bool XBeeConnect(XBee* self) {
     return self->vtable->connect(self);
 }
 
@@ -79,7 +79,7 @@ bool XBee_Connect(XBee* self) {
  * 
  * @return True if the disconnection is successful, otherwise false.
  */
-bool XBee_Disconnect(XBee* self) {
+bool XBeeDisconnect(XBee* self) {
     return self->vtable->disconnect(self);
 }
 
@@ -93,7 +93,7 @@ bool XBee_Disconnect(XBee* self) {
  * 
  * @return xbee_delivery_status_t, 0 if successful
  */
-uint8_t XBee_SendData(XBee* self, const void* data) {
+uint8_t XBeeSendData(XBee* self, const void* data) {
     return self->vtable->send_data(self, data);
 }
 
@@ -108,7 +108,7 @@ uint8_t XBee_SendData(XBee* self, const void* data) {
  * 
  * @return bool Returns true if the soft reset is successful, otherwise false.
  */
-bool XBee_SoftReset(XBee* self) {
+bool XBeeSoftReset(XBee* self) {
     return self->vtable->soft_reset(self);
 }
 
@@ -123,7 +123,7 @@ bool XBee_SoftReset(XBee* self) {
  * 
  * @return void This function does not return a value.
  */
-void XBee_HardReset(XBee* self) {
+void XBeeHardReset(XBee* self) {
     self->vtable->hard_reset(self);
 }
 
@@ -139,7 +139,7 @@ void XBee_HardReset(XBee* self) {
  * 
  * @return void This function does not return a value.
  */
-void XBee_Process(XBee* self) {
+void XBeeProcess(XBee* self) {
     self->vtable->process(self);
 }
 
@@ -154,7 +154,7 @@ void XBee_Process(XBee* self) {
  * 
  * @return bool Returns true if the XBee module is connected, otherwise false.
  */
-bool XBee_Connected(XBee* self) {
+bool XBeeConnected(XBee* self) {
     return self->vtable->connected(self);
 }
 
@@ -170,7 +170,7 @@ bool XBee_Connected(XBee* self) {
  * 
  * @return bool Returns true if the configuration was successfully written, otherwise false.
  */
-bool XBee_WriteConfig(XBee* self) {
+bool XBeeWriteConfig(XBee* self) {
     uint8_t response[33];
     uint8_t response_length;
     int status = api_send_at_command_and_get_response(self, AT_WR, NULL, 0, response, &response_length, 5000);
@@ -192,7 +192,7 @@ bool XBee_WriteConfig(XBee* self) {
  * @return bool Returns true if the changes were successfully applied, otherwise false.
  */
 
-bool XBee_ApplyChanges(XBee* self) {
+bool XBeeApplyChanges(XBee* self) {
     uint8_t response[33];
     uint8_t response_length;
     int status = api_send_at_command_and_get_response(self, AT_AC, NULL, 0, response, &response_length, 5000);
@@ -216,7 +216,7 @@ bool XBee_ApplyChanges(XBee* self) {
  * 
  * @return bool Returns true if the API Options was successfully set, otherwise false.
  */
-bool XBeeLR_SetAPIOptions(XBee* self, const uint8_t* value) {
+bool XBeeSetAPIOptions(XBee* self, const uint8_t* value) {
     uint8_t response[33];
     uint8_t response_length;
     int status = api_send_at_command_and_get_response(self, AT_AO, value, 1, response, &response_length, 5000);

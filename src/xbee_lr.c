@@ -56,7 +56,7 @@ static void SendJoinReqApiFrame(XBee* self);
  * 
  * @return bool Returns true if the XBee LR module is connected to the network, otherwise false.
  */
-bool XBeeLR_Connected(XBee* self) {
+bool XBeeLRConnected(XBee* self) {
     // Implement logic to check XBeeLR network connection
     uint8_t response = 0;
     uint8_t response_length;
@@ -89,7 +89,7 @@ bool XBeeLR_Connected(XBee* self) {
  * 
  * @return bool Returns true if the initialization is successful, otherwise false.
  */
-bool XBeeLR_Init(XBee* self, uint32_t baudrate, const char* device) {
+bool XBeeLRInit(XBee* self, uint32_t baudrate, const char* device) {
     // Implement XBeeLR initialization
     return (self->htable->PortUartInit(baudrate, device)) == UART_SUCCESS ? true:false;
 }
@@ -106,7 +106,7 @@ bool XBeeLR_Init(XBee* self, uint32_t baudrate, const char* device) {
  * 
  * @return void This function does not return a value.
  */
-void XBeeLR_Process(XBee* self) {
+void XBeeLRProcess(XBee* self) {
     // Implement XBeeLR specific process logic
     xbee_api_frame_t frame;
     int status = api_receive_api_frame(self,&frame);
@@ -131,7 +131,7 @@ void XBeeLR_Process(XBee* self) {
  * @return bool Returns true if the connection process was initiated
  * 
  */
-bool XBeeLR_Connect(XBee* self) {
+bool XBeeLRConnect(XBee* self) {
     // Implement XBeeLR specific connection logic 
     SendJoinReqApiFrame(self);
 
@@ -139,7 +139,7 @@ bool XBeeLR_Connect(XBee* self) {
     uint32_t start_time = port_millis();
 
     while ((port_millis() - start_time) < CONNECTION_TIMEOUT_MS) {
-        if (XBeeLR_Connected(self)) {
+        if (XBeeLRConnected(self)) {
             XBEE_DEBUG_PRINT_ENABLED("Successfully Joined\n");
             return true; // Successfully joined
         }
@@ -162,7 +162,7 @@ bool XBeeLR_Connect(XBee* self) {
  * 
  * @return bool Returns true if the disconnection process was initiated.
  */
-bool XBeeLR_Disconnect(XBee* self) {
+bool XBeeLRDisconnect(XBee* self) {
     // Implement XBeeLR specific disconnection logic
     return true;
 }
@@ -180,7 +180,7 @@ bool XBeeLR_Disconnect(XBee* self) {
  * @return xbee_delivery_status_t, 0 if successful
  * 
  */
-uint8_t XBeeLR_SendData(XBee* self, const void* data) {
+uint8_t XBeeLRSendData(XBee* self, const void* data) {
     // Prepare and send the API frame
     XBeeLRPacket_t *packet = (XBeeLRPacket_t*) data;
     uint8_t frame_data[128];  // Adjust size as needed
@@ -202,8 +202,8 @@ uint8_t XBeeLR_SendData(XBee* self, const void* data) {
     self->tx_status_received = false;  // Reset the status flag before waiting
 
     while ((port_millis() - start_time) < SEND_DATA_TIMEOUT_MS) {
-        // Process incoming frames using XBeeLR_Process
-        XBeeLR_Process(self);
+        // Process incoming frames using XBeeLRProcess
+        XBeeLRProcess(self);
 
         // Check if the status frame was received
         if (self->tx_status_received) {
@@ -223,12 +223,12 @@ uint8_t XBeeLR_SendData(XBee* self, const void* data) {
     return 0xFF;  // Indicate failure or timeout
 }
 
-bool XBeeLR_SoftReset(XBee* self) {
+bool XBeeLRSoftReset(XBee* self) {
     // Implement XBeeLR specific soft reset logic
     return true;
 }
 
-void XBeeLR_HardReset(XBee* self) {
+void XBeeLRHardReset(XBee* self) {
     // Implement XBeeLR specific hard reset logic
 }
 
@@ -247,7 +247,7 @@ void XBeeLR_HardReset(XBee* self) {
  * 
  * @return bool Returns true if the AppEUI was successfully set, otherwise false.
  */
-bool XBeeLR_SetAppEUI(XBee* self, const char* value) {
+bool XBeeLRSetAppEUI(XBee* self, const char* value) {
     uint8_t response[17];
     uint8_t response_length;
     uint8_t param_length = (value != NULL) ? strlen(value) : 0;
@@ -271,7 +271,7 @@ bool XBeeLR_SetAppEUI(XBee* self, const char* value) {
  * 
  * @return bool Returns true if the AppKey was successfully set, otherwise false.
  */
-bool XBeeLR_SetAppKey(XBee* self, const char* value) {
+bool XBeeLRSetAppKey(XBee* self, const char* value) {
     uint8_t response[33];
     uint8_t response_length;
     uint8_t param_length = (value != NULL) ? strlen(value) : 0;
@@ -296,7 +296,7 @@ bool XBeeLR_SetAppKey(XBee* self, const char* value) {
  * 
  * @return bool Returns true if the NwkKey was successfully set, otherwise false.
  */
-bool XBeeLR_SetNwkKey(XBee* self, const char* value) {
+bool XBeeLRSetNwkKey(XBee* self, const char* value) {
     uint8_t response[33];
     uint8_t response_length;
     uint8_t param_length = (value != NULL) ? strlen(value) : 0;
@@ -322,7 +322,7 @@ bool XBeeLR_SetNwkKey(XBee* self, const char* value) {
  * 
  * @return bool Returns true if the DevEUI was successfully retrieved, otherwise false.
  */
-bool XBeeLR_GetDevEUI(XBee* self, uint8_t* response_buffer, uint8_t buffer_size) {
+bool XBeeLRGetDevEUI(XBee* self, uint8_t* response_buffer, uint8_t buffer_size) {
     // Clear buffer
     if(buffer_size < 17){
         return false;
@@ -372,7 +372,7 @@ static void SendJoinReqApiFrame(XBee* self) {
  * 
  * @return void This function does not return a value.
  */
-static void XBeeLR_Handle_Rx_Packet(XBee* self, void *param) {
+static void XBeeLRHandle_Rx_Packet(XBee* self, void *param) {
 
     if(param == NULL) return;
 
@@ -421,7 +421,7 @@ static void XBeeLR_Handle_Rx_Packet(XBee* self, void *param) {
     // Add further processing as needed
 }
 
-void XBeeLR_Handle_Transmit_Status(XBee* self, void *param) {
+void XBeeLRHandle_Transmit_Status(XBee* self, void *param) {
 
     if(param == NULL) return;
 
@@ -454,17 +454,17 @@ void XBeeLR_Handle_Transmit_Status(XBee* self, void *param) {
 }
 
 // VTable for XBeeLR
-const XBeeVTable XBeeLR_VTable = {
-    .init = XBeeLR_Init,
-    .process = XBeeLR_Process,
-    .connect = XBeeLR_Connect,
-    .disconnect = XBeeLR_Disconnect,
-    .send_data = XBeeLR_SendData,
-    .soft_reset = XBeeLR_SoftReset,
-    .hard_reset = XBeeLR_HardReset,
-    .connected = XBeeLR_Connected,
-    .handle_rx_packet_frame = XBeeLR_Handle_Rx_Packet,
-    .handle_transmit_status_frame = XBeeLR_Handle_Transmit_Status,
+const XBeeVTable XBeeLRVTable = {
+    .init = XBeeLRInit,
+    .process = XBeeLRProcess,
+    .connect = XBeeLRConnect,
+    .disconnect = XBeeLRDisconnect,
+    .send_data = XBeeLRSendData,
+    .soft_reset = XBeeLRSoftReset,
+    .hard_reset = XBeeLRHardReset,
+    .connected = XBeeLRConnected,
+    .handle_rx_packet_frame = XBeeLRHandle_Rx_Packet,
+    .handle_transmit_status_frame = XBeeLRHandle_Transmit_Status,
 };
 
 /**
@@ -481,14 +481,14 @@ const XBeeVTable XBeeLR_VTable = {
  * 
  * @return XBeeLR* Pointer to the newly created XBeeLR instance.
  */
-XBeeLR* XBeeLR_Create(const XBeeCTable* cTable, const XBeeHTable* hTable) {
+XBeeLR* XBeeLRCreate(const XBeeCTable* cTable, const XBeeHTable* hTable) {
     XBeeLR* instance = (XBeeLR*)malloc(sizeof(XBeeLR));
-    instance->base.vtable = &XBeeLR_VTable;
+    instance->base.vtable = &XBeeLRVTable;
     instance->base.htable = hTable;
     instance->base.ctable = cTable;
     return instance;
 }
 
-void XBeeLR_Destroy(XBeeLR* self) {
+void XBeeLRDestroy(XBeeLR* self) {
     free(self);
 }

@@ -64,10 +64,10 @@ typedef struct {
 } XBeeLR;
 
 
-XBeeLR* XBeeLR_Create(const XBeeCTable* cTable, const XBeeHTable* hTable);
-bool XBeeLR_GetDevEUI(XBee* self, uint8_t* response_buffer, uint8_t buffer_size);
-bool XBeeLR_SetAppEUI(XBee* self, const char* value);
-bool XBeeLR_SetAppKey(XBee* self, const char* value);
-bool XBeeLR_SetNwkKey(XBee* self, const char* value);
+XBeeLR* XBeeLRCreate(const XBeeCTable* cTable, const XBeeHTable* hTable);
+bool XBeeLRGetDevEUI(XBee* self, uint8_t* response_buffer, uint8_t buffer_size);
+bool XBeeLRSetAppEUI(XBee* self, const char* value);
+bool XBeeLRSetAppKey(XBee* self, const char* value);
+bool XBeeLRSetNwkKey(XBee* self, const char* value);
 
 #endif // XBEELR_H
