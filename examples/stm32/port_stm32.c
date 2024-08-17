@@ -66,11 +66,12 @@ int portUartInit(uint32_t baudrate, const char *device) {
  * 
  * @return int Returns the number of bytes successfully written.
  */
-    if (HAL_UART_Transmit(&huart1, (uint8_t *)data, length, HAL_MAX_DELAY) == HAL_OK) {
+
 int portUartWrite(const uint8_t *data, int length) {
-        return length;  // Return the number of bytes written
-    }
-    return -1;  // Transmission failed
+   if (HAL_UART_Transmit(&huart1, (uint8_t *)data, length, HAL_MAX_DELAY) == HAL_OK) {
+      return length;  // Return the number of bytes written
+   }
+   return -1;  // Transmission failed
 }
 
 /**
@@ -84,11 +85,11 @@ int portUartWrite(const uint8_t *data, int length) {
  * 
  * @return int Returns the number of bytes actually read, or -1 if an error occurred.
  */
-    if (HAL_UART_Receive(&huart1, buffer, length, HAL_MAX_DELAY) == HAL_OK) {
 int portUartRead(uint8_t *buffer, int length) {
-        return length;  // Return the number of bytes read
-    }
-    return -1;  // Reception failed
+   if (HAL_UART_Receive(&huart1, buffer, length, HAL_MAX_DELAY) == HAL_OK) {
+      return length;  // Return the number of bytes read
+   }
+   return -1;  // Reception failed
 }
 
 /**
@@ -96,8 +97,9 @@ int portUartRead(uint8_t *buffer, int length) {
  * 
  * This function clears any data that may be present in the UART's receive buffer.
  */
-    __HAL_UART_FLUSH_DRREGISTER(&huart1);
+
 void portFlushRx() {
+   __HAL_UART_FLUSH_DRREGISTER(&huart1);
 }
 
 /**
@@ -107,8 +109,8 @@ void portFlushRx() {
  * 
  * @return uint32_t The number of milliseconds since startup.
  */
-    return HAL_GetTick();
 uint32_t portMillis() {
+   return HAL_GetTick();
 }
 
 /**
@@ -118,8 +120,8 @@ uint32_t portMillis() {
  * 
  * @param ms The number of milliseconds to delay.
  */
-    HAL_Delay(ms);
 void portDelay(uint32_t ms) {
+   HAL_Delay(ms);
 }
 
 /**
@@ -132,12 +134,12 @@ void portDelay(uint32_t ms) {
  * @param ... The values to print.
  */
 void portDebugPrintf(const char *format, ...) {
-    char buffer[128];
-    va_list args;
-    va_start(args, format);
-    vsnprintf(buffer, sizeof(buffer), format, args);
-    va_end(args);
+   char buffer[128];
+   va_list args;
+   va_start(args, format);
+   vsnprintf(buffer, sizeof(buffer), format, args);
+   va_end(args);
 
-    // Transmit the formatted string over the VCOM port
-    CDC_Transmit_FS((uint8_t*)buffer, strlen(buffer));
+   // Transmit the formatted string over the VCOM port
+   CDC_Transmit_FS((uint8_t*)buffer, strlen(buffer));
 }

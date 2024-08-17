@@ -48,10 +48,10 @@
  * 
  * @return int Returns 0 on success, -1 on failure.
  */
+int portUartInit(uint32_t baudrate, const char *device) {
     gpio_set_function(COMM_TX_PIN, GPIO_FUNC_UART_AUX);
     gpio_set_function(COMM_RX_PIN, GPIO_FUNC_UART_AUX);
     uart_init(COMM_UART, baudrate);
-int portUartInit(uint32_t baudrate, const char *device) {
     return 0;  // Initialization successful
 }
 
@@ -106,8 +106,8 @@ int portUartRead(uint8_t *buffer, int length) {
  * 
  * This function clears any data that may be present in the UART's receive buffer.
  */
-    uart_set_hw_flow(COMM_UART, false, false);
 void portFlushRx() {
+    uart_set_hw_flow(COMM_UART, false, false);
 }
 
 /**
@@ -117,8 +117,8 @@ void portFlushRx() {
  * 
  * @return uint32_t The number of milliseconds since startup.
  */
-    return to_ms_since_boot(get_absolute_time());
 uint32_t portMillis() {
+    return to_ms_since_boot(get_absolute_time());
 }
 
 /**
@@ -128,8 +128,8 @@ uint32_t portMillis() {
  * 
  * @param ms The number of milliseconds to delay.
  */
-    sleep_ms(ms);
 void portDelay(uint32_t ms) {
+    sleep_ms(ms);
 }
 
 /**

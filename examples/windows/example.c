@@ -100,12 +100,12 @@ void OnSendCallback(XBee* self, void* data) {
  */
 int main() {
     const XBeeHTable XBeeLRHTable = {
-        .PortUartRead = port_uart_read,
-        .PortUartWrite = port_uart_write,
-        .PortMillis = port_millis,
-        .PortFlushRx = port_flush_rx,
-        .PortUartInit = port_uart_init,
-        .PortDelay = port_delay,
+        .PortUartRead = portUartRead,
+        .PortUartWrite = portUartWrite,
+        .PortMillis = portMillis,
+        .PortFlushRx = portFlushRx,
+        .PortUartInit = portUartInit,
+        .PortDelay = portDelay,
     };
 
     const XBeeCTable XBeeLRCTable = {

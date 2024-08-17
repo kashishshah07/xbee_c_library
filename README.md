@@ -2,7 +2,7 @@
 # XBee C Library
 
 ### Overview
-This library provides a framework for interfacing with XBee modules using an XBee Library API that abstracts AT commands and API frames. It supports multiple platforms including Unix, STM32, RP2350, and EFM32.
+This library provides a framework for interfacing with XBee modules using an XBee Library API that abstracts AT commands and API frames. It supports multiple platforms including Arduino, Unix, STM32, RP2350, and EFM32.
 
 ### Currently Supported XBees
 - XBee LR (LoRaWAN)
@@ -80,12 +80,12 @@ XBeeLR* my_xbee_lr;
 
 // Hardware Abstraction Function Pointer Table for XBeeLR
 const XBeeHTable XBeeLRHTable = {
-    .PortUartRead = port_uart_read,
-    .PortUartWrite = port_uart_write,
-    .PortMillis = port_millis,
-    .PortFlushRx = port_flush_rx,
-    .PortUartInit = port_uart_init,
-    .PortDelay = port_delay,
+    .PortUartRead = portUartRead,
+    .PortUartWrite = portUartWrite,
+    .PortMillis = portMillis,
+    .PortFlushRx = portFlushRx,
+    .PortUartInit = portUartInit,
+    .PortDelay = portDelay,
 };
 
 // Callback Function Pointer Table for XBeeLR
@@ -121,10 +121,10 @@ After creating the XBee LR instance, initialize the XBee LR module, configure th
     // Read LoRaWAN DevEUI and print it
     uint8_t dev_eui[17];
     XBeeLRGetDevEUI((XBee*)my_xbee_lr, dev_eui, sizeof(dev_eui));
-    port_debug_printf("DEVEUI: %s", dev_eui);
+    portDebugPrintf("DEVEUI: %s", dev_eui);
 
     // Set LoRaWAN Network Settings
-    port_debug_printf("Configuring...");
+    portDebugPrintf("Configuring...");
     XBeeLRSetAppEUI((XBee*)my_xbee_lr, "37D56A3F6CDCF0A5");
     XBeeLRSetAppKey((XBee*)my_xbee_lr, "CD32AAB41C54175E9060D86F3A8B7F48");
     XBeeLRSetNwkKey((XBee*)my_xbee_lr, "CD32AAB41C54175E9060D86F3A8B7F48");
@@ -132,7 +132,7 @@ After creating the XBee LR instance, initialize the XBee LR module, configure th
     XBeeApplyChanges((XBee*)my_xbee_lr);
 
     // Connect to the LoRaWAN network
-    port_debug_printf("Connecting...");
+    portDebugPrintf("Connecting...");
     XBeeConnect((XBee*)my_xbee_lr);
 
     printf("XBee LR module initialized and connected.");
@@ -169,16 +169,16 @@ Handle data received from the XBee LR module using the `OnReceiveCallback` funct
 ```c
 void OnReceiveCallback(XBee* self, void* data){
     XBeeLRPacket_t* packet = (XBeeLRPacket_t*) data;
-    port_debug_printf("Received Packet: ");
+    portDebugPrintf("Received Packet: ");
     for (int i = 1; i < packet->payloadSize; i++) {
-        port_debug_printf("%02X ", packet->payload[i]);
+        portDebugPrintf("%02X ", packet->payload[i]);
     }
-    port_debug_printf("");
-    port_debug_printf("Ack %u", packet->ack);
-    port_debug_printf("Port %u", packet->port);
-    port_debug_printf("RSSI %d", packet->rssi);
-    port_debug_printf("SNR %d", packet->snr);
-    port_debug_printf("Downlink Counter %lu", packet->counter);
+    portDebugPrintf("");
+    portDebugPrintf("Ack %u", packet->ack);
+    portDebugPrintf("Port %u", packet->port);
+    portDebugPrintf("RSSI %d", packet->rssi);
+    portDebugPrintf("SNR %d", packet->snr);
+    portDebugPrintf("Downlink Counter %lu", packet->counter);
 }
 
 // Assuming a continuous loop to process incoming data
@@ -211,12 +211,12 @@ XBeeLR* my_xbee_lr;
 
 // Hardware Abstraction Function Pointer Table for XBeeLR
 const XBeeHTable XBeeLRHTable = {
-    .PortUartRead = port_uart_read,
-    .PortUartWrite = port_uart_write,
-    .PortMillis = port_millis,
-    .PortFlushRx = port_flush_rx,
-    .PortUartInit = port_uart_init,
-    .PortDelay = port_delay,
+    .PortUartRead = portUartRead,
+    .PortUartWrite = portUartWrite,
+    .PortMillis = portMillis,
+    .PortFlushRx = portFlushRx,
+    .PortUartInit = portUartInit,
+    .PortDelay = portDelay,
 };
 
 // Callback Function Pointer Table for XBeeLR
@@ -227,16 +227,16 @@ const XBeeCTable XBeeLRCTable = {
 
 void OnReceiveCallback(XBee* self, void* data){
     XBeeLRPacket_t* packet = (XBeeLRPacket_t*) data;
-    port_debug_printf("Received Packet: ");
+    portDebugPrintf("Received Packet: ");
     for (int i = 1; i < packet->payloadSize; i++) {
-        port_debug_printf("%02X ", packet->payload[i]);
+        portDebugPrintf("%02X ", packet->payload[i]);
     }
-    port_debug_printf("");
-    port_debug_printf("Ack %u", packet->ack);
-    port_debug_printf("Port %u", packet->port);
-    port_debug_printf("RSSI %d", packet->rssi);
-    port_debug_printf("SNR %d", packet->snr);
-    port_debug_printf("Downlink Counter %lu", packet->counter);
+    portDebugPrintf("");
+    portDebugPrintf("Ack %u", packet->ack);
+    portDebugPrintf("Port %u", packet->port);
+    portDebugPrintf("RSSI %d", packet->rssi);
+    portDebugPrintf("SNR %d", packet->snr);
+    portDebugPrintf("Downlink Counter %lu", packet->counter);
 }
 
 int main() {
@@ -256,10 +256,10 @@ int main() {
     // Read LoRaWAN DevEUI and print it
     uint8_t dev_eui[17];
     XBeeLRGetDevEUI((XBee*)my_xbee_lr, dev_eui, sizeof(dev_eui));
-    port_debug_printf("DEVEUI: %s", dev_eui);
+    portDebugPrintf("DEVEUI: %s", dev_eui);
 
     // Set LoRaWAN Network Settings
-    port_debug_printf("Configuring...");
+    portDebugPrintf("Configuring...");
     XBeeLRSetAppEUI((XBee*)my_xbee_lr, "37D56A3F6CDCF0A5");
     XBeeLRSetAppKey((XBee*)my_xbee_lr, "CD32AAB41C54175E9060D86F3A8B7F48");
     XBeeLRSetNwkKey((XBee*)my_xbee_lr, "CD32AAB41C54175E9060D86F3A8B7F48");
@@ -267,7 +267,7 @@ int main() {
     XBeeApplyChanges((XBee*)my_xbee_lr);
 
     // Connect to the LoRaWAN network
-    port_debug_printf("Connecting...");
+    portDebugPrintf("Connecting...");
     XBeeConnect((XBee*)my_xbee_lr);
 
     uint8_t example_payload[] = {0xC0, 0xC0, 0xC0, 0xFF, 0xEE};
@@ -366,8 +366,8 @@ typedef struct {
 } XBeeNew;
 
 // Function prototypes for the subclass
-XBeeNew* XBeeNew_Create(const XBeeCTable* cTable, const XBeeHTable* hTable);
-void XBeeNew_Destroy(XBeeNew* self);
+XBeeNew* XBeeNewCreate(const XBeeCTable* cTable, const XBeeHTable* hTable);
+void XBeeNewDestroy(XBeeNew* self);
 
 #endif // XBEE_NEW_H
 ```
@@ -380,31 +380,31 @@ In `xbee_new.c`, implement the methods specific to your new XBee module. This wi
 #include "xbee_new.h"
 #include <stdlib.h>
 
-static bool XBeeNew_Init(XBee* self, uint32_t baudrate, const char* device);
-static void XBeeNew_Process(XBee* self);
-static bool XBeeNew_Connect(XBee* self);
-static bool XBeeNew_Disconnect(XBee* self);
-static bool XBeeNew_SendData(XBee* self, const void* data);
-static bool XBeeNew_Connected(XBee* self);
-static void XBeeNew_Handle_Rx_Packet(XBee* self, void* param);
-static void XBeeNew_Handle_Transmit_Status(XBee* self, void* param);
+static bool XBeeNewInit(XBee* self, uint32_t baudrate, const char* device);
+static void XBeeNewProcess(XBee* self);
+static bool XBeeNewConnect(XBee* self);
+static bool XBeeNewDisconnect(XBee* self);
+static bool XBeeNewSendData(XBee* self, const void* data);
+static bool XBeeNewConnected(XBee* self);
+static void XBeeNewHandleRxPacket(XBee* self, void* param);
+static void XBeeNewHandleTransmitStatus(XBee* self, void* param);
 
 // Define the VTable for the new XBee module
 static const XBeeVTable XBeeNew_VTable = {
-    .init = XBeeNew_Init,
-    .process = XBeeNew_Process,
+    .init = XBeeNewInit,
+    .process = XBeeNewProcess,
     .connect = XBeeNew_Connect,
-    .disconnect = XBeeNew_Disconnect,
-    .send_data = XBeeNew_SendData,
-    .soft_reset = XBeeSoftReset,
-    .hard_reset = XBeeHardReset,
-    .connected = XBeeNew_Connected,
-    .handle_rx_packet_frame = XBeeNew_Handle_Rx_Packet,
-    .handle_transmit_status_frame = XBeeNew_Handle_Transmit_Status,
+    .disconnect = XBeeewDisconnect,
+    .sendData = XBeeNewSendData,
+    .softReset = XBeeSoftReset,
+    .hardReset = XBeeHardReset,
+    .connected = XBeeNewConnected,
+    .handleRxPacketFrame = XBeeNewHandleRxPacket,
+    .handleTransmitStatusFrame = XBeeNewHandleTransmitStatus,
 };
 
 // Implement the create and destroy methods
-XBeeNew* XBeeNew_Create(const XBeeCTable* cTable, const XBeeHTable* hTable) {
+XBeeNew* XBeeNewCreate(const XBeeCTable* cTable, const XBeeHTable* hTable) {
     XBeeNew* instance = (XBeeNew*)malloc(sizeof(XBeeNew));
     instance->base.vtable = &XBeeNew_VTable;
     instance->base.htable = hTable;
@@ -412,45 +412,45 @@ XBeeNew* XBeeNew_Create(const XBeeCTable* cTable, const XBeeHTable* hTable) {
     return instance;
 }
 
-void XBeeNew_Destroy(XBeeNew* self) {
+void XBeeNewDestroy(XBeeNew* self) {
     free(self);
 }
 
 // Implement the specific methods for the new XBee module
-static bool XBeeNew_Init(XBee* self, uint32_t baudrate, const char* device) {
+static bool XBeeNewInit(XBee* self, uint32_t baudrate, const char* device) {
     // Implement initialization logic specific to XBeeNew
     return true;
 }
 
-static void XBeeNew_Process(XBee* self) {
+static void XBeeNewProcess(XBee* self) {
     // Implement process logic specific to XBeeNew
 }
 
-static bool XBeeNew_Connect(XBee* self) {
+static bool XBeeNewConnect(XBee* self) {
     // Implement connection logic specific to XBeeNew
     return true;
 }
 
-static bool XBeeNew_Disconnect(XBee* self) {
+static bool XBeeNewDisconnect(XBee* self) {
     // Implement disconnection logic specific to XBeeNew
     return true;
 }
 
-static bool XBeeNew_SendData(XBee* self, const void* data) {
+static bool XBeeNewSendData(XBee* self, const void* data) {
     // Implement data sending logic specific to XBeeNew
     return true;
 }
 
-static bool XBeeNew_Connected(XBee* self) {
+static bool XBeeNewConnected(XBee* self) {
     // Implement logic to check if XBeeNew is connected
     return true;
 }
 
-static void XBeeNew_Handle_Rx_Packet(XBee* self, void* param) {
+static void XBeeNewHandleRxPacket(XBee* self, void* param) {
     // Implement logic to handle received packets specific to XBeeNew
 }
 
-static void XBeeNew_Handle_Transmit_Status(XBee* self, void* param) {
+static void XBeeNewHandleTransmitStatus(XBee* self, void* param) {
     // Implement logic to handle transmit status specific to XBeeNew
 }
 ```

@@ -28,7 +28,7 @@ add_executable(xbee_example
 )
 
 # Add necessary libraries for the Pico SDK
-target_link_libraries(xbee_example pico_stdlib hardware_uart)
+target_link_libraries(xbee_example pico_stdlib hardware_uart hardware_gpio)
 
 # enable usb output, disable uart output
 pico_enable_stdio_usb(xbee_example 1)
