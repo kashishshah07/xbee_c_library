@@ -54,16 +54,16 @@
  */
 void OnReceiveCallback(XBee* self, void* data) {
     XBeeLRPacket_t* packet = (XBeeLRPacket_t*) data;
-    port_debug_printf("Received Packet: ");
+    portDebugPrintf("Received Packet: ");
     for (int i = 0; i < packet->payloadSize; i++) {
-        port_debug_printf("0x%02X ", packet->payload[i]);
+        portDebugPrintf("0x%02X ", packet->payload[i]);
     }
-    port_debug_printf("\n");
-    port_debug_printf("Ack %u\n", packet->ack);
-    port_debug_printf("Port %u\n", packet->port);
-    port_debug_printf("RSSI %d\n", packet->rssi);
-    port_debug_printf("SNR %d\n", packet->snr);
-    port_debug_printf("Downlink Counter %lu\n", packet->counter);
+    portDebugPrintf("\n");
+    portDebugPrintf("Ack %u\n", packet->ack);
+    portDebugPrintf("Port %u\n", packet->port);
+    portDebugPrintf("RSSI %d\n", packet->rssi);
+    portDebugPrintf("SNR %d\n", packet->snr);
+    portDebugPrintf("Downlink Counter %lu\n", packet->counter);
 }
 
 /**
@@ -83,16 +83,16 @@ void OnSendCallback(XBee* self, void* data) {
     XBeeLRPacket_t* packet = (XBeeLRPacket_t*) data;
     switch(packet->status){
         case 0:
-            port_debug_printf("Send successful (frameId: 0x%02X)\n",packet->frameId);
+            portDebugPrintf("Send successful (frameId: 0x%02X)\n",packet->frameId);
             break;
         case 0x01:
-            port_debug_printf("Send failed (frameId: 0x%02X) (reason: Ack Failed)\n",packet->frameId);
+            portDebugPrintf("Send failed (frameId: 0x%02X) (reason: Ack Failed)\n",packet->frameId);
             break;
         case 0x022:
-            port_debug_printf("Send failed (frameId: 0x%02X) (reason: Not Connected)\n",packet->frameId);
+            portDebugPrintf("Send failed (frameId: 0x%02X) (reason: Not Connected)\n",packet->frameId);
             break;
         default:
-            port_debug_printf("Send failed (frameId: 0x%02X) (reason: 0x%02X)\n",packet->frameId, packet->status);
+            portDebugPrintf("Send failed (frameId: 0x%02X) (reason: 0x%02X)\n",packet->frameId, packet->status);
             break;
     }
 }
@@ -103,104 +103,104 @@ int main() {
     stdio_init_all();
 
     // Hardware Abstraction Function Pointer Table for XBeeLR (needs to be set!)
-    const XBeeHTable XBeeLR_HTable = {
-        .PortUartRead = port_uart_read,
-        .PortUartWrite = port_uart_write,
-        .PortMillis = port_millis,
-        .PortFlushRx = port_flush_rx,
-        .PortUartInit = port_uart_init,
-        .PortDelay = port_delay,
+    const XBeeHTable XBeeLRHTable = {
+        .PortUartRead = portUartRead,
+        .PortUartWrite = portUartWrite,
+        .PortMillis = portMillis,
+        .PortFlushRx = portFlushRx,
+        .PortUartInit = portUartInit,
+        .PortDelay = portDelay,
     };
 
     // Callback Function Pointer Table for XBeeLR
-    const XBeeCTable XBeeLR_CTable = {
+    const XBeeCTable XBeeLRCTable = {
         .OnReceiveCallback = OnReceiveCallback, // can be left as all NULL if no callbacks needed
         .OnSendCallback = NULL,                 // can be left as all NULL if no callbacks needed
     };
 
-    port_delay(20000); //workaround to give time for debug usb port connection after booting
+    portDelay(20000); //workaround to give time for debug usb port connection after booting
 
-    port_debug_printf("XBee LR Example App\n");
+    portDebugPrintf("XBee LR Example App\n");
 
     // Create an instance of the XBeeLR class
-    XBeeLR* my_xbee_lr = XBeeLR_Create(&XBeeLR_CTable, &XBeeLR_HTable);
+    XBeeLR* myXbeeLr = XBeeLRCreate(&XBeeLRCTable, &XBeeLRHTable);
 
 
     // Initialize the XBee module
-    if (!XBee_Init((XBee*)my_xbee_lr, 9600, NULL)) {
-        port_debug_printf("Failed to initialize XBee\n");
+    if (!XBeeInit((XBee*)myXbeeLr, 9600, NULL)) {
+        portDebugPrintf("Failed to initialize XBee\n");
         return -1;
     }
 
     // Read LoRaWAN DevEUI and print
-    uint8_t dev_eui[17];
-    if(!XBeeLR_GetDevEUI((XBee*)my_xbee_lr, dev_eui, sizeof(dev_eui))){
-        XBeeLR_GetDevEUI((XBee*)my_xbee_lr, dev_eui, sizeof(dev_eui));
+    uint8_t devEui[17];
+    if(!XBeeLRGetDevEUI((XBee*)myXbeeLr, devEui, sizeof(devEui))){
+        XBeeLRGetDevEUI((XBee*)myXbeeLr, devEui, sizeof(devEui));
     }
-    port_debug_printf("DEVEUI: %s\n", dev_eui);
+    portDebugPrintf("DEVEUI: %s\n", devEui);
 
     // Set LoRaWAN Network Settings
-    port_debug_printf("Configuring...\n");
-    XBeeLR_SetAppEUI((XBee*)my_xbee_lr, "37D56A3F6CDCF0A5");
-    XBeeLR_SetAppKey((XBee*)my_xbee_lr, "CD32AAB41C54175E9060D86F3A8B7F48");
-    XBeeLR_SetNwkKey((XBee*)my_xbee_lr, "CD32AAB41C54175E9060D86F3A8B7F48");
-    XBeeLR_SetAPIOptions((XBee*)my_xbee_lr, (const uint8_t[]){0x01});
-    XBee_WriteConfig((XBee*)my_xbee_lr);
-    XBee_ApplyChanges((XBee*)my_xbee_lr);
+    portDebugPrintf("Configuring...\n");
+    XBeeLRSetAppEUI((XBee*)myXbeeLr, "37D56A3F6CDCF0A5");
+    XBeeLRSetAppKey((XBee*)myXbeeLr, "CD32AAB41C54175E9060D86F3A8B7F48");
+    XBeeLRSetNwkKey((XBee*)myXbeeLr, "CD32AAB41C54175E9060D86F3A8B7F48");
+    XBeeSetAPIOptions((XBee*)myXbeeLr, (const uint8_t[]){0x01});
+    XBeeWriteConfig((XBee*)myXbeeLr);
+    XBeeApplyChanges((XBee*)myXbeeLr);
 
     // Connect to LoRaWAN network
-    port_debug_printf("Connecting...\n");
-    if (!XBee_Connect((XBee*)my_xbee_lr)) {
-        port_debug_printf("Failed to connect.\n");
+    portDebugPrintf("Connecting...\n");
+    if (!XBeeConnect((XBee*)myXbeeLr)) {
+        portDebugPrintf("Failed to connect.\n");
     } else {
-        port_debug_printf("Connected!\n");
+        portDebugPrintf("Connected!\n");
     }
 
     // XBeeLR payload to send
-    uint8_t example_payload[] = {0xC0, 0xC0, 0xC0, 0xFF, 0xEE};
-    uint16_t payload_len = sizeof(example_payload) / sizeof(example_payload[0]);
+    uint8_t examplePayload[] = {0xC0, 0xC0, 0xC0, 0xFF, 0xEE};
+    uint16_t payloadLen = sizeof(examplePayload) / sizeof(examplePayload[0]);
     XBeeLRPacket_t packet = {
-        .payload = example_payload,
-        .payloadSize = payload_len,
+        .payload = examplePayload,
+        .payloadSize = payloadLen,
         .port = 2,
         .ack = 0,
     };
 
     // Main loop
-    uint32_t start_time = port_millis();
+    uint32_t startTime = portMillis();
     while (1) {
         // Let XBee class process any serial data
-        XBee_Process((XBee*)my_xbee_lr);
+        XBeeProcess((XBee*)myXbeeLr);
 
         // Check if 10 seconds have passed
-        if (port_millis() - start_time >= 10000) {
+        if (portMillis() - startTime >= 10000) {
             // Send data if connected, else reconnect
-            if (XBee_Connected((XBee*)my_xbee_lr)) {
-                port_debug_printf("Sending 0x");
-                for (int i = 0; i < payload_len; i++) {
-                    port_debug_printf("%02X", example_payload[i]);
+            if (XBeeConnected((XBee*)myXbeeLr)) {
+                portDebugPrintf("Sending 0x");
+                for (int i = 0; i < payloadLen; i++) {
+                    portDebugPrintf("%02X", examplePayload[i]);
                 }
-                port_debug_printf("\n");
-                if (XBee_SendData((XBee*)my_xbee_lr, &packet)) {
-                    port_debug_printf("Failed to send data.\n");
+                portDebugPrintf("\n");
+                if (XBeeSendData((XBee*)myXbeeLr, &packet)) {
+                    portDebugPrintf("Failed to send data.\n");
                 } else {
-                    port_debug_printf("Data sent successfully.\n");
+                    portDebugPrintf("Data sent successfully.\n");
                 }
 
                 // Update payload
                 packet.payload[0] = packet.payload[0] + 1; // change payload
             } else {
-                port_debug_printf("Not connected. Connecting...\n");
-                if (!XBee_Connect((XBee*)my_xbee_lr)) {
-                    port_debug_printf("Failed to connect.\n");
+                portDebugPrintf("Not connected. Connecting...\n");
+                if (!XBeeConnect((XBee*)myXbeeLr)) {
+                    portDebugPrintf("Failed to connect.\n");
                 } else {
-                    port_debug_printf("Connected!\n");
+                    portDebugPrintf("Connected!\n");
                 }
             }
             // Reset the start time
-            start_time = port_millis();
+            startTime = portMillis();
         }
-        port_delay(1);
+        portDelay(1);
     }
     return 0;
 }
