@@ -38,7 +38,7 @@
 #include "port.h"
 #include "stm32f4xx_hal.h"  // Include STM32 HAL header for the target device
 
-UART_HandleTypeDef huart_debug;  // Handle for debug UART
+UART_HandleTypeDef huartDebug;  // Handle for debug UART
 
 /**
  * @brief Redirect printf output to the specified UART.
@@ -51,7 +51,7 @@ UART_HandleTypeDef huart_debug;  // Handle for debug UART
  * @return int The printed character.
  */
 int fputc(int ch, FILE *f) {
-    HAL_UART_Transmit(&huart_debug, (uint8_t *)&ch, 1, HAL_MAX_DELAY);
+    HAL_UART_Transmit(&huartDebug, (uint8_t *)&ch, 1, HAL_MAX_DELAY);
     return ch;
 }
 
@@ -61,15 +61,15 @@ int fputc(int ch, FILE *f) {
  * This function initializes a UART port to be used for printf output.
  */
 void DebugUartInit() {
-    huart_debug.Instance = USART2;  // Use USART2 for debugging (adjust as necessary)
-    huart_debug.Init.BaudRate = 115200;
-    huart_debug.Init.WordLength = UART_WORDLENGTH_8B;
-    huart_debug.Init.StopBits = UART_STOPBITS_1;
-    huart_debug.Init.Parity = UART_PARITY_NONE;
-    huart_debug.Init.Mode = UART_MODE_TX_RX;
-    huart_debug.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-    huart_debug.Init.OverSampling = UART_OVERSAMPLING_16;
-    HAL_UART_Init(&huart_debug);
+    huartDebug.Instance = USART2;  // Use USART2 for debugging (adjust as necessary)
+    huartDebug.Init.BaudRate = 115200;
+    huartDebug.Init.WordLength = UART_WORDLENGTH_8B;
+    huartDebug.Init.StopBits = UART_STOPBITS_1;
+    huartDebug.Init.Parity = UART_PARITY_NONE;
+    huartDebug.Init.Mode = UART_MODE_TX_RX;
+    huartDebug.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+    huartDebug.Init.OverSampling = UART_OVERSAMPLING_16;
+    HAL_UART_Init(&huartDebug);
 }
 
 /**
@@ -154,29 +154,29 @@ int main() {
         .OnSendCallback = OnSendCallback,
     };
 
-    XBeeLR* my_xbee_lr = XBeeLRCreate(&XBeeLRCTable, &XBeeLRHTable);
+    XBeeLR* myXbeeLr = XBeeLRCreate(&XBeeLRCTable, &XBeeLRHTable);
 
-    if (!XBeeInit((XBee*)my_xbee_lr, 9600, NULL)) {
+    if (!XBeeInit((XBee*)myXbeeLr, 9600, NULL)) {
         printf("Failed to initialize XBee\n");
         return -1;
     }
 
     // Read and print the LoRaWAN Device EUI
-    uint8_t dev_eui[17];
-    XBeeLRGetDevEUI((XBee*)my_xbee_lr, dev_eui, sizeof(dev_eui));
-    printf("DEVEUI: %s\n", dev_eui);
+    uint8_t devEui[17];
+    XBeeLRGetDevEUI((XBee*)myXbeeLr, devEui, sizeof(devEui));
+    printf("DEVEUI: %s\n", devEui);
 
     // Set LoRaWAN network settings
     printf("Configuring...\n");
-    XBeeLRSetAppEUI((XBee*)my_xbee_lr, "37D56A3F6CDCF0A5");
-    XBeeLRSetAppKey((XBee*)my_xbee_lr, "CD32AAB41C54175E9060D86F3A8B7F48");
-    XBeeLRSetNwkKey((XBee*)my_xbee_lr, "CD32AAB41C54175E9060D86F3A8B7F48");
-    XBeeWriteConfig((XBee*)my_xbee_lr);
-    XBeeApplyChanges((XBee*)my_xbee_lr);
+    XBeeLRSetAppEUI((XBee*)myXbeeLr, "37D56A3F6CDCF0A5");
+    XBeeLRSetAppKey((XBee*)myXbeeLr, "CD32AAB41C54175E9060D86F3A8B7F48");
+    XBeeLRSetNwkKey((XBee*)myXbeeLr, "CD32AAB41C54175E9060D86F3A8B7F48");
+    XBeeWriteConfig((XBee*)myXbeeLr);
+    XBeeApplyChanges((XBee*)myXbeeLr);
 
     // Connect to the LoRaWAN network
     printf("Connecting...\n");
-    if (!XBeeConnect((XBee*)my_xbee_lr)) {
+    if (!XBeeConnect((XBee*)myXbeeLr)) {
         printf("Failed to connect.\n");
         return -1;
     } else {
@@ -184,29 +184,29 @@ int main() {
     }
 
     // Prepare the XBeeLR payload to send
-    uint8_t example_payload[] = {0xC0, 0xC0, 0xC0, 0xFF, 0xEE};
-    uint16_t payload_len = sizeof(example_payload) / sizeof(example_payload[0]);
+    uint8_t examplePayload[] = {0xC0, 0xC0, 0xC0, 0xFF, 0xEE};
+    uint16_t payloadLen = sizeof(examplePayload) / sizeof(examplePayload[0]);
     XBeeLRPacket_t packet = {
-        .payload = example_payload,
-        .payloadSize = payload_len,
+        .payload = examplePayload,
+        .payloadSize = payloadLen,
         .port = 2,
         .ack = 0,
     };
 
-    uint32_t start_time = portMillis();
+    uint32_t startTime = portMillis();
     while (1) {
-        XBeeProcess((XBee*)my_xbee_lr);
+        XBeeProcess((XBee*)myXbeeLr);
 
         // Check if 10 seconds have passed
-        if (portMillis() - start_time >= 10000) {
-            if (XBeeConnected((XBee*)my_xbee_lr)) {
+        if (portMillis() - startTime >= 10000) {
+            if (XBeeConnected((XBee*)myXbeeLr)) {
                 printf("Sending 0x");
-                for (int i = 0; i < payload_len; i++) {
-                    printf("%02X", example_payload[i]);
+                for (int i = 0; i < payloadLen; i++) {
+                    printf("%02X", examplePayload[i]);
                 }
                 printf("\n");
 
-                if (XBeeSendData((XBee*)my_xbee_lr, &packet)) {
+                if (XBeeSendData((XBee*)myXbeeLr, &packet)) {
                     printf("Failed to send data.\n");
                 } else {
                     printf("Data sent successfully.\n");
@@ -216,11 +216,11 @@ int main() {
                 packet.payload[0] = packet.payload[0] + 1; // Increment payload for next transmission
             } else {
                 printf("Not connected. Reconnecting...\n");
-                if (!XBeeConnect((XBee*)my_xbee_lr)) {
+                if (!XBeeConnect((XBee*)myXbeeLr)) {
                     printf("Failed to reconnect.\n");
                 }
             }
-            start_time = portMillis();  // Reset the start time
+            startTime = portMillis();  // Reset the start time
         }
     }
 }

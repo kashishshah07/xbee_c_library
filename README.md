@@ -76,7 +76,7 @@ To create an instance of the XBee LR class, you need to pass the hardware and co
 #include "port.h"
 
 // Define a pointer for the XBee LR instance
-XBeeLR* my_xbee_lr;
+XBeeLR* myXbeeLr;
 
 // Hardware Abstraction Function Pointer Table for XBeeLR
 const XBeeHTable XBeeLRHTable = {
@@ -96,8 +96,8 @@ const XBeeCTable XBeeLRCTable = {
 
 int main() {
     // Create the XBee LR instance with hardware and command tables
-    my_xbee_lr = XBeeLRCreate(&XBeeLRHTable, &XBeeLRCTable);
-    if (my_xbee_lr == NULL) {
+    myXbeeLr = XBeeLRCreate(&XBeeLRHTable, &XBeeLRCTable);
+    if (myXbeeLr == NULL) {
         printf("Failed to create XBee LR instance.");
         return -1;
     }
@@ -112,28 +112,28 @@ After creating the XBee LR instance, initialize the XBee LR module, configure th
 
 ```c
     // Initialize the XBee LR module
-    if (!XBeeLRInit(my_xbee_lr, 9600, "COM3")) {  // Replace "COM3" with the appropriate serial port for your platform
+    if (!XBeeLRInit(myXbeeLr, 9600, "COM3")) {  // Replace "COM3" with the appropriate serial port for your platform
         printf("Failed to initialize XBee LR module.
 ");
         return -1;
     }
 
     // Read LoRaWAN DevEUI and print it
-    uint8_t dev_eui[17];
-    XBeeLRGetDevEUI((XBee*)my_xbee_lr, dev_eui, sizeof(dev_eui));
-    portDebugPrintf("DEVEUI: %s", dev_eui);
+    uint8_t devEui[17];
+    XBeeLRGetDevEUI((XBee*)myXbeeLr, devEui, sizeof(devEui));
+    portDebugPrintf("DEVEUI: %s", devEui);
 
     // Set LoRaWAN Network Settings
     portDebugPrintf("Configuring...");
-    XBeeLRSetAppEUI((XBee*)my_xbee_lr, "37D56A3F6CDCF0A5");
-    XBeeLRSetAppKey((XBee*)my_xbee_lr, "CD32AAB41C54175E9060D86F3A8B7F48");
-    XBeeLRSetNwkKey((XBee*)my_xbee_lr, "CD32AAB41C54175E9060D86F3A8B7F48");
-    XBeeWriteConfig((XBee*)my_xbee_lr);
-    XBeeApplyChanges((XBee*)my_xbee_lr);
+    XBeeLRSetAppEUI((XBee*)myXbeeLr, "37D56A3F6CDCF0A5");
+    XBeeLRSetAppKey((XBee*)myXbeeLr, "CD32AAB41C54175E9060D86F3A8B7F48");
+    XBeeLRSetNwkKey((XBee*)myXbeeLr, "CD32AAB41C54175E9060D86F3A8B7F48");
+    XBeeWriteConfig((XBee*)myXbeeLr);
+    XBeeApplyChanges((XBee*)myXbeeLr);
 
     // Connect to the LoRaWAN network
     portDebugPrintf("Connecting...");
-    XBeeConnect((XBee*)my_xbee_lr);
+    XBeeConnect((XBee*)myXbeeLr);
 
     printf("XBee LR module initialized and connected.");
 
@@ -146,16 +146,16 @@ To send data over the XBee LR network, use the `XBeeLRSendData` method. Here's a
 
 ```c
 // XBeeLR payload to send
-uint8_t example_payload[] = {0xC0, 0xC0, 0xC0, 0xFF, 0xEE};
-uint16_t payload_len = sizeof(example_payload) / sizeof(example_payload[0]);
+uint8_t examplePayload[] = {0xC0, 0xC0, 0xC0, 0xFF, 0xEE};
+uint16_t payloadLen = sizeof(examplePayload) / sizeof(examplePayload[0]);
 XBeeLRPacket_t packet = {
-    .payload = example_payload,
-    .payloadSize = payload_len,
+    .payload = examplePayload,
+    .payloadSize = payloadLen,
     .port = 2,
     .ack = 0,
 };
 
-if (!XBeeSendData(my_xbee_lr, &packet)) {
+if (!XBeeSendData(myXbeeLr, &packet)) {
     printf("Failed to send data.");
 } else {
     printf("Data sent successfully.");
@@ -183,7 +183,7 @@ void OnReceiveCallback(XBee* self, void* data){
 
 // Assuming a continuous loop to process incoming data
 while (1) {
-    XBeeProcess(my_xbee_lr);
+    XBeeProcess(myXbeeLr);
     usleep(10000);  // Sleep for 10ms to avoid busy-waiting
 }
 ```
@@ -193,9 +193,9 @@ while (1) {
 After completing your operations, disconnect the XBee LR module, clean up resources, and free the XBee LR instance:
 
 ```c
-XBeeDisconnect(my_xbee_lr);
-XBeeClose(my_xbee_lr);
-XBeeDestroy(my_xbee_lr);  // Free the XBee LR instance
+XBeeDisconnect(myXbeeLr);
+XBeeClose(myXbeeLr);
+XBeeDestroy(myXbeeLr);  // Free the XBee LR instance
 printf("XBee LR module disconnected and resources cleaned up.");
 ```
 
@@ -207,7 +207,7 @@ Here is the full example code combining the steps mentioned above:
 #include "xbee_lr.h"
 #include "port.h"
 
-XBeeLR* my_xbee_lr;
+XBeeLR* myXbeeLr;
 
 // Hardware Abstraction Function Pointer Table for XBeeLR
 const XBeeHTable XBeeLRHTable = {
@@ -241,45 +241,45 @@ void OnReceiveCallback(XBee* self, void* data){
 
 int main() {
     // Create the XBee LR instance with hardware and command tables
-    my_xbee_lr = XBeeLRCreate(&XBeeLRHTable, &XBeeLRCTable);
-    if (my_xbee_lr == NULL) {
+    myXbeeLr = XBeeLRCreate(&XBeeLRHTable, &XBeeLRCTable);
+    if (myXbeeLr == NULL) {
         printf("Failed to create XBee LR instance.");
         return -1;
     }
 
     // Initialize the XBee LR module
-    if (!XBeeLRInit(my_xbee_lr, 9600, "COM3")) {  // Replace "COM3" with the appropriate serial port
+    if (!XBeeLRInit(myXbeeLr, 9600, "COM3")) {  // Replace "COM3" with the appropriate serial port
         printf("Failed to initialize XBee LR module.");
         return -1;
     }
 
     // Read LoRaWAN DevEUI and print it
-    uint8_t dev_eui[17];
-    XBeeLRGetDevEUI((XBee*)my_xbee_lr, dev_eui, sizeof(dev_eui));
-    portDebugPrintf("DEVEUI: %s", dev_eui);
+    uint8_t devEui[17];
+    XBeeLRGetDevEUI((XBee*)myXbeeLr, devEui, sizeof(devEui));
+    portDebugPrintf("DEVEUI: %s", devEui);
 
     // Set LoRaWAN Network Settings
     portDebugPrintf("Configuring...");
-    XBeeLRSetAppEUI((XBee*)my_xbee_lr, "37D56A3F6CDCF0A5");
-    XBeeLRSetAppKey((XBee*)my_xbee_lr, "CD32AAB41C54175E9060D86F3A8B7F48");
-    XBeeLRSetNwkKey((XBee*)my_xbee_lr, "CD32AAB41C54175E9060D86F3A8B7F48");
-    XBeeWriteConfig((XBee*)my_xbee_lr);
-    XBeeApplyChanges((XBee*)my_xbee_lr);
+    XBeeLRSetAppEUI((XBee*)myXbeeLr, "37D56A3F6CDCF0A5");
+    XBeeLRSetAppKey((XBee*)myXbeeLr, "CD32AAB41C54175E9060D86F3A8B7F48");
+    XBeeLRSetNwkKey((XBee*)myXbeeLr, "CD32AAB41C54175E9060D86F3A8B7F48");
+    XBeeWriteConfig((XBee*)myXbeeLr);
+    XBeeApplyChanges((XBee*)myXbeeLr);
 
     // Connect to the LoRaWAN network
     portDebugPrintf("Connecting...");
-    XBeeConnect((XBee*)my_xbee_lr);
+    XBeeConnect((XBee*)myXbeeLr);
 
-    uint8_t example_payload[] = {0xC0, 0xC0, 0xC0, 0xFF, 0xEE};
-    uint16_t payload_len = sizeof(example_payload) / sizeof(example_payload[0]);
+    uint8_t examplePayload[] = {0xC0, 0xC0, 0xC0, 0xFF, 0xEE};
+    uint16_t payloadLen = sizeof(examplePayload) / sizeof(examplePayload[0]);
     XBeeLRPacket_t packet = {
-        .payload = example_payload,
-        .payloadSize = payload_len,
+        .payload = examplePayload,
+        .payloadSize = payloadLen,
         .port = 2,
         .ack = 0,
     };
 
-    if (!XBeeSendData(my_xbee_lr, &packet)) {
+    if (!XBeeSendData(myXbeeLr, &packet)) {
         printf("Failed to send data.");
     } else {
         printf("Data sent successfully.");
@@ -287,13 +287,13 @@ int main() {
 
     // Main loop to process incoming data
     while (1) {
-        XBeeProcess(my_xbee_lr);
+        XBeeProcess(myXbeeLr);
         usleep(10000);  // Sleep for 10ms
     }
 
-    XBeeDisconnect(my_xbee_lr);
-    XBeeClose(my_xbee_lr);
-    XBeeDestroy(my_xbee_lr);  // Free the XBee LR instance
+    XBeeDisconnect(myXbeeLr);
+    XBeeClose(myXbeeLr);
+    XBeeDestroy(myXbeeLr);  // Free the XBee LR instance
     printf("XBee LR module disconnected and resources cleaned up.");
 
     return 0;

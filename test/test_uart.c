@@ -1,12 +1,12 @@
 #include "unity.h"
 #include "port.h"
 
-void setUp(void) {}
+void setUp(void) {};
 
-void tearDown(void) {}
+void tearDown(void) {};
 
 void testUartInit(void) {
-    portUartInit(("/dev/ttyUSB0", B9600);
+    portUartInit("/dev/ttyUSB0", B9600);
     // Check UART initialization behavior (e.g., file descriptor value)
 }
 
@@ -19,12 +19,12 @@ void testUartWrite(void) {
 
 void testUartRead(void) {
     uint8_t buffer[10];
-    int bytes_read = portUartRead(buffer, sizeof(buffer), 1000);
+    int bytesRead = portUartRead(buffer, sizeof(buffer), 1000);
 
-    TESTAssert(bytes_read > 0); // Assuming some data was read
+    TESTAssert(bytesRead > 0); // Assuming some data was read
 }
 
 void testUartClearReceiveBuffer(void) {
-    portFlushRx(();
+    portFlushRx();
     // Verify that the buffer was cleared
 }

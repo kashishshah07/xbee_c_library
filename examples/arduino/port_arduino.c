@@ -78,19 +78,19 @@ int portUartWrite(const uint8_t *data, int length) {
  * @return int Returns the number of bytes actually read.
  */
 int portUartRead(uint8_t *buffer, int length) {
-    int bytes_read = 0;
+    int bytesRead = 0;
 
-    while (bytes_read < length) {
+    while (bytesRead < length) {
         if (XBEE_SERIAL_PORT.available()) {
             int c = XBEE_SERIAL_PORT.read();
             if (c == -1) {
                 return -1; // Return error if Serial.read() fails
             }
-            buffer[bytes_read++] = (uint8_t)c;
+            buffer[bytesRead++] = (uint8_t)c;
         }
     }
 
-    return bytes_read;
+    return bytesRead;
 }
 
 /**

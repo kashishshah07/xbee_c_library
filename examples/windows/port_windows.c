@@ -111,12 +111,12 @@ int portUartWrite(const uint8_t *data, int length) {
  * @return int Returns the number of bytes actually read.
  */
 int portUartRead(uint8_t *buffer, int length) {
-    DWORD bytes_read;
-    if (!ReadFile(hSerial, buffer, length, &bytes_read, NULL)) {
+    DWORD bytesRead;
+    if (!ReadFile(hSerial, buffer, length, &bytesRead, NULL)) {
         printf("Error reading data from serial port\n");
         return -1;
     }
-    return bytes_read;
+    return bytesRead;
 }
 
 /**

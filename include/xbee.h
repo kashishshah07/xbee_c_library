@@ -119,8 +119,8 @@ struct XBee {
     const XBeeHTable* htable;
     const XBeeCTable* ctable;
     uint8_t frameIdCntr;
-    bool tx_status_received;        ///< Flag to indicate if TX Status frame was received
-    uint8_t delivery_status;        ///< Stores the delivery status of the transmitted frame
+    bool txStatusReceived;        ///< Flag to indicate if TX Status frame was received
+    uint8_t deliveryStatus;        ///< Stores the delivery status of the transmitted frame
 
 };
 

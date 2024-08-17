@@ -71,65 +71,65 @@ static uint8_t calculateChecksum(const uint8_t *frame, uint16_t len) {
  * returns 0; otherwise, it returns an error code indicating the failure.
  * 
  * @param[in] self Pointer to the XBee instance.
- * @param[in] frame_type The type of the API frame to send.
+ * @param[in] frameType The type of the API frame to send.
  * @param[in] data Pointer to the frame data to be included in the API frame.
  * @param[in] len Length of the frame data in bytes.
  * 
  * @return int Returns 0 (`API_SEND_SUCCESS`) if the frame is successfully sent, 
  * or a non-zero error code (`API_SEND_ERROR_UART_FAILURE`) if there is a failure.
  */
-int apiSendFrame(XBee* self, uint8_t frame_type, const uint8_t *data, uint16_t len) {
+int apiSendFrame(XBee* self, uint8_t frameType, const uint8_t *data, uint16_t len) {
     uint8_t frame[256];
-    uint16_t frame_length = 0;
+    uint16_t frameLength = 0;
     self->frameIdCntr++;
     if (self->frameIdCntr == 0) self->frameIdCntr = 1; // Reset frame counter when 0
 
     // Start delimiter
-    frame[frame_length++] = 0x7E;
+    frame[frameLength++] = 0x7E;
 
     // Length MSB and LSB
-    frame[frame_length++] = (len + 1) >> 8;
-    frame[frame_length++] = (len + 1) & 0xFF;
+    frame[frameLength++] = (len + 1) >> 8;
+    frame[frameLength++] = (len + 1) & 0xFF;
 
     // Frame type
-    frame[frame_length++] = frame_type;
+    frame[frameLength++] = frameType;
 
     // Frame data
-    memcpy(&frame[frame_length], data, len);
-    frame_length += len;
+    memcpy(&frame[frameLength], data, len);
+    frameLength += len;
 
     // Calculate and add checksum
-    frame[frame_length] = calculateChecksum(frame, frame_length);
-    frame_length++;
+    frame[frameLength] = calculateChecksum(frame, frameLength);
+    frameLength++;
 
     // Print the API frame in hex format
     APIFrameDebugPrint("Sending API Frame: ");
-    for (uint16_t i = 0; i < frame_length; i++) {
+    for (uint16_t i = 0; i < frameLength; i++) {
         APIFrameDebugPrint("0x%02X ", frame[i]);
     }
     APIFrameDebugPrint("\n");
 
     // Measure the time taken to send the frame
-    uint32_t start_time = portMillis();
-    int total_bytes_written = 0;
+    uint32_t startTime = portMillis();
+    int totalBytesWritten = 0;
 
-    while (total_bytes_written < frame_length) {
-        int bytes_written = self->htable->PortUartWrite(frame + total_bytes_written, frame_length - total_bytes_written);
+    while (totalBytesWritten < frameLength) {
+        int bytes_written = self->htable->PortUartWrite(frame + totalBytesWritten, frameLength - totalBytesWritten);
         if (bytes_written < 0) {
             return API_SEND_ERROR_UART_FAILURE;
         }
 
-        total_bytes_written += bytes_written;
+        totalBytesWritten += bytes_written;
 
         // Check for timeout
-        if ((portMillis() - start_time) > UART_WRITE_TIMEOUT_MS) {
-            APIFrameDebugPrint("Error: Frame sending timeout after %lu ms\n", portMillis() - start_time);
+        if ((portMillis() - startTime) > UART_WRITE_TIMEOUT_MS) {
+            APIFrameDebugPrint("Error: Frame sending timeout after %lu ms\n", portMillis() - startTime);
             return API_SEND_ERROR_UART_FAILURE;
         }
         portDelay(1);
     }
 
-    uint32_t elapsed_time = portMillis() - start_time;
+    uint32_t elapsed_time = portMillis() - startTime;
     APIFrameDebugPrint("UART write completed in %lu ms\n", elapsed_time);
 
     // Return success if everything went well
@@ -149,44 +149,44 @@ int apiSendFrame(XBee* self, uint8_t frame_type, const uint8_t *data, uint16_t l
  * @param[in] self Pointer to the XBee instance.
  * @param[in] command The AT command to be sent, specified as an `at_command_t` enum.
  * @param[in] parameter Pointer to the parameter data to be included with the AT command (can be NULL).
- * @param[in] param_length Length of the parameter data in bytes (0 if no parameters).
+ * @param[in] paramLength Length of the parameter data in bytes (0 if no parameters).
  * 
  * @return int Returns 0 (`API_SEND_SUCCESS`) if the AT command is successfully sent, 
  * or a non-zero error code if there is a failure (`API_SEND_ERROR_FRAME_TOO_LARGE`, 
  * `API_SEND_ERROR_INVALID_COMMAND`, etc.).
  */
-int apiSendAtCommand(XBee* self,at_command_t command, const uint8_t *parameter, uint8_t param_length) {
+int apiSendAtCommand(XBee* self,at_command_t command, const uint8_t *parameter, uint8_t paramLength) {
     uint8_t frame_data[128];
-    uint16_t frame_length = 0;
+    uint16_t frameLength = 0;
 
    // Check if the parameter length is too large
-    if (param_length > 128) {
+    if (paramLength > 128) {
         return API_SEND_ERROR_FRAME_TOO_LARGE;
     }
 
     // Frame ID
-    frame_data[frame_length++] = self->frameIdCntr;
+    frame_data[frameLength++] = self->frameIdCntr;
 
     // AT Command (2 bytes)
     const char *cmd_str = atCommandToString(command);
-    frame_data[frame_length++] = cmd_str[0];
-    frame_data[frame_length++] = cmd_str[1];
+    frame_data[frameLength++] = cmd_str[0];
+    frame_data[frameLength++] = cmd_str[1];
 
     if (cmd_str == NULL) {
         return API_SEND_ERROR_INVALID_COMMAND;
     }
 
     // AT Command Parameter
-    if (param_length > 0) {
-        memcpy(&frame_data[frame_length], parameter, param_length);
-        frame_length += param_length;
+    if (paramLength > 0) {
+        memcpy(&frame_data[frameLength], parameter, paramLength);
+        frameLength += paramLength;
     }
 
     // Print the AT command and parameter in a readable format
     APIFrameDebugPrint("Sending AT Command: %s\n", cmd_str);
-    if (param_length > 0) {
+    if (paramLength > 0) {
         APIFrameDebugPrint("Parameter: ");
-        for (uint8_t i = 0; i < param_length; i++) {
+        for (uint8_t i = 0; i < paramLength; i++) {
             APIFrameDebugPrint("0x%02X ", parameter[i]);
         }
         APIFrameDebugPrint("\n");
@@ -195,7 +195,7 @@ int apiSendAtCommand(XBee* self,at_command_t command, const uint8_t *parameter, 
     }
 
     // Use api_send_frame to send the complete frame
-    return apiSendFrame(self, XBEE_API_TYPE_AT_COMMAND, frame_data, frame_length);
+    return apiSendFrame(self, XBEE_API_TYPE_AT_COMMAND, frame_data, frameLength);
 }
 
 /**
@@ -208,26 +208,26 @@ int apiSendAtCommand(XBee* self,at_command_t command, const uint8_t *parameter, 
  * @param[in] self Pointer to the XBee instance, which contains the UART hardware table and other settings.
  * @param[out] buffer Pointer to the buffer where the received bytes will be stored.
  * @param[in] length The number of bytes to read from the UART.
- * @param[in] timeout_ms The maximum time in milliseconds to wait for the complete data to be read.
+ * @param[in] timeoutMs The maximum time in milliseconds to wait for the complete data to be read.
  * 
  * @return api_receive_status_t Returns API_RECEIVE_SUCCESS if the specified number of bytes are successfully read.
  *         Returns API_RECEIVE_ERROR_UART_FAILURE if the UART read operation fails.
  *         Returns API_RECEIVE_ERROR_TIMEOUT_DATA if the timeout is exceeded before the required bytes are read.
  */
-static api_receive_status_t readBytesWithTimeout(XBee* self, uint8_t* buffer, int length, uint32_t timeout_ms) {
-    int total_bytes_received = 0;
+static api_receive_status_t readBytesWithTimeout(XBee* self, uint8_t* buffer, int length, uint32_t timeoutMs) {
+    int totalBytesReceived = 0;
     int bytes_received = 0;
-    uint32_t start_time = portMillis();
+    uint32_t startTime = portMillis();
 
-    while (total_bytes_received < length) {
-        bytes_received = self->htable->PortUartRead(buffer + total_bytes_received, length - total_bytes_received);
+    while (totalBytesReceived < length) {
+        bytes_received = self->htable->PortUartRead(buffer + totalBytesReceived, length - totalBytesReceived);
         
         if (bytes_received > 0) {
-            total_bytes_received += bytes_received;
+            totalBytesReceived += bytes_received;
         }
 
         // Check for timeout
-        if (portMillis() - start_time >= timeout_ms) {
+        if (portMillis() - startTime >= timeoutMs) {
             return API_RECEIVE_ERROR_TIMEOUT_DATA;
         }
         portDelay(1);  // Add a 1 ms delay to prevent busy-waiting
@@ -375,20 +375,20 @@ void apiHandleFrame(XBee* self, xbee_api_frame_t frame){
  * @param[in] self Pointer to the XBee instance.
  * @param[in] command The AT command to be sent, specified as an `at_command_t` enum.
  * @param[in] parameter Pointer to the parameter data to be included with the AT command (can be NULL).
- * @param[out] response_buffer Pointer to a buffer where the AT command response will be stored.
- * @param[out] response_length Pointer to a variable where the length of the response will be stored.
- * @param[in] timeout_ms The timeout period in milliseconds within which the response must be received.
+ * @param[out] responseBuffer Pointer to a buffer where the AT command response will be stored.
+ * @param[out] responseLength Pointer to a variable where the length of the response will be stored.
+ * @param[in] timeoutMs The timeout period in milliseconds within which the response must be received.
  * 
  * @return int Returns 0 (`API_SEND_SUCCESS`) if the AT command is successfully sent and a valid response is received, 
  * or a non-zero error code if there is a failure (`API_SEND_AT_CMD_ERROR`, `API_SEND_AT_CMD_RESPONSE_TIMEOUT`, etc.).
  */
-int apiSendAtCommandAndGetResponse(XBee* self, at_command_t command, const uint8_t *parameter, uint8_t param_length, uint8_t *response_buffer, 
-    uint8_t *response_length, uint32_t timeout_ms) {
+int apiSendAtCommandAndGetResponse(XBee* self, at_command_t command, const uint8_t *parameter, uint8_t paramLength, uint8_t *responseBuffer, 
+    uint8_t *responseLength, uint32_t timeoutMs) {
     // Send the AT command using API frame
-    apiSendAtCommand(self, command, (const uint8_t *)parameter, param_length);
+    apiSendAtCommand(self, command, (const uint8_t *)parameter, paramLength);
 
     // Get the start time using the platform-specific function
-    uint32_t start_time = self->htable->PortMillis();
+    uint32_t startTime = self->htable->PortMillis();
     
     // Wait and receive the response within the timeout period
     xbee_api_frame_t frame;
@@ -404,11 +404,11 @@ int apiSendAtCommandAndGetResponse(XBee* self, at_command_t command, const uint8
             if (frame.type == XBEE_API_TYPE_AT_RESPONSE) {
 
                 // Extract the AT command response
-                *response_length = frame.length - 5;  // Subtract the frame ID and AT command bytes
-                APIFrameDebugPrint("response_length: %u\n", *response_length);
+                *responseLength = frame.length - 5;  // Subtract the frame ID and AT command bytes
+                APIFrameDebugPrint("responseLength: %u\n", *responseLength);
                 if(frame.data[4] == 0){
-                    if((response_buffer != NULL) && (*response_length)){
-                        memcpy(response_buffer, &frame.data[5], *response_length);
+                    if((responseBuffer != NULL) && (*responseLength)){
+                        memcpy(responseBuffer, &frame.data[5], *responseLength);
                     }
                 }else{
                     APIFrameDebugPrint("API Frame AT CMD Error.\n");
@@ -424,7 +424,7 @@ int apiSendAtCommandAndGetResponse(XBee* self, at_command_t command, const uint8
         }
 
         // Check if the timeout period has elapsed using platform-specific time
-        if ((self->htable->PortMillis() - start_time) >= timeout_ms) {
+        if ((self->htable->PortMillis() - startTime) >= timeoutMs) {
             APIFrameDebugPrint("Timeout waiting for AT response.\n");
             return API_SEND_AT_CMD_RESONSE_TIMEOUT;
         }

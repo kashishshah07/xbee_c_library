@@ -44,7 +44,7 @@
 #include <sys/ioctl.h>
 #include <stdarg.h>
 
-static int uart_fd = -1;
+static int uartFd = -1;
 
 /**
  * @brief Initializes the serial port for communication with the XBee module.
@@ -61,14 +61,14 @@ int portUartInit(uint32_t baudrate, const char *device) {
     struct termios options;
 
     // Open the UART device file
-    uart_fd = open(device, O_RDWR | O_NOCTTY | O_NDELAY);
-    if (uart_fd == -1) {
+    uartFd = open(device, O_RDWR | O_NOCTTY | O_NDELAY);
+    if (uartFd == -1) {
         perror("Unable to open UART");
         return UART_INIT_FAILED;
     }
 
     // Get the current options for the port
-    tcgetattr(uart_fd, &options);
+    tcgetattr(uartFd, &options);
 
     // Set the baud rate
     cfsetispeed(&options, baudrate);
@@ -81,10 +81,10 @@ int portUartInit(uint32_t baudrate, const char *device) {
     options.c_cflag |= CS8;
 
     // Set non-blocking mode
-    fcntl(uart_fd, F_SETFL, FNDELAY);
+    fcntl(uartFd, F_SETFL, FNDELAY);
 
     // Apply the options
-    tcsetattr(uart_fd, TCSANOW, &options);
+    tcsetattr(uartFd, TCSANOW, &options);
 
     return UART_SUCCESS;
 }
@@ -101,19 +101,19 @@ int portUartInit(uint32_t baudrate, const char *device) {
  * @return int The number of bytes successfully written, or a negative error code.
  */
 int portUartWrite(const uint8_t *buf, uint16_t len) {
-    uint16_t total_bytes_written = 0;
+    uint16_t totalBytesWritten = 0;
 
-    while (total_bytes_written < len) {
-        int bytes_written = write(uart_fd, buf + total_bytes_written, len - total_bytes_written);
-        if (bytes_written < 0) {
+    while (totalBytesWritten < len) {
+        int bytesWritten = write(uartFd, buf + totalBytesWritten, len - totalBytesWritten);
+        if (bytesWritten < 0) {
             perror("Error writing to UART");
             return UART_ERROR_UNKNOWN;  // Return error code if write fails
         }
 
-        total_bytes_written += bytes_written;  // Accumulate the total bytes written
+        totalBytesWritten += bytesWritten;  // Accumulate the total bytes written
     }
 
-    return total_bytes_written;  // Return the total number of bytes successfully written
+    return totalBytesWritten;  // Return the total number of bytes successfully written
 }
 
 
@@ -128,14 +128,14 @@ int portUartWrite(const uint8_t *buf, uint16_t len) {
  * @return int Number of bytes actually read, or -1 if an error occurs.
  */
 int portUartRead(uint8_t *buffer, int length) {
-    int bytes_read = read(uart_fd, buffer, length);
+    int bytesRead = read(uartFd, buffer, length);
     
-    if (bytes_read < 0) {
+    if (bytesRead < 0) {
         //perror("UART read error");
         return -1;
     }
 
-    return bytes_read; // Return the actual number of bytes read
+    return bytesRead; // Return the actual number of bytes read
 }
 /**
  * @brief Gets the current system time in milliseconds.
@@ -163,7 +163,7 @@ uint32_t portMillis(void) {
  * @return void
  */
 void portFlushRx(void) {
-    tcflush(uart_fd, TCIFLUSH);
+    tcflush(uartFd, TCIFLUSH);
 }
 
 /**

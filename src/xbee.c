@@ -50,9 +50,9 @@
  * 
  * @return True if initialization is successful, otherwise false.
  */
-bool XBeeInit(XBee* self, uint32_t baudrate, const char* device) {
+bool XBeeInit(XBee* self, uint32_t baudRate, const char* device) {
     self->frameIdCntr = 1;
-    return self->vtable->init(self, baudrate, device);
+    return self->vtable->init(self, baudRate, device);
 }
 
 /**
@@ -91,7 +91,7 @@ bool XBeeDisconnect(XBee* self) {
  * 
  * @param[in] self Pointer to the XBee instance.
  * 
- * @return xbee_delivery_status_t, 0 if successful
+ * @return xbee_deliveryStatus_t, 0 if successful
  */
 uint8_t XBeeSendData(XBee* self, const void* data) {
     return self->vtable->sendData(self, data);
@@ -172,8 +172,8 @@ bool XBeeConnected(XBee* self) {
  */
 bool XBeeWriteConfig(XBee* self) {
     uint8_t response[33];
-    uint8_t response_length;
-    int status = apiSendAtCommandAndGetResponse(self, AT_WR, NULL, 0, response, &response_length, 5000);
+    uint8_t responseLength;
+    int status = apiSendAtCommandAndGetResponse(self, AT_WR, NULL, 0, response, &responseLength, 5000);
     if(status != API_SEND_SUCCESS){
         XBEEDebugPrintEnabled("Failed to Write Config\n");
     }
@@ -194,8 +194,8 @@ bool XBeeWriteConfig(XBee* self) {
 
 bool XBeeApplyChanges(XBee* self) {
     uint8_t response[33];
-    uint8_t response_length;
-    int status = apiSendAtCommandAndGetResponse(self, AT_AC, NULL, 0, response, &response_length, 5000);
+    uint8_t responseLength;
+    int status = apiSendAtCommandAndGetResponse(self, AT_AC, NULL, 0, response, &responseLength, 5000);
     if(status != API_SEND_SUCCESS){
         XBEEDebugPrintEnabled("Failed to Apply Changes\n");
     }
@@ -218,8 +218,8 @@ bool XBeeApplyChanges(XBee* self) {
  */
 bool XBeeSetAPIOptions(XBee* self, const uint8_t* value) {
     uint8_t response[33];
-    uint8_t response_length;
-    int status = apiSendAtCommandAndGetResponse(self, AT_AO, value, 1, response, &response_length, 5000);
+    uint8_t responseLength;
+    int status = apiSendAtCommandAndGetResponse(self, AT_AO, value, 1, response, &responseLength, 5000);
     if(status != API_SEND_SUCCESS){
         XBEEDebugPrintEnabled("Failed to set API Options\n");
     }

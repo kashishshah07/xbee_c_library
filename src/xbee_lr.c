@@ -59,11 +59,11 @@ static void SendJoinReqApiFrame(XBee* self);
 bool XBeeLRConnected(XBee* self) {
     // Implement logic to check XBeeLR network connection
     uint8_t response = 0;
-    uint8_t response_length;
+    uint8_t responseLength;
     int status;
 
     // Send the AT_JS command to query the Join Status
-    status = apiSendAtCommandAndGetResponse(self, AT_JS, NULL, 0, &response, &response_length, 5000);
+    status = apiSendAtCommandAndGetResponse(self, AT_JS, NULL, 0, &response, &responseLength, 5000);
 
     if (status == API_SEND_SUCCESS) {
         // Print the received reponse
@@ -89,9 +89,9 @@ bool XBeeLRConnected(XBee* self) {
  * 
  * @return bool Returns true if the initialization is successful, otherwise false.
  */
-bool XBeeLRInit(XBee* self, uint32_t baudrate, const char* device) {
+bool XBeeLRInit(XBee* self, uint32_t baudRate, const char* device) {
     // Implement XBeeLR initialization
-    return (self->htable->PortUartInit(baudrate, device)) == UART_SUCCESS ? true:false;
+    return (self->htable->PortUartInit(baudRate, device)) == UART_SUCCESS ? true:false;
 }
 
 /**
@@ -136,9 +136,9 @@ bool XBeeLRConnect(XBee* self) {
     SendJoinReqApiFrame(self);
 
     // Start the timeout timer
-    uint32_t start_time = portMillis();
+    uint32_t startTime = portMillis();
 
-    while ((portMillis() - start_time) < CONNECTION_TIMEOUT_MS) {
+    while ((portMillis() - startTime) < CONNECTION_TIMEOUT_MS) {
         if (XBeeLRConnected(self)) {
             XBEEDebugPrintEnabled("Successfully Joined\n");
             return true; // Successfully joined
@@ -177,7 +177,7 @@ bool XBeeLRDisconnect(XBee* self) {
  * @param[in] self Pointer to the XBee instance.
  * @param[in] data Pointer to the data to be sent, encapsulated in an XBeeLRPacket_t structure.
  * 
- * @return xbee_delivery_status_t, 0 if successful
+ * @return xbee_deliveryStatus_t, 0 if successful
  * 
  */
 uint8_t XBeeLRSendData(XBee* self, const void* data) {
@@ -197,21 +197,21 @@ uint8_t XBeeLRSendData(XBee* self, const void* data) {
     }
 
     // Block and wait for the XBEE_API_TYPE_TX_STATUS frame
-    uint32_t start_time = portMillis();  // Get the current time in milliseconds
+    uint32_t startTime = portMillis();  // Get the current time in milliseconds
 
-    self->tx_status_received = false;  // Reset the status flag before waiting
+    self->txStatusReceived = false;  // Reset the status flag before waiting
 
-    while ((portMillis() - start_time) < SEND_DATA_TIMEOUT_MS) {
+    while ((portMillis() - startTime) < SEND_DATA_TIMEOUT_MS) {
         // Process incoming frames using XBeeLRProcess
         XBeeLRProcess(self);
 
         // Check if the status frame was received
-        if (self->tx_status_received) {
+        if (self->txStatusReceived) {
             // Return the delivery status
-            if(self->delivery_status){
-                XBEEDebugPrintEnabled("TX Delivery Status 0x%02X\n", self->delivery_status );
+            if(self->deliveryStatus){
+                XBEEDebugPrintEnabled("TX Delivery Status 0x%02X\n", self->deliveryStatus );
             }
-            return self->delivery_status;
+            return self->deliveryStatus;
         }
 
         // Add a small delay here to avoid busy-waiting
@@ -249,9 +249,9 @@ void XBeeLRHardReset(XBee* self) {
  */
 bool XBeeLRSetAppEUI(XBee* self, const char* value) {
     uint8_t response[17];
-    uint8_t response_length;
-    uint8_t param_length = (value != NULL) ? strlen(value) : 0;
-    int status = apiSendAtCommandAndGetResponse(self, AT_AE, value, param_length, response, &response_length, 5000);
+    uint8_t responseLength;
+    uint8_t paramLength = (value != NULL) ? strlen(value) : 0;
+    int status = apiSendAtCommandAndGetResponse(self, AT_AE, value, paramLength, response, &responseLength, 5000);
     if(status != API_SEND_SUCCESS){
         XBEEDebugPrintEnabled("Failed to set App EUI\n");
     }
@@ -273,9 +273,9 @@ bool XBeeLRSetAppEUI(XBee* self, const char* value) {
  */
 bool XBeeLRSetAppKey(XBee* self, const char* value) {
     uint8_t response[33];
-    uint8_t response_length;
-    uint8_t param_length = (value != NULL) ? strlen(value) : 0;
-    int status = apiSendAtCommandAndGetResponse(self, AT_AK, value, param_length, response, &response_length, 5000);
+    uint8_t responseLength;
+    uint8_t paramLength = (value != NULL) ? strlen(value) : 0;
+    int status = apiSendAtCommandAndGetResponse(self, AT_AK, value, paramLength, response, &responseLength, 5000);
     if(status != API_SEND_SUCCESS){
         XBEEDebugPrintEnabled("Failed to set App Key\n");
     }
@@ -298,9 +298,9 @@ bool XBeeLRSetAppKey(XBee* self, const char* value) {
  */
 bool XBeeLRSetNwkKey(XBee* self, const char* value) {
     uint8_t response[33];
-    uint8_t response_length;
-    uint8_t param_length = (value != NULL) ? strlen(value) : 0;
-    int status = apiSendAtCommandAndGetResponse(self, AT_NK, value, param_length, response, &response_length, 5000);
+    uint8_t responseLength;
+    uint8_t paramLength = (value != NULL) ? strlen(value) : 0;
+    int status = apiSendAtCommandAndGetResponse(self, AT_NK, value, paramLength, response, &responseLength, 5000);
     if(status != API_SEND_SUCCESS){
         XBEEDebugPrintEnabled("Failed to set Nwk Key\n");
     }
@@ -317,21 +317,21 @@ bool XBeeLRSetNwkKey(XBee* self, const char* value) {
  * The DevEUI is stored in the provided response buffer.
  * 
  * @param[in] self Pointer to the XBee instance.
- * @param[out] response_buffer Buffer to store the retrieved DevEUI.
+ * @param[out] responseBuffer Buffer to store the retrieved DevEUI.
  * @param[in] buffer_size Size of the response buffer (should be at least 17 bytes).
  * 
  * @return bool Returns true if the DevEUI was successfully retrieved, otherwise false.
  */
-bool XBeeLRGetDevEUI(XBee* self, uint8_t* response_buffer, uint8_t buffer_size) {
+bool XBeeLRGetDevEUI(XBee* self, uint8_t* responseBuffer, uint8_t buffer_size) {
     // Clear buffer
     if(buffer_size < 17){
         return false;
     }
-    memset(response_buffer,0,buffer_size);
+    memset(responseBuffer,0,buffer_size);
 
     // Send the AT_DE command to query the DevEUI
-    uint8_t response_length;
-    int status = apiSendAtCommandAndGetResponse(self, AT_DE, NULL, 0, response_buffer, &response_length, 5000);
+    uint8_t responseLength;
+    int status = apiSendAtCommandAndGetResponse(self, AT_DE, NULL, 0, responseBuffer, &responseLength, 5000);
 
     if (status != API_SEND_SUCCESS) {
         XBEEDebugPrintEnabled("Failed to receive AT_DE response, error code: %d\n", status);
@@ -441,10 +441,10 @@ void XBeeLRHandleTransmitStatus(XBee* self, void *param) {
     packet->status = frame->data[2];
 
     // Store the delivery status in the XBee instance
-    self->delivery_status = frame->data[2];  // Extract Delivery Status
+    self->deliveryStatus = frame->data[2];  // Extract Delivery Status
 
-    // Set the tx_status_received flag to indicate the status frame was received
-    self->tx_status_received = true;
+    // Set the txStatusReceived flag to indicate the status frame was received
+    self->txStatusReceived = true;
 
     if(self->ctable->OnSendCallback){
         self->ctable->OnSendCallback(self,packet);

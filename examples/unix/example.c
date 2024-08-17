@@ -122,62 +122,62 @@ int main() {
     portDebugPrintf("XBee LR Example App\n");
 
    // Create an instance of the XBeeLR class
-    XBeeLR * my_xbee_lr = XBeeLRCreate(&XBeeLRCTable,&XBeeLRHTable);
+    XBeeLR * myXbeeLr = XBeeLRCreate(&XBeeLRCTable,&XBeeLRHTable);
 
     //Init XBee
-    if(!XBeeInit((XBee*)my_xbee_lr,B9600, "/dev/cu.usbserial-1120")){
+    if(!XBeeInit((XBee*)myXbeeLr,B9600, "/dev/cu.usbserial-1120")){
         portDebugPrintf("Failed to initialize XBee\n");
     }
 
     //Read LoRaWAN DevEUI and print
-    uint8_t dev_eui[17];
-    XBeeLRGetDevEUI((XBee*)my_xbee_lr, dev_eui, sizeof(dev_eui));
-    portDebugPrintf("DEVEUI: %s\n", dev_eui);
+    uint8_t devEui[17];
+    XBeeLRGetDevEUI((XBee*)myXbeeLr, devEui, sizeof(devEui));
+    portDebugPrintf("DEVEUI: %s\n", devEui);
 
      //Set LoRaWAN Network Settings
     portDebugPrintf("Configuring...\n");
-    XBeeLRSetAppEUI((XBee*)my_xbee_lr, "37D56A3F6CDCF0A5");
-    XBeeLRSetAppKey((XBee*)my_xbee_lr, "CD32AAB41C54175E9060D86F3A8B7F48");
-    XBeeLRSetNwkKey((XBee*)my_xbee_lr, "CD32AAB41C54175E9060D86F3A8B7F48");
-    XBeeSetAPIOptions((XBee*)my_xbee_lr, (const uint8_t[]){0x01});
-    XBeeWriteConfig((XBee*)my_xbee_lr);
-    XBeeApplyChanges((XBee*)my_xbee_lr);
+    XBeeLRSetAppEUI((XBee*)myXbeeLr, "37D56A3F6CDCF0A5");
+    XBeeLRSetAppKey((XBee*)myXbeeLr, "CD32AAB41C54175E9060D86F3A8B7F48");
+    XBeeLRSetNwkKey((XBee*)myXbeeLr, "CD32AAB41C54175E9060D86F3A8B7F48");
+    XBeeSetAPIOptions((XBee*)myXbeeLr, (const uint8_t[]){0x01});
+    XBeeWriteConfig((XBee*)myXbeeLr);
+    XBeeApplyChanges((XBee*)myXbeeLr);
 
     //Connect to LoRaWAN network
     portDebugPrintf("Connecting...\n");
-    XBeeConnect((XBee*)my_xbee_lr);
+    XBeeConnect((XBee*)myXbeeLr);
 
     // XBeeLR payload to send
-    uint8_t example_payload[] = {0xC0, 0xC0, 0xC0, 0xFF, 0xEE};
-    uint16_t payload_len = sizeof(example_payload) / sizeof(example_payload[0]);
+    uint8_t examplePayload[] = {0xC0, 0xC0, 0xC0, 0xFF, 0xEE};
+    uint16_t payloadLen = sizeof(examplePayload) / sizeof(examplePayload[0]);
     XBeeLRPacket_t packet = {
-        .payload = example_payload,
-        .payloadSize = payload_len,
+        .payload = examplePayload,
+        .payloadSize = payloadLen,
         .port = 2,
         .ack = 0,
     };
 
     //To keep track of time
-    time_t start_time, current_time;
-    time(&start_time);
+    time_t startTime, currentTime;
+    time(&startTime);
 
    while (1) {
         //Let XBee class process any serial data
-        XBeeProcess((XBee*)my_xbee_lr);
+        XBeeProcess((XBee*)myXbeeLr);
 
         // Get the current time
-        time(&current_time);
+        time(&currentTime);
 
         // Check if 10 seconds have passed
-        if (difftime(current_time, start_time) >= 10) {
+        if (difftime(currentTime, startTime) >= 10) {
             //Send data if connected, else connect
-            if(XBeeConnected((XBee*)my_xbee_lr)){
+            if(XBeeConnected((XBee*)myXbeeLr)){
                 portDebugPrintf("Sending 0x");
-                for (int i = 0; i < payload_len; i++) {
-                    portDebugPrintf("%02X", example_payload[i]);
+                for (int i = 0; i < payloadLen; i++) {
+                    portDebugPrintf("%02X", examplePayload[i]);
                 }
                 portDebugPrintf("\n");
-                if (XBeeSendData((XBee*)my_xbee_lr, &packet)) {
+                if (XBeeSendData((XBee*)myXbeeLr, &packet)) {
                     printf("Failed to send data.\n");
                 } else {
                     printf("Data sent successfully.\n");
@@ -188,14 +188,14 @@ int main() {
             }
             else{
                 portDebugPrintf("Not connected. Connecting...\n");
-                if (!XBeeConnect((XBee*)my_xbee_lr)) {
+                if (!XBeeConnect((XBee*)myXbeeLr)) {
                     printf("Failed to connect.\n");
                 } else {
                     printf("Connected!\n");
                 }
             }
             // Reset the start time
-            time(&start_time);
+            time(&startTime);
         }
     }
     return 0;

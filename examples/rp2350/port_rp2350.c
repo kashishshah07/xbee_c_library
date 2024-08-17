@@ -48,10 +48,10 @@
  * 
  * @return int Returns 0 on success, -1 on failure.
  */
-int portUartInit(uint32_t baudrate, const char *device) {
+int portUartInit(uint32_t baudRate, const char *device) {
     gpio_set_function(COMM_TX_PIN, GPIO_FUNC_UART_AUX);
     gpio_set_function(COMM_RX_PIN, GPIO_FUNC_UART_AUX);
-    uart_init(COMM_UART, baudrate);
+    uart_init(COMM_UART, baudRate);
     return 0;  // Initialization successful
 }
 
@@ -66,16 +66,16 @@ int portUartInit(uint32_t baudrate, const char *device) {
  * @return int Returns the number of bytes successfully written.
  */
 int portUartWrite(const uint8_t *buf, uint16_t len) {
-    int bytes_written = 0;
+    int bytesWritten = 0;
     for (int i = 0; i < len; i++) {
         if(uart_is_writable(COMM_UART)){
             uart_putc_raw(COMM_UART, buf[i]);
-            bytes_written++;
+            bytesWritten++;
         }else{
             break;
         }
     }
-    return bytes_written;  // Return the number of bytes written
+    return bytesWritten;  // Return the number of bytes written
 }
 
 /**
@@ -90,15 +90,15 @@ int portUartWrite(const uint8_t *buf, uint16_t len) {
  * @return int Returns the number of bytes actually read.
  */
 int portUartRead(uint8_t *buffer, int length) {
-    int bytes_read = 0;
-    while (bytes_read < length) {
+    int bytesRead = 0;
+    while (bytesEead < length) {
         if (uart_is_readable(COMM_UART)) {
-            buffer[bytes_read++] = uart_getc(COMM_UART);
+            buffer[bytesRead++] = uart_getc(COMM_UART);
         } else {
             break;  // No more data to read, exit loop
         }
     }
-    return bytes_read;  // Return the number of bytes read
+    return bytesRead;  // Return the number of bytes read
 }
 
 /**

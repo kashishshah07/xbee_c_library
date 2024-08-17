@@ -8,9 +8,9 @@ void tearDown(void) {}
 void testApiSendAtCommandWithNoParameters(void) {
     at_command_t cmd = AT_DE;
     uint8_t parameter[0];
-    uint8_t param_length = 0;
+    uint8_t paramLength = 0;
 
-    apiSendAtCommand(cmd, parameter, param_length);
+    apiSendAtCommand(cmd, parameter, paramLength);
 
     // Verify the behavior here (e.g., using a mock to check UART output)
 }
@@ -18,9 +18,9 @@ void testApiSendAtCommandWithNoParameters(void) {
 void testApiSendAtCommandWithParameters(void) {
     at_command_t cmd = AT_WR;
     uint8_t parameter[] = { 0x01, 0x02 };
-    uint8_t param_length = sizeof(parameter);
+    uint8_t paramLength = sizeof(parameter);
 
-    apiSendAtCommand(cmd, parameter, param_length);
+    apiSendAtCommand(cmd, parameter, paramLength);
 
     // Verify the behavior here (e.g., using a mock to check UART output)
 }

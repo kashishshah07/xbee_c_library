@@ -50,7 +50,7 @@
 #define API_SEND_AT_CMD_RESONSE_TIMEOUT -6
 
 /**
- * @enum xbee_delivery_status_t
+ * @enum xbee_deliveryStatus_t
  * @brief Delivery status codes for XBee Transmit Status frames (0x89).
  *
  * This enumeration defines the possible delivery status codes that can be 
@@ -108,7 +108,7 @@ typedef enum {
     XBEE_DELIVERY_STATUS_ADDRESS_NOT_FOUND = 0x24, // Address not found
     XBEE_DELIVERY_STATUS_ROUTE_NOT_FOUND = 0x25, // Route not found
     XBEE_DELIVERY_STATUS_PAYLOAD_TOO_LARGE = 0x74 // Payload too large
-} xbee_delivery_status_t;
+} xbee_deliveryStatus_t;
 
 /**
  * @enum xbee_api_frame_type_t
@@ -299,10 +299,10 @@ typedef struct {
 
 // Function prototypes
 api_receive_status_t apiReceiveApiFrame(XBee* self, xbee_api_frame_t *frame);
-int apiSendAtCommand(XBee* self,at_command_t command, const uint8_t *parameter, uint8_t param_length);
+int apiSendAtCommand(XBee* self,at_command_t command, const uint8_t *parameter, uint8_t paramLength);
 int apiSendFrame(XBee* self,uint8_t frame_type, const uint8_t *data, uint16_t len);
 int apiSendAtCommandAndGetResponse(XBee* self, at_command_t command, const uint8_t *parameter, 
-    uint8_t param_length, uint8_t *response_buffer, uint8_t *response_length, uint32_t timeout_ms);
+    uint8_t paramLength, uint8_t *responseBuffer, uint8_t *responseLength, uint32_t timeoutMs);
 void apiHandleFrame(XBee* self,xbee_api_frame_t frame);
 void xbeeHandleAtResponse(XBee* self,xbee_api_frame_t *frame);
 void xbeeHandleModemStatus(XBee* self,xbee_api_frame_t *frame);
