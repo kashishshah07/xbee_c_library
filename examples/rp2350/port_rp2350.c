@@ -49,8 +49,8 @@
  * @return int Returns 0 on success, -1 on failure.
  */
 int portUartInit(uint32_t baudRate, const char *device) {
-    gpio_set_function(COMM_TX_PIN, GPIO_FUNC_UART_AUX);
-    gpio_set_function(COMM_RX_PIN, GPIO_FUNC_UART_AUX);
+    gpio_set_function(COMM_TX_PIN, 11);
+    gpio_set_function(COMM_RX_PIN, 11);
     uart_init(COMM_UART, baudRate);
     return 0;  // Initialization successful
 }
@@ -91,7 +91,7 @@ int portUartWrite(const uint8_t *buf, uint16_t len) {
  */
 int portUartRead(uint8_t *buffer, int length) {
     int bytesRead = 0;
-    while (bytesEead < length) {
+    while (bytesRead < length) {
         if (uart_is_readable(COMM_UART)) {
             buffer[bytesRead++] = uart_getc(COMM_UART);
         } else {

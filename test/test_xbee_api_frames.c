@@ -1,46 +1,56 @@
 #include "unity.h"
-#include "xbee_api_frames.h"
+#include "xbee_api_frames.c"
 
 void setUp(void) {}
-
 void tearDown(void) {}
 
-void testApiSendAtCommandWithNoParameters(void) {
-    at_command_t cmd = AT_DE;
-    uint8_t parameter[0];
-    uint8_t paramLength = 0;
-
-    apiSendAtCommand(cmd, parameter, paramLength);
-
-    // Verify the behavior here (e.g., using a mock to check UART output)
+void test_calculateChecksum_should_DoSomething(void) {
+    calculateChecksum();
+    // Add appropriate assertions to check the state changes or side effects
 }
 
-void testApiSendAtCommandWithParameters(void) {
-    at_command_t cmd = AT_WR;
-    uint8_t parameter[] = { 0x01, 0x02 };
-    uint8_t paramLength = sizeof(parameter);
-
-    apiSendAtCommand(cmd, parameter, paramLength);
-
-    // Verify the behavior here (e.g., using a mock to check UART output)
+void test_apiSendFrame_should_DoSomething(void) {
+    apiSendFrame();
+    // Add appropriate assertions to check the state changes or side effects
 }
 
-void testApiReceiveApiFrameValidFrame(void) {
-    xbee_api_frame_t frame;
-
-    // Simulate receiving a valid frame
-    int status = apiReceiveApiFrame(&frame);
-
-    TESTAssertEqual(0, status);
-    // Further assertions based on the expected frame content
+void test_apiSendAtCommand_should_DoSomething(void) {
+    int result = apiSendAtCommand();
+    TEST_ASSERT_EQUAL(0, result);  // Replace 0 with expected return value
 }
 
-void testApiReceiveApiFrameInvalidFrame(void) {
-    xbee_api_frame_t frame;
-
-    // Simulate receiving an invalid frame
-    int status = apiReceiveApiFrame(&frame);
-
-    TESTAssertNotEqual(0, status);
-    // Further assertions based on the expected error handling
+void test_if_should_DoSomething(void) {
+    if();
+    // Add appropriate assertions to check the state changes or side effects
 }
+
+void test_readBytesWithTimeout_should_DoSomething(void) {
+    readBytesWithTimeout();
+    // Add appropriate assertions to check the state changes or side effects
+}
+
+void test_apiReceiveApiFrame_should_DoSomething(void) {
+    int result = apiReceiveApiFrame();
+    TEST_ASSERT_EQUAL(0, result);  // Replace 0 with expected return value
+}
+
+void test_apiHandleFrame_should_DoSomething(void) {
+    apiHandleFrame();
+    // Add appropriate assertions to check the state changes or side effects
+}
+
+void test_apiSendAtCommandAndGetResponse_should_DoSomething(void) {
+    apiSendAtCommandAndGetResponse();
+    // Add appropriate assertions to check the state changes or side effects
+}
+
+void test_xbeeHandleAtResponse_should_DoSomething(void) {
+    xbeeHandleAtResponse();
+    // Add appropriate assertions to check the state changes or side effects
+}
+
+void test_xbeeHandleModemStatus_should_DoSomething(void) {
+    int result = xbeeHandleModemStatus();
+    TEST_ASSERT_EQUAL(0, result);  // Replace 0 with expected return value
+}
+
