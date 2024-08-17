@@ -113,11 +113,11 @@ void OnSendCallback(XBee* self, void* data) {
 }
 
 // Global XBeeLR instance
-XBeeLR* my_xbee_lr;
+XBeeLR* myXbeeLr;
 
 // XBeeLR payload to send
-uint8_t example_payload[] = {0xC0, 0xC0, 0xC0, 0xFF, 0xEE};
-uint16_t payload_len;
+uint8_t examplePayload[] = {0xC0, 0xC0, 0xC0, 0xFF, 0xEE};
+uint16_t payloadLen;
 XBeeLRPacket_t packet;
 
 void setup() {
@@ -125,47 +125,47 @@ void setup() {
     Serial.begin(9600);
 
     // Hardware Abstraction Function Pointer Table for XBeeLR (needs to be set!)
-    const XBeeHTable XBeeLR_HTable = {
-        .PortUartRead = port_uart_read,
-        .PortUartWrite = port_uart_write,
-        .PortMillis = port_millis,
-        .PortFlushRx = port_flush_rx,
-        .PortUartInit = port_uart_init,
-        .PortDelay = port_delay,
+    const XBeeHTable XBeeLRHTable = {
+        .PortUartRead = portUartRead,
+        .PortUartWrite = portUartWrite,
+        .PortMillis = portMillis,
+        .PortFlushRx = portFlushRx,
+        .PortUartInit = portUartInit,
+        .PortDelay = portDelay,
     };
 
     // Callback Function Pointer Table for XBeeLR
-    const XBeeCTable XBeeLR_CTable = {
+    const XBeeCTable XBeeLRCTable = {
         .OnReceiveCallback = OnReceiveCallback, // can be left as all NULL if no callbacks needed
         .OnSendCallback = NULL,                 // can be left as all NULL if no callbacks needed
     };
 
     // Create an instance of the XBeeLR class
-    my_xbee_lr = XBeeLR_Create(&XBeeLR_CTable, &XBeeLR_HTable);
+    myXbeeLr = XBeeLRCreate(&XBeeLRCTable, &XBeeLRHTable);
 
     // Initialize the XBee module
-    if (!XBee_Init((XBee*)my_xbee_lr, 9600, NULL)) {
+    if (!XBeeInit((XBee*)myXbeeLr, 9600, NULL)) {
         Serial.println("Failed to initialize XBee");
         while (1); // Halt the program on failure
     }
 
     // Read LoRaWAN DevEUI and print
-    uint8_t dev_eui[17];
-    XBeeLR_GetDevEUI((XBee*)my_xbee_lr, dev_eui, sizeof(dev_eui));
+    uint8_t devEui[17];
+    XBeeLRGetDevEUI((XBee*)myXbeeLr, devEui, sizeof(devEui));
     Serial.print("DEVEUI: ");
-    Serial.println((char*)dev_eui);
+    Serial.println((char*)devEui);
 
     // Set LoRaWAN Network Settings
     Serial.println("Configuring...");
-    XBeeLR_SetAppEUI((XBee*)my_xbee_lr, "37D56A3F6CDCF0A5");
-    XBeeLR_SetAppKey((XBee*)my_xbee_lr, "CD32AAB41C54175E9060D86F3A8B7F48");
-    XBeeLR_SetNwkKey((XBee*)my_xbee_lr, "CD32AAB41C54175E9060D86F3A8B7F48");
-    XBee_WriteConfig((XBee*)my_xbee_lr);
-    XBee_ApplyChanges((XBee*)my_xbee_lr);
+    XBeeLRSetAppEUI((XBee*)myXbeeLr, "37D56A3F6CDCF0A5");
+    XBeeLRSetAppKey((XBee*)myXbeeLr, "CD32AAB41C54175E9060D86F3A8B7F48");
+    XBeeLRSetNwkKey((XBee*)myXbeeLr, "CD32AAB41C54175E9060D86F3A8B7F48");
+    XBeeWriteConfig((XBee*)myXbeeLr);
+    XBeeApplyChanges((XBee*)myXbeeLr);
 
     // Connect to LoRaWAN network
     Serial.println("Connecting...");
-    if (!XBee_Connect((XBee*)my_xbee_lr)) {
+    if (!XBeeConnect((XBee*)myXbeeLr)) {
         Serial.println("Failed to connect.");
         while (1); // Halt the program on failure
     } else {
@@ -173,29 +173,29 @@ void setup() {
     }
 
     // Initialize the payload
-    payload_len = sizeof(example_payload) / sizeof(example_payload[0]);
-    packet.payload = example_payload;
-    packet.payloadSize = payload_len;
+    payloadLen = sizeof(examplePayload) / sizeof(examplePayload[0]);
+    packet.payload = examplePayload;
+    packet.payloadSize = payloadLen;
     packet.port = 2;
     packet.ack = 0;
 }
 
 void loop() {
     // Let XBee class process any serial data
-    XBee_Process((XBee*)my_xbee_lr);
+    XBeeProcess((XBee*)myXbeeLr);
 
     // Check if 10 seconds have passed
-    static uint32_t start_time = millis();
-    if (millis() - start_time >= 10000) {
+    static uint32_t startTime = millis();
+    if (millis() - startTime >= 10000) {
         // Send data if connected, else reconnect
-        if (XBee_Connected((XBee*)my_xbee_lr)) {
+        if (XBeeConnected((XBee*)myXbeeLr)) {
             Serial.print("Sending 0x");
-            for (int i = 0; i < payload_len; i++) {
-                Serial.print(example_payload[i], HEX);
+            for (int i = 0; i < payloadLen; i++) {
+                Serial.print(examplePayload[i], HEX);
             }
             Serial.println();
 
-            if (XBee_SendData((XBee*)my_xbee_lr, &packet)) {
+            if (XBeeSendData((XBee*)myXbeeLr, &packet)) {
                 Serial.println("Failed to send data.");
             } else {
                 Serial.println("Data sent successfully.");
@@ -205,13 +205,13 @@ void loop() {
             packet.payload[0] = packet.payload[0] + 1; // change payload
         } else {
             Serial.println("Not connected. Connecting...");
-            if (!XBee_Connect((XBee*)my_xbee_lr)) {
+            if (!XBeeConnect((XBee*)myXbeeLr)) {
                 Serial.println("Failed to connect.");
             } else {
                 Serial.println("Connected!");
             }
         }
         // Reset the start time
-        start_time = millis();
+        startTime = millis();
     }
 }
