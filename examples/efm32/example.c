@@ -61,9 +61,9 @@ int fputc(int ch, FILE *f) {
  * 
  * This function initializes a UART port to be used for printf output.
  */
-void Debug_UART_Init() {
     RETARGET_SerialInit();  // Initialize the UART for printf
     RETARGET_SerialCrLf(1); // Enable automatic CR to LF conversion
+void DebugUartInit() {
 }
 
 /**
@@ -130,45 +130,45 @@ int main() {
     CMU_ClockSelectSet(cmuClock_HF, cmuSelect_HFXO);  // Set up the clock
 
     // Initialize the debug UART
-    Debug_UART_Init();
+    DebugUartInit();
 
-    const XBeeHTable XBeeLR_HTable = {
-        .PortUartRead = port_uart_read,
-        .PortUartWrite = port_uart_write,
-        .PortMillis = port_millis,
-        .PortFlushRx = port_flush_rx,
-        .PortUartInit = port_uart_init,
-        .PortDelay = port_delay,
+    const XBeeHTable XBeeLRHTable = {
+        .PortUartRead = portUartRead,
+        .PortUartWrite = portUartWrite,
+        .PortMillis = portMillis,
+        .PortFlushRx = portFlushRx,
+        .PortUartInit = portUartInit,
+        .PortDelay = portDelay,
     };
 
-    const XBeeCTable XBeeLR_CTable = {
+    const XBeeCTable XBeeLRCTable = {
         .OnReceiveCallback = OnReceiveCallback,
         .OnSendCallback = OnSendCallback,
     };
 
-    XBeeLR* my_xbee_lr = XBeeLR_Create(&XBeeLR_CTable, &XBeeLR_HTable);
+    XBeeLR* myXbeeLr = XBeeLRCreate(&XBeeLRCTable, &XBeeLRHTable);
 
-    if (!XBee_Init((XBee*)my_xbee_lr, 9600, NULL)) {
+    if (!XBeeInit((XBee*)myXbeeLr, 9600, NULL)) {
         printf("Failed to initialize XBee\n");
         return -1;
     }
 
     // Read and print the LoRaWAN Device EUI
-    uint8_t dev_eui[17];
-    XBeeLR_GetDevEUI((XBee*)my_xbee_lr, dev_eui, sizeof(dev_eui));
-    printf("DEVEUI: %s\n", dev_eui);
+    uint8_t devEui[17];
+    XBeeLRGetDevEUI((XBee*)myXbeeLr, devEui, sizeof(devEui));
+    printf("DEVEUI: %s\n", devEui);
 
     // Set LoRaWAN network settings
     printf("Configuring...\n");
-    XBeeLR_SetAppEUI((XBee*)my_xbee_lr, "37D56A3F6CDCF0A5");
-    XBeeLR_SetAppKey((XBee*)my_xbee_lr, "CD32AAB41C54175E9060D86F3A8B7F48");
-    XBeeLR_SetNwkKey((XBee*)my_xbee_lr, "CD32AAB41C54175E9060D86F3A8B7F48");
-    XBee_WriteConfig((XBee*)my_xbee_lr);
-    XBee_ApplyChanges((XBee*)my_xbee_lr);
+    XBeeLRSetAppEUI((XBee*)myXbeeLr, "37D56A3F6CDCF0A5");
+    XBeeLRSetAppKey((XBee*)myXbeeLr, "CD32AAB41C54175E9060D86F3A8B7F48");
+    XBeeLRSetNwkKey((XBee*)myXbeeLr, "CD32AAB41C54175E9060D86F3A8B7F48");
+    XBeeWriteConfig((XBee*)myXbeeLr);
+    XBeeApplyChanges((XBee*)myXbeeLr);
 
     // Connect to the LoRaWAN network
     printf("Connecting...\n");
-    if (!XBee_Connect((XBee*)my_xbee_lr)) {
+    if (!XBeeConnect((XBee*)myXbeeLr)) {
         printf("Failed to connect.\n");
         return -1;
     } else {
@@ -176,29 +176,29 @@ int main() {
     }
 
     // Prepare the XBeeLR payload to send
-    uint8_t example_payload[] = {0xC0, 0xC0, 0xC0, 0xFF, 0xEE};
-    uint16_t payload_len = sizeof(example_payload) / sizeof(example_payload[0]);
+    uint8_t examplePayload[] = {0xC0, 0xC0, 0xC0, 0xFF, 0xEE};
+    uint16_t payloadLen = sizeof(examplePayload) / sizeof(examplePayload[0]);
     XBeeLRPacket_t packet = {
-        .payload = example_payload,
-        .payloadSize = payload_len,
+        .payload = examplePayload,
+        .payloadSize = payloadLen,
         .port = 2,
         .ack = 0,
     };
 
-    uint32_t start_time = port_millis();
+    uint32_t startTime = portMillis();
     while (1) {
-        XBee_Process((XBee*)my_xbee_lr);
+        XBeeProcess((XBee*)myXbeeLr);
 
         // Check if 10 seconds have passed
-        if (port_millis() - start_time >= 10000) {
-            if (XBee_Connected((XBee*)my_xbee_lr)) {
+        if (portMillis() - startTime >= 10000) {
+            if (XBeeConnected((XBee*)myXbeeLr)) {
                 printf("Sending 0x");
-                for (int i = 0; i < payload_len; i++) {
-                    printf("%02X", example_payload[i]);
+                for (int i = 0; i < payloadLen; i++) {
+                    printf("%02X", examplePayload[i]);
                 }
                 printf("\n");
 
-                if (XBee_SendData((XBee*)my_xbee_lr, &packet)) {
+                if (XBeeSendData((XBee*)myXbeeLr, &packet)) {
                     printf("Failed to send data.\n");
                 } else {
                     printf("Data sent successfully.\n");
@@ -208,11 +208,11 @@ int main() {
                 packet.payload[0] = packet.payload[0] + 1; // Increment payload for next transmission
             } else {
                 printf("Not connected. Reconnecting...\n");
-                if (!XBee_Connect((XBee*)my_xbee_lr)) {
+                if (!XBeeConnect((XBee*)myXbeeLr)) {
                     printf("Failed to reconnect.\n");
                 }
             }
-            start_time = port_millis();  // Reset the start time
+            startTime = portMillis();  // Reset the start time
         }
     }
 }
