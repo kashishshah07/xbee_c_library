@@ -23,7 +23,7 @@ file(GLOB SOURCES "${SOURCE_DIR}/*.c")
 # Define the executable for your project
 add_executable(xbee_example
     example.c
-    port_rp2350.c
+    ../../ports/port_rp2350.c
     ${SOURCES}
 )
 
