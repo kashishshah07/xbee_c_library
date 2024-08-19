@@ -89,7 +89,7 @@ bool XBeeLRConnected(XBee* self) {
  * 
  * @return bool Returns true if the initialization is successful, otherwise false.
  */
-bool XBeeLRInit(XBee* self, uint32_t baudRate, const char* device) {
+bool XBeeLRInit(XBee* self, uint32_t baudRate, void* device) {
     // Implement XBeeLR initialization
     return (self->htable->PortUartInit(baudRate, device)) == UART_SUCCESS ? true:false;
 }
@@ -247,7 +247,7 @@ void XBeeLRHardReset(XBee* self) {
  * 
  * @return bool Returns true if the AppEUI was successfully set, otherwise false.
  */
-bool XBeeLRSetAppEUI(XBee* self, const char* value) {
+bool XBeeLRSetAppEUI(XBee* self, const uint8_t* value) {
     uint8_t response[17];
     uint8_t responseLength;
     uint8_t paramLength = (value != NULL) ? strlen(value) : 0;
@@ -271,7 +271,7 @@ bool XBeeLRSetAppEUI(XBee* self, const char* value) {
  * 
  * @return bool Returns true if the AppKey was successfully set, otherwise false.
  */
-bool XBeeLRSetAppKey(XBee* self, const char* value) {
+bool XBeeLRSetAppKey(XBee* self, const uint8_t* value) {
     uint8_t response[33];
     uint8_t responseLength;
     uint8_t paramLength = (value != NULL) ? strlen(value) : 0;
@@ -296,7 +296,7 @@ bool XBeeLRSetAppKey(XBee* self, const char* value) {
  * 
  * @return bool Returns true if the NwkKey was successfully set, otherwise false.
  */
-bool XBeeLRSetNwkKey(XBee* self, const char* value) {
+bool XBeeLRSetNwkKey(XBee* self, const uint8_t* value) {
     uint8_t response[33];
     uint8_t responseLength;
     uint8_t paramLength = (value != NULL) ? strlen(value) : 0;

@@ -48,7 +48,7 @@
  * 
  * @return int Returns 0 on success, -1 on failure.
  */
-int portUartInit(uint32_t baudRate, const char *device) {
+int portUartInit(uint32_t baudRate, void *device) {
     gpio_set_function(COMM_TX_PIN, 11);
     gpio_set_function(COMM_RX_PIN, 11);
     uart_init(COMM_UART, baudRate);

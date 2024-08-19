@@ -1,12 +1,13 @@
 /**
- * @file port_arduino.cpp
+ * @file port_arduino.c
  * @brief Platform-specific implementation of hardware abstraction functions for Arduino.
  * 
  * This file provides the necessary functions to interface with the hardware on the Arduino platform,
  * including UART initialization, data transmission, data reception, and timekeeping.
  * 
  * @version 1.0
- * @date 2024-08-13
+ * @date 2024-08-17
+ * @author Felix Galindo
  * 
  * @license MIT
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -31,8 +32,8 @@
 #include "port.h"
 #include <Arduino.h>
 
-// Define which serial port to use for XBee communication
-#define XBEE_SERIAL_PORT Serial1
+// Global or static variable to hold the HardwareSerial instance
+static HardwareSerial* serialPort = NULL;
 
 /**
  * @brief Initializes the UART for communication on the Arduino platform.
@@ -40,15 +41,17 @@
  * This function sets up the UART peripheral with the specified baud rate.
  * 
  * @param baudrate The baud rate for UART communication.
- * @param device Unused parameter on the Arduino platform; pass NULL.
+ * @param device Pointer to the `HardwareSerial` instance representing the UART to use.
  * 
- * @return int Returns 0 on success.
+ * @return int Returns 0 on success, or -1 if the device is not specified.
  */
-int portUartInit(uint32_t baudrate, const char *device) {
-    XBEE_SERIAL_PORT.begin(baudrate);
-    while (!XBEE_SERIAL_PORT) {
-        ; // Wait for the serial port to connect (for Leonardo or similar boards)
+int portUartInit(uint32_t baudrate, void *device) {
+    if (device == NULL) {
+        return -1; // Error: No device specified
     }
+
+    serialPort = (HardwareSerial*)device; // Store the device globally
+    serialPort->begin(baudrate);
     return 0; // Indicate success
 }
 
@@ -60,10 +63,13 @@ int portUartInit(uint32_t baudrate, const char *device) {
  * @param data Pointer to the data to be written.
  * @param length Number of bytes to write.
  * 
- * @return int Returns the number of bytes successfully written.
+ * @return int Returns the number of bytes successfully written, or -1 if the serial port is not initialized.
  */
 int portUartWrite(const uint8_t *data, int length) {
-    return XBEE_SERIAL_PORT.write(data, length);
+    if (serialPort == NULL) {
+        return -1; // Error: Serial port not initialized
+    }
+    return serialPort->write(data, length);
 }
 
 /**
@@ -75,14 +81,18 @@ int portUartWrite(const uint8_t *data, int length) {
  * @param buffer Pointer to the buffer where the data will be stored.
  * @param length Maximum number of bytes to read.
  * 
- * @return int Returns the number of bytes actually read.
+ * @return int Returns the number of bytes actually read, or -1 if the serial port is not initialized.
  */
 int portUartRead(uint8_t *buffer, int length) {
+    if (serialPort == NULL) {
+        return -1; // Error: Serial port not initialized
+    }
+
     int bytesRead = 0;
 
     while (bytesRead < length) {
-        if (XBEE_SERIAL_PORT.available()) {
-            int c = XBEE_SERIAL_PORT.read();
+        if (serialPort->available()) {
+            int c = serialPort->read();
             if (c == -1) {
                 return -1; // Return error if Serial.read() fails
             }
@@ -99,8 +109,12 @@ int portUartRead(uint8_t *buffer, int length) {
  * This function clears any data that may be present in the UART's receive buffer.
  */
 void portFlushRx() {
-    while (XBEE_SERIAL_PORT.available()) {
-        XBEE_SERIAL_PORT.read();
+    if (serialPort == NULL) {
+        return; // Error: Serial port not initialized
+    }
+
+    while (serialPort->available()) {
+        serialPort->read();
     }
 }
 
@@ -137,8 +151,8 @@ void portDelay(uint32_t ms) {
 void portDebugPrintf(const char *format, ...) {
     char buffer[128];
     va_list args;
-    vaStart(args, format);
+    va_start(args, format);
     vsnprintf(buffer, sizeof(buffer), format, args);
-    vaEnd(args);
+    va_end(args);
     Serial.print(buffer);
 }

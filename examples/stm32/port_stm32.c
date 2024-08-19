@@ -46,7 +46,7 @@ extern UART_HandleTypeDef huart2;  ///< Handle for the debugging UART (e.g., hua
  * 
  * @return int Returns 0 on success, -1 on failure.
  */
-int portUartInit(uint32_t baudrate, const char *device) {
+int portUartInit(uint32_t baudrate, void *device) {
     // Assuming huart1 is pre-configured for communication with the XBee module
     // UART initialization can include baudrate setup here if necessary
     huart1.Init.BaudRate = baudrate;

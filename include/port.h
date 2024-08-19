@@ -50,7 +50,7 @@ int portUartRead(uint8_t *buffer, int length);
 int portUartWrite(const uint8_t *buf, uint16_t len);
 uint32_t portMillis(void);
 void portFlushRx(void);
-int portUartInit(uint32_t baudrate, const char *device);
+int portUartInit(uint32_t baudrate, void *device);
 void portDelay(uint32_t ms);
 void portDebugPrintf(const char *format, ...);
 

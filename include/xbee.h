@@ -56,7 +56,7 @@ typedef struct XBee XBee;
  * the appropriate function implementations for each platform.
  */
 typedef struct {
-    bool (*init)(XBee* self, uint32_t baudrate, const char* device);
+    bool (*init)(XBee* self, uint32_t baudrate, void* device);
     bool (*connect)(XBee* self);
     bool (*disconnect)(XBee* self);
     uint8_t (*sendData)(XBee* self, const void* data);
@@ -84,7 +84,7 @@ typedef struct {
     int (*PortUartWrite)(const uint8_t *buf, uint16_t len);
     uint32_t (*PortMillis)(void);
     void (*PortFlushRx)(void);
-    int (*PortUartInit)(uint32_t baudrate, const char *device);
+    int (*PortUartInit)(uint32_t baudrate, void *device);
     void (*PortDelay)(uint32_t ms);
 } XBeeHTable;
 
@@ -125,7 +125,7 @@ struct XBee {
 };
 
 // Interface functions to call the methods
-bool XBeeInit(XBee* self, uint32_t baudrate, const char* device);
+bool XBeeInit(XBee* self, uint32_t baudrate, void* device);
 bool XBeeConnect(XBee* self);
 bool XBeeDisconnect(XBee* self);
 uint8_t XBeeSendData(XBee* self, const void*);

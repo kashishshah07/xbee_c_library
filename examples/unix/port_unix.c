@@ -57,7 +57,7 @@ static int uartFd = -1;
  * 
  * @return int Returns 0 on success, or a negative error code on failure.
  */
-int portUartInit(uint32_t baudrate, const char *device) {
+int portUartInit(uint32_t baudrate, void *device) {
     struct termios options;
 
     // Open the UART device file

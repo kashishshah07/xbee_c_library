@@ -44,7 +44,7 @@
  * 
  * @return int Returns 0 on success, -1 on failure.
  */
-int portUartInit(uint32_t baudrate, const char *device) {
+int portUartInit(uint32_t baudrate, void *device) {
     // Initialize the UART for communication with the XBee module
     RETARGETSerialinit();  // Initialize the serial communication for EFM32
     RETARGETSerialcrlf(1); // Enable automatic CR to LF conversion

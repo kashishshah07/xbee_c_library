@@ -44,7 +44,7 @@ HANDLE hSerial;  // Handle for the serial port
  * 
  * @return int Returns 0 on success, -1 on failure.
  */
-int portUartInit(uint32_t baudrate, const char *device) {
+int portUartInit(uint32_t baudrate, void *device) {
     hSerial = CreateFile(device, GENERIC_READ | GENERIC_WRITE, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
     if (hSerial == INVALID_HANDLE_VALUE) {
         printf("Error opening serial port %s\n", device);

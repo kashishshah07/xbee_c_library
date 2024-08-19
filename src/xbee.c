@@ -50,7 +50,7 @@
  * 
  * @return True if initialization is successful, otherwise false.
  */
-bool XBeeInit(XBee* self, uint32_t baudRate, const char* device) {
+bool XBeeInit(XBee* self, uint32_t baudRate, void* device) {
     self->frameIdCntr = 1;
     return self->vtable->init(self, baudRate, device);
 }
