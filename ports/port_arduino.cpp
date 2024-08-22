@@ -1,5 +1,5 @@
 /**
- * @file port_arduino.c
+ * @file port_arduino.cpp
  * @brief Platform-specific implementation of hardware abstraction functions for Arduino.
  * 
  * This file provides the necessary functions to interface with the hardware on the Arduino platform,
@@ -7,7 +7,7 @@
  * 
  * @version 1.0
  * @date 2024-08-17
- * @author Felix Galindo
+ * author Felix Galindo
  * 
  * @license MIT
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -29,11 +29,12 @@
  * SOFTWARE.
  */
 
-#include "port.h"
 #include <Arduino.h>
+#include <stdarg.h>
+#include "port.h"
 
-// Global or static variable to hold the HardwareSerial instance
-static HardwareSerial* serialPort = NULL;
+// Global or static variable to hold the serial instance (HardwareSerial or SoftwareSerial)
+static Stream* serialPort = NULL;
 
 /**
  * @brief Initializes the UART for communication on the Arduino platform.
@@ -41,7 +42,7 @@ static HardwareSerial* serialPort = NULL;
  * This function sets up the UART peripheral with the specified baud rate.
  * 
  * @param baudrate The baud rate for UART communication.
- * @param device Pointer to the `HardwareSerial` instance representing the UART to use.
+ * @param device Pointer to the `HardwareSerial` or `SoftwareSerial` instance representing the UART to use.
  * 
  * @return int Returns 0 on success, or -1 if the device is not specified.
  */
@@ -50,10 +51,16 @@ int portUartInit(uint32_t baudrate, void *device) {
         return -1; // Error: No device specified
     }
 
-    serialPort = (HardwareSerial*)device; // Store the device globally
-    serialPort->begin(baudrate);
+    serialPort = static_cast<Stream*>(device); // Store the device globally as a Stream*
+
+    // Since RTTI is not available, we will assume the correct type is passed
+    // if (device == &Serial1 || device == &Serial || device == &Serial2 || device == &Serial3) {
+        ((HardwareSerial*)serialPort)->begin(baudrate);
+    // }
+
     return 0; // Indicate success
 }
+
 
 /**
  * @brief Writes data to the UART.
@@ -65,7 +72,7 @@ int portUartInit(uint32_t baudrate, void *device) {
  * 
  * @return int Returns the number of bytes successfully written, or -1 if the serial port is not initialized.
  */
-int portUartWrite(const uint8_t *data, int length) {
+int portUartWrite(const uint8_t *data, uint16_t length) {
     if (serialPort == NULL) {
         return -1; // Error: Serial port not initialized
     }
@@ -90,15 +97,15 @@ int portUartRead(uint8_t *buffer, int length) {
 
     int bytesRead = 0;
 
-    while (bytesRead < length) {
-        if (serialPort->available()) {
-            int c = serialPort->read();
-            if (c == -1) {
-                return -1; // Return error if Serial.read() fails
-            }
-            buffer[bytesRead++] = (uint8_t)c;
+
+    if (serialPort->available()) {
+        int c = serialPort->read();
+        if (c == -1) {
+            return -1; // Return error if Serial.read() fails
         }
+        buffer[bytesRead++] = (uint8_t)c;
     }
+
 
     return bytesRead;
 }

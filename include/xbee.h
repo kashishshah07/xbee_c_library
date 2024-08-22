@@ -36,6 +36,11 @@
 #ifndef XBEE_H
 #define XBEE_H
 
+#if defined(__cplusplus)
+extern "C"
+{
+#endif
+
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -135,6 +140,10 @@ void XBeeProcess(XBee* self);
 bool XBeeConnected(XBee* self);
 bool XBeeWriteConfig(XBee* self);
 bool XBeeApplyChanges(XBee* self);
-bool XBeeSetAPIOptions(XBee* self, const uint8_t* value);
+bool XBeeSetAPIOptions(XBee* self, const uint8_t value);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #endif // XBEE_H

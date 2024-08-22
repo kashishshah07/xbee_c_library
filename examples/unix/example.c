@@ -125,7 +125,7 @@ int main() {
     XBeeLR * myXbeeLr = XBeeLRCreate(&XBeeLRCTable,&XBeeLRHTable);
 
     //Init XBee
-    if(!XBeeInit((XBee*)myXbeeLr,B9600, "/dev/cu.usbserial-1120")){
+    if(!XBeeInit((XBee*)myXbeeLr,B9600, "/dev/cu.usbserial-1110")){
         portDebugPrintf("Failed to initialize XBee\n");
     }
 
@@ -139,7 +139,7 @@ int main() {
     XBeeLRSetAppEUI((XBee*)myXbeeLr, "37D56A3F6CDCF0A5");
     XBeeLRSetAppKey((XBee*)myXbeeLr, "CD32AAB41C54175E9060D86F3A8B7F48");
     XBeeLRSetNwkKey((XBee*)myXbeeLr, "CD32AAB41C54175E9060D86F3A8B7F48");
-    XBeeSetAPIOptions((XBee*)myXbeeLr, (const uint8_t[]){0x01});
+    XBeeSetAPIOptions((XBee*)myXbeeLr, 0x01);
     XBeeWriteConfig((XBee*)myXbeeLr);
     XBeeApplyChanges((XBee*)myXbeeLr);
 

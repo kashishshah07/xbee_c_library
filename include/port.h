@@ -35,6 +35,11 @@
 #ifndef PORT_H
 #define PORT_H
 
+#if defined(__cplusplus)
+extern "C"
+{
+#endif
+    
 #include <stdint.h>
 
 // Enum for UART read status
@@ -53,5 +58,9 @@ void portFlushRx(void);
 int portUartInit(uint32_t baudrate, void *device);
 void portDelay(uint32_t ms);
 void portDebugPrintf(const char *format, ...);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #endif // UART_H

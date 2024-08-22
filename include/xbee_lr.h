@@ -37,6 +37,11 @@
 #ifndef XBEELR_H
 #define XBEELR_H
 
+#if defined(__cplusplus)
+extern "C"
+{
+#endif
+
 #include "xbee.h"
 
 #define CONNECTION_TIMEOUT_MS 6000
@@ -69,5 +74,9 @@ bool XBeeLRGetDevEUI(XBee* self, uint8_t* responseBuffer, uint8_t buffer_size);
 bool XBeeLRSetAppEUI(XBee* self, const uint8_t* value);
 bool XBeeLRSetAppKey(XBee* self, const uint8_t* value);
 bool XBeeLRSetNwkKey(XBee* self, const uint8_t* value);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #endif // XBEELR_H

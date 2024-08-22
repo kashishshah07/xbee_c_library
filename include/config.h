@@ -32,6 +32,11 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#if defined(__cplusplus)
+extern "C"
+{
+#endif
+
 #include "port.h"
 
 // Constants
@@ -52,5 +57,8 @@
 #define XBEEDebugPrintEnabled(...)
 #endif
 
+#if defined(__cplusplus)
+}
+#endif
 
 #endif // CONFIG

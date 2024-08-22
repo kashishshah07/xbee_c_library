@@ -216,10 +216,10 @@ bool XBeeApplyChanges(XBee* self) {
  * 
  * @return bool Returns true if the API Options was successfully set, otherwise false.
  */
-bool XBeeSetAPIOptions(XBee* self, const uint8_t* value) {
+bool XBeeSetAPIOptions(XBee* self, const uint8_t value) {
     uint8_t response[33];
     uint8_t responseLength;
-    int status = apiSendAtCommandAndGetResponse(self, AT_AO, value, 1, response, &responseLength, 5000);
+    int status = apiSendAtCommandAndGetResponse(self, AT_AO, (const uint8_t[]){value}, 1, response, &responseLength, 5000);
     if(status != API_SEND_SUCCESS){
         XBEEDebugPrintEnabled("Failed to set API Options\n");
     }

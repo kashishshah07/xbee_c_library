@@ -35,6 +35,11 @@
 #ifndef XBEE_AT_H
 #define XBEE_AT_H
 
+#if defined(__cplusplus)
+extern "C"
+{
+#endif
+
 #include <stdint.h>
 
 /**
@@ -155,6 +160,10 @@ typedef enum {
  * @return const char* The string representation of the AT command.
  */
 const char* atCommandToString(at_command_t command);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #endif // XBEE_AT_H
 

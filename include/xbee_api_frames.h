@@ -37,6 +37,11 @@
 #ifndef XBEE_FRAMES_H
 #define XBEE_FRAMES_H
 
+#if defined(__cplusplus)
+extern "C"
+{
+#endif
+
 #include "xbee_at_cmds.h"
 #include "xbee.h"
 
@@ -308,5 +313,8 @@ void xbeeHandleAtResponse(XBee* self,xbee_api_frame_t *frame);
 void xbeeHandleModemStatus(XBee* self,xbee_api_frame_t *frame);
 void xbeeHandleRxPacket(XBee* self,xbee_api_frame_t *frame);
 
+#if defined(__cplusplus)
+}
+#endif
 
 #endif // XBEE_FRAMES_H
