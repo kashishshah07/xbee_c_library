@@ -74,6 +74,20 @@ bool XBeeLRGetDevEUI(XBee* self, uint8_t* responseBuffer, uint8_t buffer_size);
 bool XBeeLRSetAppEUI(XBee* self, const char* value);
 bool XBeeLRSetAppKey(XBee* self, const char* value);
 bool XBeeLRSetNwkKey(XBee* self, const char* value);
+bool XBeeLRSetClass(XBee* self, const char value);
+bool XBeeLRSetActivationMode(XBee* self, const uint8_t value);
+bool XBeeLRSetADR(XBee* self, const uint8_t value);
+bool XBeeLRSetDataRate(XBee* self, const uint8_t value);
+bool XBeeLRSetRegion(XBee* self, const uint8_t value);
+bool XBeeLRSetDutyCycle(XBee* self, const uint8_t value);
+bool XBeeLRGetSpecVersion(XBee* self,  char* responseBuffer, uint8_t buffer_size);
+bool XBeeLRSetJoinRX1Delay(XBee* self, const uint32_t value);
+bool XBeeLRSetJoinRX2Delay(XBee* self, const uint32_t value);
+bool XBeeLRSetRX1Delay(XBee* self, const uint32_t value);
+bool XBeeLRSetRX2Delay(XBee* self, const uint32_t value);
+bool XBeeLRSetRX2DataRate(XBee* self, const uint8_t value);
+bool XBeeLRSetRX2Frequency(XBee* self, const uint32_t value);
+bool XBeeLRSetTransmitPower(XBee* self, const uint8_t value);
 
 #if defined(__cplusplus)
 }

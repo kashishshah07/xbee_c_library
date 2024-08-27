@@ -142,8 +142,20 @@ typedef enum {
     AT_AE,   /**< LoRaWAN Application EUI */
     AT_NK,   /**< LoRaWAN Network Key */
     AT_JS,   /**< LoRaWAN Join Status */
-    AT_FQ,   /**< Test Configuration Frequency */
-    AT_PW,   /**< Test Configuration Power */
+    AT_LC,   /**< LoRaWAN Class */
+    AT_AM,   /**< LoRaWAN Activation Mode */
+    AT_AD,   /**< LoRaWAN ADR */
+    AT_DR,   /**< LoRaWAN DataRate */
+    AT_LR,   /**< LoRaWAN Region */
+    //AT_DC,   /**< LoRaWAN Duty Cycle */
+    AT_LV,   /**< LoRaWAN Spec Version */
+    AT_J1,   /**< LoRaWAN Join RX1 Delay */
+    AT_J2,   /**< LoRaWAN Join RX2 Delay */
+    AT_D1,   /**< LoRaWAN RX1 Delay */
+    AT_D2,   /**< LoRaWAN RX2 Delay */
+    AT_XD,   /**< LoRaWAN RX2 Data Rate */ 
+    AT_XF,   /**< LoRaWAN RX2 Frequency */ 
+    AT_PO,   /**< LoRaWAN Transmit Power */ 
 
     // ... (other existing AT commands) ...
 

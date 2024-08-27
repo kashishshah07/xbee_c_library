@@ -139,8 +139,20 @@ const char* atCommandToString(at_command_t command) {
         case AT_AE: return "AE";            ///< LoRaWAN Application EUI
         case AT_NK: return "NK";            ///< LoRaWAN Network Key
         case AT_JS: return "JS";            ///< LoRaWAN Join Status
-        case AT_FQ: return "FQ";            ///< Test Configuration Frequency
-        case AT_PW: return "PW";            ///< Test Configuration Power
+        case AT_LC: return "LC";            ///< LoRaWAN Class
+        case AT_AM: return "AM";            ///< LoRaWAN Activation Mode
+        case AT_AD: return "AD";            ///< LoRaWAN ADR
+        case AT_DR: return "DR";            ///< LoRaWAN DataRate
+        case AT_LR: return "LR";            ///< LoRaWAN Region
+       // case AT_DC: return "DC";            ///< LoRaWAN Duty Cycle        
+        case AT_LV: return "LV";            ///< LoRaWAN Spec Version     
+        case AT_J1: return "J1";            ///< LoRaWAN Join RX1 Delay        
+        case AT_J2: return "J2";            ///< LoRaWAN Join RX2 Delay
+        case AT_D1: return "D1";            ///< LoRaWAN RX1 Delay
+        case AT_D2: return "D2";            ///< LoRaWAN RX2 Delay
+        case AT_XD: return "XD";            ///< LoRaWAN RX2 Data Rate
+        case AT_XF: return "XF";            ///< LoRaWAN RX2 Frequency   
+        case AT_PO: return "PO";            ///< LoRaWAN Transmit Power   
 
         default: return NULL;               ///< Unknown command
     }

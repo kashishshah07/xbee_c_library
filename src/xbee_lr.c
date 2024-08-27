@@ -308,6 +308,323 @@ bool XBeeLRSetNwkKey(XBee* self, const char* value) {
 }
 
 /**
+ * @brief Sends the AT_LC command to set the LoRaWAN Class on the XBee LR module.
+ * 
+ * This function configures the LoRaWAN Class on the XBee LR module 
+ * by sending the AT command `AT_LC` with the specified Class value. The function 
+ * is blocking, meaning it waits for a response from the module or until a timeout 
+ * occurs. If the command fails to send or the module does not respond, a debug 
+ * message is printed.
+ * 
+ * @param[in] self Pointer to the XBee instance.
+ * @param[in] value The Class to be set, provided as a char. 'A','B','C'
+ * 
+ * @return bool Returns true if the Class was successfully set, otherwise false.
+ */
+bool XBeeLRSetClass(XBee* self, const char value) {
+    uint8_t response[33];
+    uint8_t responseLength;
+    int status = apiSendAtCommandAndGetResponse(self, AT_LC, (const uint8_t *) &value, 1, response, &responseLength, 5000);
+    if(status != API_SEND_SUCCESS){
+        XBEEDebugPrintEnabled("Failed to set Class\n");
+    }
+    return status;
+}
+
+/**
+ * @brief Sends the AT_AM command to set the LoRaWAN Activation Mode on the XBee LR module.
+ * 
+ * @param[in] self Pointer to the XBee instance.
+ * @param[in] value The Activation Mode to be set.
+ * 
+ * @return bool Returns true if the Activation Mode was successfully set, otherwise false.
+ */
+bool XBeeLRSetActivationMode(XBee* self, const uint8_t value) {
+    uint8_t response[33];
+    uint8_t responseLength;
+
+    int status = apiSendAtCommandAndGetResponse(self, AT_AM, &value, 1, response, &responseLength, 5000);
+
+    if (status != API_SEND_SUCCESS) {
+        XBEEDebugPrintEnabled("Failed to set Activation Mode\n");
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * @brief Sends the AT_AD command to set the LoRaWAN ADR on the XBee LR module.
+ * 
+ * @param[in] self Pointer to the XBee instance.
+ * @param[in] value The ADR setting to be set.
+ * 
+ * @return bool Returns true if the ADR was successfully set, otherwise false.
+ */
+bool XBeeLRSetADR(XBee* self, const uint8_t value) {
+    uint8_t response[33];
+    uint8_t responseLength;
+
+    int status = apiSendAtCommandAndGetResponse(self, AT_AD, &value, 1, response, &responseLength, 5000);
+
+    if (status != API_SEND_SUCCESS) {
+        XBEEDebugPrintEnabled("Failed to set ADR\n");
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * @brief Sends the AT_DR command to set the LoRaWAN DataRate on the XBee LR module.
+ * 
+ * @param[in] self Pointer to the XBee instance.
+ * @param[in] value The DataRate to be set.
+ * 
+ * @return bool Returns true if the DataRate was successfully set, otherwise false.
+ */
+bool XBeeLRSetDataRate(XBee* self, const uint8_t value) {
+    uint8_t response[33];
+    uint8_t responseLength;
+
+    int status = apiSendAtCommandAndGetResponse(self, AT_DR, &value, 1, response, &responseLength, 5000);
+
+    if (status != API_SEND_SUCCESS) {
+        XBEEDebugPrintEnabled("Failed to set DataRate\n");
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * @brief Sends the AT_LR command to set the LoRaWAN Region on the XBee LR module.
+ * 
+ * @param[in] self Pointer to the XBee instance.
+ * @param[in] value The Region to be set.
+ * 
+ * @return bool Returns true if the Region was successfully set, otherwise false.
+ */
+bool XBeeLRSetRegion(XBee* self, const uint8_t value) {
+    uint8_t response[33];
+    uint8_t responseLength;
+
+    int status = apiSendAtCommandAndGetResponse(self, AT_LR, &value, 1, response, &responseLength, 5000);
+
+    if (status != API_SEND_SUCCESS) {
+        XBEEDebugPrintEnabled("Failed to set Region\n");
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * @brief Sends the AT_DC command to set the LoRaWAN Duty Cycle on the XBee LR module.
+ * 
+ * @param[in] self Pointer to the XBee instance.
+ * @param[in] value The Duty Cycle to be set.
+ * 
+ * @return bool Returns true if the Duty Cycle was successfully set, otherwise false.
+ */
+bool XBeeLRSetDutyCycle(XBee* self, const uint8_t value) {
+    uint8_t response[33];
+    uint8_t responseLength;
+
+    int status = apiSendAtCommandAndGetResponse(self, AT_DC, &value, 1, response, &responseLength, 5000);
+
+    if (status != API_SEND_SUCCESS) {
+        XBEEDebugPrintEnabled("Failed to set Duty Cycle\n");
+        return false;
+    }
+
+    return true;
+}
+
+// /**
+//  * @brief Sends the AT_LV command to get the LoRaWAN Spec Version on the XBee LR module.
+//  * 
+//  * @param[in] self Pointer to the XBee instance.
+//  * @param[in] value The Spec Version to be set.
+//  * 
+//  * @return bool Returns true if the Spec Version was successfully set, otherwise false.
+//  */
+// bool XBeeLRGetSpecVersion(XBee* self, const char value) {
+//     uint8_t response[33];
+//     uint8_t responseLength;
+//     uint8_t paramLength = 1;
+
+//     int status = apiSendAtCommandAndGetResponse(self, AT_LV, &value, paramLength, response, &responseLength, 5000);
+
+//     if (status != API_SEND_SUCCESS) {
+//         XBEEDebugPrintEnabled("Failed to set Spec Version\n");
+//         return false;
+//     }
+
+//     return true;
+// }
+
+/**
+ * @brief Sends the AT_J1 command to set the LoRaWAN Join RX1 Delay on the XBee LR module.
+ * 
+ * @param[in] self Pointer to the XBee instance.
+ * @param[in] value The Join RX1 Delay to be set.
+ * 
+ * @return bool Returns true if the Join RX1 Delay was successfully set, otherwise false.
+ */
+bool XBeeLRSetJoinRX1Delay(XBee* self, const uint32_t value) {
+    uint8_t response[33];
+    uint8_t responseLength;
+    uint8_t paramLength = sizeof(value);
+
+    int status = apiSendAtCommandAndGetResponse(self, AT_J1, &value, paramLength, response, &responseLength, 5000);
+
+    if (status != API_SEND_SUCCESS) {
+        XBEEDebugPrintEnabled("Failed to set Join RX1 Delay\n");
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * @brief Sends the AT_J2 command to set the LoRaWAN Join RX2 Delay on the XBee LR module.
+ * 
+ * @param[in] self Pointer to the XBee instance.
+ * @param[in] value The Join RX2 Delay to be set.
+ * 
+ * @return bool Returns true if the Join RX2 Delay was successfully set, otherwise false.
+ */
+bool XBeeLRSetJoinRX2Delay(XBee* self, const uint32_t value) {
+    uint8_t response[33];
+    uint8_t responseLength;
+    uint8_t paramLength = sizeof(value);
+
+    int status = apiSendAtCommandAndGetResponse(self, AT_J2, &value, paramLength, response, &responseLength, 5000);
+
+    if (status != API_SEND_SUCCESS) {
+        XBEEDebugPrintEnabled("Failed to set Join RX2 Delay\n");
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * @brief Sends the AT_D1 command to set the LoRaWAN RX1 Delay on the XBee LR module.
+ * 
+ * @param[in] self Pointer to the XBee instance.
+ * @param[in] value The RX1 Delay to be set.
+ * 
+ * @return bool Returns true if the RX1 Delay was successfully set, otherwise false.
+ */
+bool XBeeLRSetRX1Delay(XBee* self, const uint32_t value) {
+    uint8_t response[33];
+    uint8_t responseLength;
+    uint8_t paramLength = sizeof(value);
+
+    int status = apiSendAtCommandAndGetResponse(self, AT_D1, &value, paramLength, response, &responseLength, 5000);
+
+    if (status != API_SEND_SUCCESS) {
+        XBEEDebugPrintEnabled("Failed to set RX1 Delay\n");
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * @brief Sends the AT_D2 command to set the LoRaWAN RX2 Delay on the XBee LR module.
+ * 
+ * @param[in] self Pointer to the XBee instance.
+ * @param[in] value The RX2 Delay to be set.
+ * 
+ * @return bool Returns true if the RX2 Delay was successfully set, otherwise false.
+ */
+bool XBeeLRSetRX2Delay(XBee* self, const uint32_t value) {
+    uint8_t response[33];
+    uint8_t responseLength;
+    uint8_t paramLength = sizeof(value);
+
+    int status = apiSendAtCommandAndGetResponse(self, AT_D2, &value, paramLength, response, &responseLength, 5000);
+
+    if (status != API_SEND_SUCCESS) {
+        XBEEDebugPrintEnabled("Failed to set RX2 Delay\n");
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * @brief Sends the AT_XD command to set the LoRaWAN RX2 Data Rate on the XBee LR module.
+ * 
+ * @param[in] self Pointer to the XBee instance.
+ * @param[in] value The RX2 Data Rate to be set.
+ * 
+ * @return bool Returns true if the RX2 Data Rate was successfully set, otherwise false.
+ */
+bool XBeeLRSetRX2DataRate(XBee* self, const uint8_t value) {
+    uint8_t response[33];
+    uint8_t responseLength;
+    uint8_t paramLength = sizeof(value);
+
+    int status = apiSendAtCommandAndGetResponse(self,AT_XD, &value, paramLength, response, &responseLength, 5000);
+
+    if (status != API_SEND_SUCCESS) {
+        XBEEDebugPrintEnabled("Failed to set RX2 Data Rate\n");
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * @brief Sends the AT_XF command to set the LoRaWAN RX2 Frequency on the XBee LR module.
+ * 
+ * @param[in] self Pointer to the XBee instance.
+ * @param[in] value The RX2 Frequency to be set.
+ * 
+ * @return bool Returns true if the RX2 Frequency was successfully set, otherwise false.
+ */
+bool XBeeLRSetRX2Frequency(XBee* self, const uint32_t value) {
+    uint8_t response[33];
+    uint8_t responseLength;
+    uint8_t paramLength = sizeof(value);
+
+    int status = apiSendAtCommandAndGetResponse(self, AT_XF, (uint8_t*)&value, paramLength, response, &responseLength, 5000);
+
+    if (status != API_SEND_SUCCESS) {
+        XBEEDebugPrintEnabled("Failed to set RX2 Frequency\n");
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * @brief Sends the AT_PO command to set the LoRaWAN Transmit Power on the XBee LR module.
+ * 
+ * @param[in] self Pointer to the XBee instance.
+ * @param[in] value The Transmit Power to be set.
+ * 
+ * @return bool Returns true if the Transmit Power was successfully set, otherwise false.
+ */
+bool XBeeLRSetTransmitPower(XBee* self, const uint8_t value) {
+    uint8_t response[33];
+    uint8_t responseLength;
+    uint8_t paramLength = sizeof(value);
+
+    int status = apiSendAtCommandAndGetResponse(self, AT_PO, &value, paramLength, response, &responseLength, 5000);
+
+    if (status != API_SEND_SUCCESS) {
+        XBEEDebugPrintEnabled("Failed to set Transmit Power\n");
+        return false;
+    }
+
+    return true;
+}
+/**
  * @brief Sends the AT_DE command to read the LoRaWAN DevEUI from the XBee LR module.
  * 
  * This function retrieves the LoRaWAN DevEUI (Device Extended Unique Identifier) 
