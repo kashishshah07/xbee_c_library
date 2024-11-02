@@ -153,6 +153,7 @@ const char* atCommandToString(at_command_t command) {
         case AT_XD: return "XD";            ///< LoRaWAN RX2 Data Rate
         case AT_XF: return "XF";            ///< LoRaWAN RX2 Frequency   
         case AT_PO: return "PO";            ///< LoRaWAN Transmit Power   
+        case AT_CM: return "CM";            ///< LoRaWAN Channels Mask
 
         default: return NULL;               ///< Unknown command
     }
