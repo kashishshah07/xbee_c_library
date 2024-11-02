@@ -657,6 +657,30 @@ bool XBeeLRGetDevEUI(XBee* self, uint8_t* responseBuffer, uint8_t buffer_size) {
     return true;  
 }
 
+
+/**
+ * @brief Sends the AT_CM command to set the LoRaWAN Channels Mask on the XBee LR module.
+ * 
+ * This function configures the Channels Mask for the LoRaWAN network on the XBee LR module by
+ * sending the AT_CM command. The Channels Mask specifies the sub-bands that are enabled for 
+ * communication. The function checks the command response to verify if the mask was successfully set.
+ * 
+ * @param[in] self Pointer to the XBee instance.
+ * @param[in] value Pointer to a null-terminated string representing the Channels Mask in hexadecimal format.
+ * 
+ * @return bool Returns true if the Channels Mask was successfully set; otherwise, false.
+ */
+bool XBeeLRSetChannelsMask(XBee* self, const char* value) {
+    uint8_t response[33];
+    uint8_t responseLength;
+    uint8_t paramLength = (value != NULL) ? strlen(value) : 0;
+    int status = apiSendAtCommandAndGetResponse(self, AT_CM, value, paramLength, response, &responseLength, 5000);
+    if(status != API_SEND_SUCCESS){
+        XBEEDebugPrintEnabled("Failed to set Channels Mask\n");
+    }
+    return status;
+}
+
 // XBeeLR private functions
 
 /**

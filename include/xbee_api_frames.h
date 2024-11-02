@@ -210,6 +210,7 @@ typedef enum {
     XBEE_API_TYPE_LR_TX_REQUEST = 0x50,            ///< Frame for transmitting data in LoRaWAN
     XBEE_API_TYPE_LR_RX_PACKET = 0xD0,             ///< Frame for receiving data packets in LoRaWAN
     XBEE_API_TYPE_LR_EXPLICIT_RX_PACKET = 0xD1,    ///< Frame for receiving explicitly addressed packets in LoRaWAN
+    XBEE_API_TYPE_LR_EXPLICIT_TX_STATUS = 0xD2,    ///< Frame for explicit TX status in LoRaWAN
 
     /**< XBee 3 RF Specific API Frames */
     XBEE_API_TYPE_3RF_REMOTE_AT_COMMAND = 0x17,    ///< Frame for sending remote AT commands (XBee 3 RF)

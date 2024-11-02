@@ -88,6 +88,7 @@ bool XBeeLRSetRX2Delay(XBee* self, const uint32_t value);
 bool XBeeLRSetRX2DataRate(XBee* self, const uint8_t value);
 bool XBeeLRSetRX2Frequency(XBee* self, const uint32_t value);
 bool XBeeLRSetTransmitPower(XBee* self, const uint8_t value);
+bool XBeeLRSetChannelsMask(XBee* self, const char* value);
 
 #if defined(__cplusplus)
 }

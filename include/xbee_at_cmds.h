@@ -156,6 +156,7 @@ typedef enum {
     AT_XD,   /**< LoRaWAN RX2 Data Rate */ 
     AT_XF,   /**< LoRaWAN RX2 Frequency */ 
     AT_PO,   /**< LoRaWAN Transmit Power */ 
+    AT_CM,   /**< LoRaWAN Channels Mask */
 
     // ... (other existing AT commands) ...
 
