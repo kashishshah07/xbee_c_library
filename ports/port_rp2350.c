@@ -144,6 +144,7 @@ void portDebugPrintf(const char *format, ...) {
     char buffer[128];
     va_list args;
     va_start(args, format);
-    vprintf(format, args);
+    vsnprintf(buffer, sizeof(buffer), format, args);  // Format into buffer
     va_end(args);
+    printf("%s", buffer);  // Print the formatted buffer
 }

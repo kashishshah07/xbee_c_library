@@ -44,6 +44,7 @@ extern "C"
 
 #include "xbee_at_cmds.h"
 #include "xbee.h"
+#include "config.h"
 
 #define XBEE_MAX_FRAME_DATA_SIZE 256
 #define API_SEND_SUCCESS 0

@@ -41,6 +41,7 @@ extern "C"
 #endif
 
 #include <stdint.h>
+#include "config.h"
 
 /**
  * @enum at_command_t
