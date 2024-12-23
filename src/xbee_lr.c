@@ -715,13 +715,12 @@ static void SendJoinReqApiFrame(XBee* self) {
  */
 static void XBeeLRHandleRxPacket(XBee* self, void *param) {
 
-    if(param == NULL) return;
+    if (param == NULL) return;
 
     xbee_api_frame_t *frame = (xbee_api_frame_t *)param;
     if (frame->type != XBEE_API_TYPE_LR_RX_PACKET && frame->type != XBEE_API_TYPE_LR_EXPLICIT_RX_PACKET) return;
 
-    XBeeLRPacket_t * packet = (XBeeLRPacket_t*)malloc(sizeof(XBeeLRPacket_t));
-    memset(packet,0,sizeof(XBeeLRPacket_t));
+    XBeeLRPacket_t packet = {0}; // Allocate on the stack and zero-initialize
 
     APIFrameDebugPrint("RX Packet Data: ");
     for (int i = 0; i < frame->length; i++) {
@@ -729,49 +728,35 @@ static void XBeeLRHandleRxPacket(XBee* self, void *param) {
     }
     APIFrameDebugPrint("\n");
 
-    if(frame->type == XBEE_API_TYPE_LR_EXPLICIT_RX_PACKET){
-        packet->port = frame->data[1];
-        packet->rssi = frame->data[2];
-        packet->snr = frame->data[3];
-        packet->dr = frame->data[4] & 0xF;
-        packet->slot = frame->data[4] >> 4;
-        packet->counter = frame->data[5] << 24 | frame->data[6] << 16 | frame->data[7] << 8 | frame->data[8];
-        packet->payloadSize = frame->length - 10;
-        packet->payload = &(frame->data[10]);//(uint8_t *)malloc(packet->payloadSize);
-        // memset(packet->payload,0,packet->payloadSize);
-        // memcpy(packet->payload,&(frame->data[9]),packet->payloadSize);
-    }else{
-        packet->port = frame->data[1];
-        packet->payloadSize = frame->length - 2;
-        packet->payload = &(frame->data[2]);//(uint8_t *)malloc(packet->payloadSize);
-        // memset(packet->payload,0,packet->payloadSize);
-        // memcpy(packet->payload,&(frame->data[2]),packet->payloadSize);
+    if (frame->type == XBEE_API_TYPE_LR_EXPLICIT_RX_PACKET) {
+        packet.port = frame->data[1];
+        packet.rssi = frame->data[2];
+        packet.snr = frame->data[3];
+        packet.dr = frame->data[4] & 0xF;
+        packet.slot = frame->data[4] >> 4;
+        packet.counter = frame->data[5] << 24 | frame->data[6] << 16 | frame->data[7] << 8 | frame->data[8];
+        packet.payloadSize = frame->length - 10;
+        packet.payload = &(frame->data[10]); // Point directly to the payload in the frame data
+    } else {
+        packet.port = frame->data[1];
+        packet.payloadSize = frame->length - 2;
+        packet.payload = &(frame->data[2]); // Point directly to the payload in the frame data
     }
 
-
-    if(self->ctable->OnReceiveCallback){
-        self->ctable->OnReceiveCallback(self,packet);
+    if (self->ctable->OnReceiveCallback) {
+        self->ctable->OnReceiveCallback(self, &packet); // Pass the address of the stack variable
     }
- 
-    // if(packet->payload){
-    //     free(packet->payload);
-    // }
-
-    if(packet){
-        free(packet);
-    }
-    // Add further processing as needed
 }
+
 
 void XBeeLRHandleTransmitStatus(XBee* self, void *param) {
 
-    if(param == NULL) return;
+    if (param == NULL) return;
 
     xbee_api_frame_t *frame = (xbee_api_frame_t *)param;
     if (frame->type != XBEE_API_TYPE_TX_STATUS && frame->type != XBEE_API_TYPE_LR_EXPLICIT_TX_STATUS) return;
 
-    XBeeLRPacket_t * packet = (XBeeLRPacket_t*)malloc(sizeof(XBeeLRPacket_t));
-    memset(packet,0,sizeof(XBeeLRPacket_t));
+    XBeeLRPacket_t packet = {0}; // Allocate on the stack and zero-initialize
 
     APIFrameDebugPrint("Received Transmit Status Frame: ");
     for (int i = 1; i < frame->length; i++) {
@@ -779,28 +764,28 @@ void XBeeLRHandleTransmitStatus(XBee* self, void *param) {
     }
     APIFrameDebugPrint("\n");
 
-    packet->frameId = frame->data[1];
-    packet->status = frame->data[2];
+    packet.frameId = frame->data[1];
+    packet.status = frame->data[2];
 
     // Store the delivery status in the XBee instance
     self->deliveryStatus = frame->data[2];  // Extract Delivery Status
 
-    if (frame->type == XBEE_API_TYPE_LR_EXPLICIT_TX_STATUS){
-        packet->dr = frame->data[3];
-        packet->channel = frame->data[4];
-        packet->power = frame->data[5];
-        packet->counter = frame->data[6] << 24 | frame->data[7] << 16 | frame->data[8] << 8 | frame->data[9];
+    if (frame->type == XBEE_API_TYPE_LR_EXPLICIT_TX_STATUS) {
+        packet.dr = frame->data[3];
+        packet.channel = frame->data[4];
+        packet.power = frame->data[5];
+        packet.counter = frame->data[6] << 24 | frame->data[7] << 16 | frame->data[8] << 8 | frame->data[9];
     }
 
     // Set the txStatusReceived flag to indicate the status frame was received
     self->txStatusReceived = true;
 
-    if(self->ctable->OnSendCallback){
-        self->ctable->OnSendCallback(self,packet);
+    if (self->ctable->OnSendCallback) {
+        self->ctable->OnSendCallback(self, &packet); // Pass the address of the stack variable
     }
 
-    // Add further processing as needed
 }
+
 
 // VTable for XBeeLR
 const XBeeVTable XBeeLRVTable = {
