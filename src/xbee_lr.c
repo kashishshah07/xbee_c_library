@@ -67,10 +67,10 @@ bool XBeeLRConnected(XBee* self) {
 
     if (status == API_SEND_SUCCESS) {
         // Print the received reponse
-        // XBEEDebugPrintEnabled("ATJS Resp: %u \n", response);
-        // XBEEDebugPrintEnabled("Join Status: %s \n", response ? "Joined" : "Not Joined");
+        // XBEEDebugPrint("ATJS Resp: %u \n", response);
+        // XBEEDebugPrint("Join Status: %s \n", response ? "Joined" : "Not Joined");
     } else {
-        XBEEDebugPrintEnabled("Failed to receive AT_JS response, error code: %d\n", status);
+        XBEEDebugPrint("Failed to receive AT_JS response, error code: %d\n", status);
     }
     return response;  
 }
@@ -113,7 +113,7 @@ void XBeeLRProcess(XBee* self) {
     if (status == API_SEND_SUCCESS) {
         apiHandleFrame(self,frame);
     } else if (status != API_RECEIVE_ERROR_TIMEOUT_START_DELIMITER) {
-        XBEEDebugPrintEnabled("Error receiving frame.\n");
+        XBEEDebugPrint("Error receiving frame.\n");
     }
 }
 
@@ -140,14 +140,14 @@ bool XBeeLRConnect(XBee* self) {
 
     while ((portMillis() - startTime) < CONNECTION_TIMEOUT_MS) {
         if (XBeeLRConnected(self)) {
-            XBEEDebugPrintEnabled("Successfully Joined\n");
+            XBEEDebugPrint("Successfully Joined\n");
             return true; // Successfully joined
         }
 
         portDelay(500); // Delay between checks 
     }
 
-    XBEEDebugPrintEnabled("Failed to Join\n");
+    XBEEDebugPrint("Failed to Join\n");
     return false; // Timeout reached without successful join
 }
 
@@ -209,7 +209,7 @@ uint8_t XBeeLRSendData(XBee* self, const void* data) {
         if (self->txStatusReceived) {
             // Return the delivery status
             if(self->deliveryStatus){
-                XBEEDebugPrintEnabled("TX Delivery Status 0x%02X\n", self->deliveryStatus );
+                XBEEDebugPrint("TX Delivery Status 0x%02X\n", self->deliveryStatus );
             }
             return self->deliveryStatus;
         }
@@ -219,7 +219,7 @@ uint8_t XBeeLRSendData(XBee* self, const void* data) {
     }
 
     // Timeout reached without receiving the expected frame
-    XBEEDebugPrintEnabled("Failed to receive TX Request Status frame\n");
+    XBEEDebugPrint("Failed to receive TX Request Status frame\n");
     return 0xFF;  // Indicate failure or timeout
 }
 
@@ -253,7 +253,7 @@ bool XBeeLRSetAppEUI(XBee* self, const char* value) {
     uint8_t paramLength = (value != NULL) ? strlen(value) : 0;
     int status = apiSendAtCommandAndGetResponse(self, AT_AE, value, paramLength, response, &responseLength, 5000);
     if(status != API_SEND_SUCCESS){
-        XBEEDebugPrintEnabled("Failed to set App EUI\n");
+        XBEEDebugPrint("Failed to set App EUI\n");
     }
     return status;
 }
@@ -277,7 +277,7 @@ bool XBeeLRSetAppKey(XBee* self, const char* value) {
     uint8_t paramLength = (value != NULL) ? strlen(value) : 0;
     int status = apiSendAtCommandAndGetResponse(self, AT_AK, value, paramLength, response, &responseLength, 5000);
     if(status != API_SEND_SUCCESS){
-        XBEEDebugPrintEnabled("Failed to set App Key\n");
+        XBEEDebugPrint("Failed to set App Key\n");
     }
     return status;
 }
@@ -302,7 +302,7 @@ bool XBeeLRSetNwkKey(XBee* self, const char* value) {
     uint8_t paramLength = (value != NULL) ? strlen(value) : 0;
     int status = apiSendAtCommandAndGetResponse(self, AT_NK, value, paramLength, response, &responseLength, 5000);
     if(status != API_SEND_SUCCESS){
-        XBEEDebugPrintEnabled("Failed to set Nwk Key\n");
+        XBEEDebugPrint("Failed to set Nwk Key\n");
     }
     return status;
 }
@@ -326,7 +326,7 @@ bool XBeeLRSetClass(XBee* self, const char value) {
     uint8_t responseLength;
     int status = apiSendAtCommandAndGetResponse(self, AT_LC, (const uint8_t *) &value, 1, response, &responseLength, 5000);
     if(status != API_SEND_SUCCESS){
-        XBEEDebugPrintEnabled("Failed to set Class\n");
+        XBEEDebugPrint("Failed to set Class\n");
     }
     return status;
 }
@@ -346,7 +346,7 @@ bool XBeeLRSetActivationMode(XBee* self, const uint8_t value) {
     int status = apiSendAtCommandAndGetResponse(self, AT_AM, &value, 1, response, &responseLength, 5000);
 
     if (status != API_SEND_SUCCESS) {
-        XBEEDebugPrintEnabled("Failed to set Activation Mode\n");
+        XBEEDebugPrint("Failed to set Activation Mode\n");
         return false;
     }
 
@@ -368,7 +368,7 @@ bool XBeeLRSetADR(XBee* self, const uint8_t value) {
     int status = apiSendAtCommandAndGetResponse(self, AT_AD, &value, 1, response, &responseLength, 5000);
 
     if (status != API_SEND_SUCCESS) {
-        XBEEDebugPrintEnabled("Failed to set ADR\n");
+        XBEEDebugPrint("Failed to set ADR\n");
         return false;
     }
 
@@ -390,7 +390,7 @@ bool XBeeLRSetDataRate(XBee* self, const uint8_t value) {
     int status = apiSendAtCommandAndGetResponse(self, AT_DR, &value, 1, response, &responseLength, 5000);
 
     if (status != API_SEND_SUCCESS) {
-        XBEEDebugPrintEnabled("Failed to set DataRate\n");
+        XBEEDebugPrint("Failed to set DataRate\n");
         return false;
     }
 
@@ -412,7 +412,7 @@ bool XBeeLRSetRegion(XBee* self, const uint8_t value) {
     int status = apiSendAtCommandAndGetResponse(self, AT_LR, &value, 1, response, &responseLength, 5000);
 
     if (status != API_SEND_SUCCESS) {
-        XBEEDebugPrintEnabled("Failed to set Region\n");
+        XBEEDebugPrint("Failed to set Region\n");
         return false;
     }
 
@@ -434,7 +434,7 @@ bool XBeeLRSetDutyCycle(XBee* self, const uint8_t value) {
     int status = apiSendAtCommandAndGetResponse(self, AT_DC, &value, 1, response, &responseLength, 5000);
 
     if (status != API_SEND_SUCCESS) {
-        XBEEDebugPrintEnabled("Failed to set Duty Cycle\n");
+        XBEEDebugPrint("Failed to set Duty Cycle\n");
         return false;
     }
 
@@ -457,7 +457,7 @@ bool XBeeLRSetDutyCycle(XBee* self, const uint8_t value) {
 //     int status = apiSendAtCommandAndGetResponse(self, AT_LV, &value, paramLength, response, &responseLength, 5000);
 
 //     if (status != API_SEND_SUCCESS) {
-//         XBEEDebugPrintEnabled("Failed to set Spec Version\n");
+//         XBEEDebugPrint("Failed to set Spec Version\n");
 //         return false;
 //     }
 
@@ -480,7 +480,7 @@ bool XBeeLRSetJoinRX1Delay(XBee* self, const uint32_t value) {
     int status = apiSendAtCommandAndGetResponse(self, AT_J1, &value, paramLength, response, &responseLength, 5000);
 
     if (status != API_SEND_SUCCESS) {
-        XBEEDebugPrintEnabled("Failed to set Join RX1 Delay\n");
+        XBEEDebugPrint("Failed to set Join RX1 Delay\n");
         return false;
     }
 
@@ -503,7 +503,7 @@ bool XBeeLRSetJoinRX2Delay(XBee* self, const uint32_t value) {
     int status = apiSendAtCommandAndGetResponse(self, AT_J2, &value, paramLength, response, &responseLength, 5000);
 
     if (status != API_SEND_SUCCESS) {
-        XBEEDebugPrintEnabled("Failed to set Join RX2 Delay\n");
+        XBEEDebugPrint("Failed to set Join RX2 Delay\n");
         return false;
     }
 
@@ -526,7 +526,7 @@ bool XBeeLRSetRX1Delay(XBee* self, const uint32_t value) {
     int status = apiSendAtCommandAndGetResponse(self, AT_D1, &value, paramLength, response, &responseLength, 5000);
 
     if (status != API_SEND_SUCCESS) {
-        XBEEDebugPrintEnabled("Failed to set RX1 Delay\n");
+        XBEEDebugPrint("Failed to set RX1 Delay\n");
         return false;
     }
 
@@ -549,7 +549,7 @@ bool XBeeLRSetRX2Delay(XBee* self, const uint32_t value) {
     int status = apiSendAtCommandAndGetResponse(self, AT_D2, &value, paramLength, response, &responseLength, 5000);
 
     if (status != API_SEND_SUCCESS) {
-        XBEEDebugPrintEnabled("Failed to set RX2 Delay\n");
+        XBEEDebugPrint("Failed to set RX2 Delay\n");
         return false;
     }
 
@@ -572,7 +572,7 @@ bool XBeeLRSetRX2DataRate(XBee* self, const uint8_t value) {
     int status = apiSendAtCommandAndGetResponse(self,AT_XD, &value, paramLength, response, &responseLength, 5000);
 
     if (status != API_SEND_SUCCESS) {
-        XBEEDebugPrintEnabled("Failed to set RX2 Data Rate\n");
+        XBEEDebugPrint("Failed to set RX2 Data Rate\n");
         return false;
     }
 
@@ -595,7 +595,7 @@ bool XBeeLRSetRX2Frequency(XBee* self, const uint32_t value) {
     int status = apiSendAtCommandAndGetResponse(self, AT_XF, (uint8_t*)&value, paramLength, response, &responseLength, 5000);
 
     if (status != API_SEND_SUCCESS) {
-        XBEEDebugPrintEnabled("Failed to set RX2 Frequency\n");
+        XBEEDebugPrint("Failed to set RX2 Frequency\n");
         return false;
     }
 
@@ -618,7 +618,7 @@ bool XBeeLRSetTransmitPower(XBee* self, const uint8_t value) {
     int status = apiSendAtCommandAndGetResponse(self, AT_PO, &value, paramLength, response, &responseLength, 5000);
 
     if (status != API_SEND_SUCCESS) {
-        XBEEDebugPrintEnabled("Failed to set Transmit Power\n");
+        XBEEDebugPrint("Failed to set Transmit Power\n");
         return false;
     }
 
@@ -651,7 +651,7 @@ bool XBeeLRGetDevEUI(XBee* self, uint8_t* responseBuffer, uint8_t buffer_size) {
     int status = apiSendAtCommandAndGetResponse(self, AT_DE, NULL, 0, responseBuffer, &responseLength, 5000);
 
     if (status != API_SEND_SUCCESS) {
-        XBEEDebugPrintEnabled("Failed to receive AT_DE response, error code: %d\n", status);
+        XBEEDebugPrint("Failed to receive AT_DE response, error code: %d\n", status);
         return false;
     }
     return true;  
@@ -676,7 +676,7 @@ bool XBeeLRSetChannelsMask(XBee* self, const char* value) {
     uint8_t paramLength = (value != NULL) ? strlen(value) : 0;
     int status = apiSendAtCommandAndGetResponse(self, AT_CM, value, paramLength, response, &responseLength, 5000);
     if(status != API_SEND_SUCCESS){
-        XBEEDebugPrintEnabled("Failed to set Channels Mask\n");
+        XBEEDebugPrint("Failed to set Channels Mask\n");
     }
     return status;
 }
@@ -715,13 +715,12 @@ static void SendJoinReqApiFrame(XBee* self) {
  */
 static void XBeeLRHandleRxPacket(XBee* self, void *param) {
 
-    if(param == NULL) return;
+    if (param == NULL) return;
 
     xbee_api_frame_t *frame = (xbee_api_frame_t *)param;
     if (frame->type != XBEE_API_TYPE_LR_RX_PACKET && frame->type != XBEE_API_TYPE_LR_EXPLICIT_RX_PACKET) return;
 
-    XBeeLRPacket_t * packet = (XBeeLRPacket_t*)malloc(sizeof(XBeeLRPacket_t));
-    memset(packet,0,sizeof(XBeeLRPacket_t));
+    XBeeLRPacket_t packet = {0}; // Allocate on the stack and zero-initialize
 
     APIFrameDebugPrint("RX Packet Data: ");
     for (int i = 0; i < frame->length; i++) {
@@ -729,48 +728,35 @@ static void XBeeLRHandleRxPacket(XBee* self, void *param) {
     }
     APIFrameDebugPrint("\n");
 
-    if(frame->type == XBEE_API_TYPE_LR_EXPLICIT_RX_PACKET){
-        packet->port = frame->data[1];
-        packet->rssi = frame->data[2];
-        packet->snr = frame->data[3];
-        packet->dr = frame->data[4];
-        packet->counter = frame->data[5] << 24 | frame->data[6] << 16 | frame->data[7] << 8 | frame->data[8];
-        packet->payloadSize = frame->length - 10;
-        packet->payload = &(frame->data[10]);//(uint8_t *)malloc(packet->payloadSize);
-        // memset(packet->payload,0,packet->payloadSize);
-        // memcpy(packet->payload,&(frame->data[9]),packet->payloadSize);
-    }else{
-        packet->port = frame->data[1];
-        packet->payloadSize = frame->length - 2;
-        packet->payload = &(frame->data[2]);//(uint8_t *)malloc(packet->payloadSize);
-        // memset(packet->payload,0,packet->payloadSize);
-        // memcpy(packet->payload,&(frame->data[2]),packet->payloadSize);
+    if (frame->type == XBEE_API_TYPE_LR_EXPLICIT_RX_PACKET) {
+        packet.port = frame->data[1];
+        packet.rssi = frame->data[2];
+        packet.snr = frame->data[3];
+        packet.dr = frame->data[4] & 0xF;
+        packet.slot = frame->data[4] >> 4;
+        packet.counter = frame->data[5] << 24 | frame->data[6] << 16 | frame->data[7] << 8 | frame->data[8];
+        packet.payloadSize = frame->length - 10;
+        packet.payload = &(frame->data[10]); // Point directly to the payload in the frame data
+    } else {
+        packet.port = frame->data[1];
+        packet.payloadSize = frame->length - 2;
+        packet.payload = &(frame->data[2]); // Point directly to the payload in the frame data
     }
 
-
-    if(self->ctable->OnReceiveCallback){
-        self->ctable->OnReceiveCallback(self,packet);
+    if (self->ctable->OnReceiveCallback) {
+        self->ctable->OnReceiveCallback(self, &packet); // Pass the address of the stack variable
     }
- 
-    // if(packet->payload){
-    //     free(packet->payload);
-    // }
-
-    if(packet){
-        free(packet);
-    }
-    // Add further processing as needed
 }
+
 
 void XBeeLRHandleTransmitStatus(XBee* self, void *param) {
 
-    if(param == NULL) return;
+    if (param == NULL) return;
 
     xbee_api_frame_t *frame = (xbee_api_frame_t *)param;
-    if (frame->type != XBEE_API_TYPE_TX_STATUS) return;
+    if (frame->type != XBEE_API_TYPE_TX_STATUS && frame->type != XBEE_API_TYPE_LR_EXPLICIT_TX_STATUS) return;
 
-    XBeeLRPacket_t * packet = (XBeeLRPacket_t*)malloc(sizeof(XBeeLRPacket_t));
-    memset(packet,0,sizeof(XBeeLRPacket_t));
+    XBeeLRPacket_t packet = {0}; // Allocate on the stack and zero-initialize
 
     APIFrameDebugPrint("Received Transmit Status Frame: ");
     for (int i = 1; i < frame->length; i++) {
@@ -778,21 +764,28 @@ void XBeeLRHandleTransmitStatus(XBee* self, void *param) {
     }
     APIFrameDebugPrint("\n");
 
-    packet->frameId = frame->data[1];
-    packet->status = frame->data[2];
+    packet.frameId = frame->data[1];
+    packet.status = frame->data[2];
 
     // Store the delivery status in the XBee instance
     self->deliveryStatus = frame->data[2];  // Extract Delivery Status
 
+    if (frame->type == XBEE_API_TYPE_LR_EXPLICIT_TX_STATUS) {
+        packet.dr = frame->data[3];
+        packet.channel = frame->data[4];
+        packet.power = frame->data[5];
+        packet.counter = frame->data[6] << 24 | frame->data[7] << 16 | frame->data[8] << 8 | frame->data[9];
+    }
+
     // Set the txStatusReceived flag to indicate the status frame was received
     self->txStatusReceived = true;
 
-    if(self->ctable->OnSendCallback){
-        self->ctable->OnSendCallback(self,packet);
+    if (self->ctable->OnSendCallback) {
+        self->ctable->OnSendCallback(self, &packet); // Pass the address of the stack variable
     }
 
-    // Add further processing as needed
 }
+
 
 // VTable for XBeeLR
 const XBeeVTable XBeeLRVTable = {

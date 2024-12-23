@@ -43,6 +43,7 @@ extern "C"
 #endif
 
 #include "xbee.h"
+#include "config.h"
 
 #define CONNECTION_TIMEOUT_MS 6000
 #define SEND_DATA_TIMEOUT_MS 10000
@@ -59,7 +60,11 @@ typedef struct XBeeLRPacket_s{
     int8_t rssi;
     int8_t snr;
     uint8_t dr;
+    uint8_t slot;
     uint32_t counter;
+    //For TX only
+    uint8_t channel;
+    int8_t power;
 }XBeeLRPacket_t;
 
 // Subclass for XBeeLR

@@ -129,7 +129,9 @@ int apiSendFrame(XBee* self, uint8_t frameType, const uint8_t *data, uint16_t le
         portDelay(1);
     }
 
+#if API_FRAME_DEBUG_PRINT_ENABLED
     uint32_t elapsed_time = portMillis() - startTime;
+#endif
     APIFrameDebugPrint("UART write completed in %lu ms\n", elapsed_time);
 
     // Return success if everything went well
@@ -169,12 +171,13 @@ int apiSendAtCommand(XBee* self,at_command_t command, const uint8_t *parameter, 
 
     // AT Command (2 bytes)
     const char *cmd_str = atCommandToString(command);
-    frame_data[frameLength++] = cmd_str[0];
-    frame_data[frameLength++] = cmd_str[1];
 
     if (cmd_str == NULL) {
         return API_SEND_ERROR_INVALID_COMMAND;
     }
+    
+    frame_data[frameLength++] = cmd_str[0];
+    frame_data[frameLength++] = cmd_str[1];
 
     // AT Command Parameter
     if (paramLength > 0) {
@@ -347,6 +350,7 @@ void apiHandleFrame(XBee* self, xbee_api_frame_t frame){
             xbeeHandleModemStatus(self, &frame);
             break;
         case XBEE_API_TYPE_TX_STATUS:
+        case XBEE_API_TYPE_LR_EXPLICIT_TX_STATUS:
             if(self->vtable->handleTransmitStatusFrame){
                 self->vtable->handleTransmitStatusFrame(self, &frame);
             }
@@ -435,6 +439,7 @@ int apiSendAtCommandAndGetResponse(XBee* self, at_command_t command, const uint8
 
 //Print out AT Response
 void xbeeHandleAtResponse(XBee* self, xbee_api_frame_t *frame) {
+#if API_FRAME_DEBUG_PRINT_ENABLED
     // The first byte of frame->data is the Frame ID
     uint8_t frame_id = frame->data[1];
 
@@ -444,8 +449,10 @@ void xbeeHandleAtResponse(XBee* self, xbee_api_frame_t *frame) {
     at_command[1] = frame->data[3];
     at_command[2] = '\0'; // Null-terminate the string
 
+
     // The next byte is the command status
     uint8_t command_status = frame->data[4];
+#endif
 
     // Print the basic information
     APIFrameDebugPrint("AT Response:\n");
