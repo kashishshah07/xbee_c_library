@@ -75,7 +75,7 @@ typedef struct {
 
 
 XBeeLR* XBeeLRCreate(const XBeeCTable* cTable, const XBeeHTable* hTable);
-bool XBeeLRGetDevEUI(XBee* self, uint8_t* responseBuffer, uint8_t buffer_size);
+bool XBeeLRGetDevEUI(XBee* self, char* responseBuffer, uint8_t buffer_size);
 bool XBeeLRSetAppEUI(XBee* self, const char* value);
 bool XBeeLRSetAppKey(XBee* self, const char* value);
 bool XBeeLRSetNwkKey(XBee* self, const char* value);

@@ -314,6 +314,7 @@ void apiHandleFrame(XBee* self,xbee_api_frame_t frame);
 void xbeeHandleAtResponse(XBee* self,xbee_api_frame_t *frame);
 void xbeeHandleModemStatus(XBee* self,xbee_api_frame_t *frame);
 void xbeeHandleRxPacket(XBee* self,xbee_api_frame_t *frame);
+int asciiToHexArray(const char *asciiStr, uint8_t *hexArray, size_t maxLen);
 
 #if defined(__cplusplus)
 }
