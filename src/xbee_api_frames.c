@@ -477,3 +477,33 @@ void xbeeHandleModemStatus(XBee* self, xbee_api_frame_t *frame) {
     APIFrameDebugPrint("Modem Status: %d\n", frame->data[1]);
     // Add further processing as needed
 }
+
+/**
+ * @brief Converts an ASCII string to a hex array.
+ * 
+ * This function takes an ASCII string and converts it into a hexadecimal
+ * representation where each character pair forms a hex byte.
+ * 
+ * @param[in] asciiStr Pointer to the ASCII string.
+ * @param[out] hexArray Pointer to the output hex array.
+ * @param[in] maxLen Maximum allowed length of the hex array.
+ * 
+ * @return int Number of bytes written to hex_array, or -1 if an error occurs.
+ */
+int asciiToHexArray(const char *asciiStr, uint8_t *hexArray, size_t maxLen) {
+    if (!asciiStr || !hexArray) {
+        return -1; // Error: Null pointer
+    }
+
+    size_t asciiLen = strlen(asciiStr);
+    if (asciiLen % 2 != 0 || asciiLen / 2 > maxLen) {
+        return -1; // Error: Invalid length
+    }
+
+    for (size_t i = 0; i < asciiLen; i += 2) {
+        char hexByte[3] = {asciiStr[i], asciiStr[i + 1], '\0'};
+        hexArray[i / 2] = (uint8_t)strtol(hexByte, NULL, 16);
+    }
+
+    return asciiLen / 2;
+}
