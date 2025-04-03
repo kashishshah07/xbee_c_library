@@ -58,6 +58,15 @@ int portUartInit(uint32_t baudrate, void *device) {
         ((HardwareSerial*)serialPort)->begin(baudrate);
     // }
 
+    // KDB - The arduino core doesn't set our pins to the correct function for the UART 
+    // see the helpful table here: https://github.com/raspberrypi/pico-sdk/blob/master/src/rp2_common/hardware_gpio/include/hardware/gpio.h
+#if defined(PICO_RP2350)
+    if (PIN_SERIAL1_TX == 18 && PIN_SERIAL1_RX == 19 && device == &Serial1) {
+        gpio_set_function(PIN_SERIAL1_TX, (gpio_function_t)11);
+        gpio_set_function(PIN_SERIAL1_RX, (gpio_function_t)11);
+        uart_init(uart0, baudrate);
+    }
+#endif
     return 0; // Indicate success
 }
 
@@ -162,4 +171,5 @@ void portDebugPrintf(const char *format, ...) {
     vsnprintf(buffer, sizeof(buffer), format, args);
     va_end(args);
     Serial.print(buffer);
+    Serial.println();
 }
